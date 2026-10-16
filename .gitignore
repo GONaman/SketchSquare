@@ -1,0 +1,36 @@
+# IDEs / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Node / backend
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+build/
+**/ios/Pods/
+**/macos/Pods/
+*.keystore
+*.jks
+key.properties
+local.properties
+
+# Secrets / local data
+*.pem
+secrets/
+infra/data/
+
+# Logs
+*.log
+npm-debug.log*
