@@ -1,0 +1,66 @@
+# SketchSquare — Progress
+
+Resume rule: re-read `AGENTS.md` and this file, then continue from the first unticked item.
+Workflow: every sub-step is a small branch → PR → squash-merge into `main` (never push to `main` directly).
+
+## Phase 0 — Scaffold
+- [x] 0.1 Repo hygiene (.gitignore, untrack .idea, AGENTS.md, copilot-instructions, progress/decisions docs)
+- [ ] 0.2 infra/docker-compose.yml (postgres, redis, minio + bucket init, mailpit)
+- [ ] 0.3 backend NestJS scaffold (config, swagger, health, Prisma, lint/test)
+- [ ] 0.4 Flutter core (theme, dio, error model, secure storage, router, 5-tab shell)
+- [ ] 0.5 Root README
+- [ ] 0.6 GitHub Actions CI
+
+## Phase 1 — Database schema
+- [ ] 1.1 Prisma schema + migration (enums, indexes, partial unique, FTS)
+- [ ] 1.2 Seed script
+- [ ] 1.3 Ledger zero-sum guard + test
+- [ ] 1.4 docs/data-model.md
+
+## Phase 2 — Auth, onboarding, verification
+- [ ] 2.1 Backend auth (signup/login/refresh/logout/reset)
+- [ ] 2.2 Backend verification + admin + email jobs + global guard
+- [ ] 2.3 Backend e2e tests
+- [ ] 2.4 Flutter auth core (interceptor, router guard)
+- [ ] 2.5 Flutter intro/sign in/sign up/forgot
+- [ ] 2.6 Flutter pending screen + admin area
+
+## Phase 3 — Upload pipeline
+- [ ] 3.1 Drawings CRUD + categories
+- [ ] 3.2 Storage + sheets (presigned upload, magic bytes)
+- [ ] 3.3 Publish + processing worker (previews, pHash)
+- [ ] 3.4 WatermarkService
+- [ ] 3.5 Flutter upload flow
+
+## Phase 4 — Discovery
+- [ ] 4.1 Search endpoint (size tolerance + rotation, filters, sort)
+- [ ] 4.2 Detail, categories, cities, architects
+- [ ] 4.3 Flutter home + search + filters
+- [ ] 4.4 Flutter featured + drawing detail
+
+## Phase 5 — Purchasing
+- [ ] 5.1 Cart + checkout + Razorpay (stub) + webhook + ledger
+- [ ] 5.2 Downloads + free quota + reviews
+- [ ] 5.3 Flutter basket/checkout/download/reviews
+
+## Phase 6 — Seller side, wallet, profile
+- [ ] 6.1 Manage drawings + stats endpoints
+- [ ] 6.2 Wallet + bank account + withdrawals + payouts
+- [ ] 6.3 Profile endpoints
+- [ ] 6.4 Flutter profile, manage drawings, wallet
+
+## Phase 7 — Hardening
+- [ ] 7.1 Security + authorization matrix test
+- [ ] 7.2 Observability + perf
+- [ ] 7.3 Flutter polish
+- [ ] 7.4 Deployment docs + release build + TESTING.md
+
+## Phase 8 — Future features
+- [ ] 8.1 Favorites
+- [ ] 8.2 Express interest
+- [ ] 8.3 Contribution rule
+- [ ] 8.4 Plagiarism check + admin review queue
+- [ ] 8.5 Push notifications (stub)
+
+## Needs manual check
+(none yet)
