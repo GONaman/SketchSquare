@@ -22,7 +22,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 2.2 Backend verification + admin + email jobs + global guard
 - [ ] 2.3 Backend e2e tests
 - [x] 2.4 Flutter auth core (interceptor, router guard)
-- [ ] 2.5 Flutter intro/sign in/sign up/forgot
+- [x] 2.5 Flutter intro/sign in/sign up/forgot
 - [ ] 2.6 Flutter pending screen + admin area
 
 ## Phase 3 — Upload pipeline
@@ -63,4 +63,6 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 8.5 Push notifications (stub)
 
 ## Needs manual check
-(none yet)
+- Flutter intro video (`sketch_square/assets/videos/intro.mp4`) is a placeholder; TODO replace with the real ~30 s demo. `video_player` playback itself is only checked on a device/emulator (tests stub it).
+- Flutter document picker (`file_picker`) on iOS/macOS/Android: verify picking PDF/JPG/PNG on a real device (platform permissions/entitlements untested).
+- Password-reset email link does not open the app (no deep-link setup); users paste the code from the email (A10).
