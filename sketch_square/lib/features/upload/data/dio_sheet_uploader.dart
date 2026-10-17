@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../../core/network/api_exception.dart';
-import '../domain/drawing_sheet.dart';
+import '../domain/sheet_upload_target.dart';
 import '../domain/sheet_file_rules.dart';
 import '../domain/upload_repository.dart';
 

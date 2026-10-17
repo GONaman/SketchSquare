@@ -4,7 +4,7 @@ import '../../../core/network/api_exception.dart';
 import '../../drawings/domain/drawing_summary.dart';
 import '../domain/drawing_form.dart';
 import '../domain/drawing_record.dart';
-import '../domain/drawing_sheet.dart';
+import '../domain/sheet_upload_target.dart';
 import '../domain/upload_repository.dart';
 
 /// Set `--dart-define=UPLOAD_SEND_EXTENDED_METADATA=true` once the backend
@@ -85,7 +85,7 @@ class DioUploadRepository implements UploadRepository {
   });
 
   @override
-  Future<DrawingSheet> registerSheet(
+  Future<Sheet> registerSheet(
     String drawingId, {
     required SheetType type,
     required String objectKey,
@@ -103,11 +103,11 @@ class DioUploadRepository implements UploadRepository {
         'sizeBytes': sizeBytes,
       },
     );
-    return DrawingSheet.fromJson(res.data!);
+    return Sheet.fromJson(res.data!);
   });
 
   @override
-  Future<DrawingSheet> updateSheet(
+  Future<Sheet> updateSheet(
     String drawingId,
     String sheetId, {
     SheetType? type,
@@ -120,7 +120,7 @@ class DioUploadRepository implements UploadRepository {
         if (isPreview != null) 'isPreview': isPreview,
       },
     );
-    return DrawingSheet.fromJson(res.data!);
+    return Sheet.fromJson(res.data!);
   });
 
   @override

@@ -31,9 +31,9 @@ _DrawingRecord _$DrawingRecordFromJson(Map<String, dynamic> json) =>
       failureReason: json['failureReason'] as String?,
       sheets:
           (json['sheets'] as List<dynamic>?)
-              ?.map((e) => DrawingSheet.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => Sheet.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          const <DrawingSheet>[],
+          const <Sheet>[],
       previewUrl: json['previewUrl'] as String?,
       viewCount: (json['viewCount'] as num?)?.toInt() ?? 0,
       purchaseCount: (json['purchaseCount'] as num?)?.toInt() ?? 0,

@@ -2,7 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../drawings/domain/drawing_summary.dart';
 import 'drawing_form.dart';
-import 'drawing_sheet.dart';
+import 'sheet_upload_target.dart';
 
 part 'drawing_record.freezed.dart';
 part 'drawing_record.g.dart';
@@ -31,7 +31,7 @@ abstract class DrawingRecord with _$DrawingRecord {
     @Default(false) bool isFree,
     required DrawingStatus status,
     String? failureReason,
-    @Default(<DrawingSheet>[]) List<DrawingSheet> sheets,
+    @Default(<Sheet>[]) List<Sheet> sheets,
     String? previewUrl,
     @Default(0) int viewCount,
     @Default(0) int purchaseCount,

@@ -8,7 +8,7 @@ import 'package:sketch_square/features/drawings/domain/drawing_summary.dart';
 import 'package:sketch_square/features/upload/data/dio_sheet_uploader.dart';
 import 'package:sketch_square/features/upload/data/dio_upload_repository.dart';
 import 'package:sketch_square/features/upload/domain/drawing_form.dart';
-import 'package:sketch_square/features/upload/domain/drawing_sheet.dart';
+import 'package:sketch_square/features/upload/domain/sheet_upload_target.dart';
 import 'package:sketch_square/features/upload/domain/upload_repository.dart';
 
 const drawingJson = {

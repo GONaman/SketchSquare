@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import '../../drawings/domain/drawing_summary.dart';
 import 'drawing_form.dart';
 import 'drawing_record.dart';
-import 'drawing_sheet.dart';
+import 'sheet_upload_target.dart';
 
 /// A file the user picked, independent of the picker plugin so tests can fake it.
 class PickedSheetFile {
@@ -42,7 +42,7 @@ abstract interface class UploadRepository {
     required int sizeBytes,
   });
 
-  Future<DrawingSheet> registerSheet(
+  Future<Sheet> registerSheet(
     String drawingId, {
     required SheetType type,
     required String objectKey,
@@ -51,7 +51,7 @@ abstract interface class UploadRepository {
     required int sizeBytes,
   });
 
-  Future<DrawingSheet> updateSheet(
+  Future<Sheet> updateSheet(
     String drawingId,
     String sheetId, {
     SheetType? type,
