@@ -39,6 +39,13 @@ export const AUTHZ_MATRIX: Record<string, MatrixEntry> = {
   'POST /me/avatar/confirm': { access: 'authed' },
   'GET /verification/me': { access: 'authed' },
   'POST /verification': { access: 'authed' },
+  // Device tokens + inbox: unverified users must receive their verification result.
+  'POST /me/device-tokens': { access: 'authed' },
+  'DELETE /me/device-tokens': { access: 'authed' },
+  'POST /me/devices': { access: 'authed' },
+  'DELETE /me/devices': { access: 'authed' },
+  'GET /me/notifications': { access: 'authed' },
+  'POST /me/notifications/read': { access: 'authed' },
 
   // --- approved architects ---
   'GET /me/contribution-status': { access: 'approved' },
@@ -107,4 +114,7 @@ export const AUTHZ_MATRIX: Record<string, MatrixEntry> = {
   'GET /admin/purchases': { access: 'admin' },
   'GET /admin/purchases/:id': { access: 'admin' },
   'POST /admin/purchases/:id/refund': { access: 'admin' },
+  'GET /admin/plagiarism-flags': { access: 'admin' },
+  'POST /admin/plagiarism-flags/:id/approve': { access: 'admin' },
+  'POST /admin/plagiarism-flags/:id/reject': { access: 'admin' },
 };
