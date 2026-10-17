@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/layout/layout.dart';
 import '../../../core/router/routes.dart';
+import 'admin_home_screen.dart';
 import 'admin_plagiarism_screen.dart';
 import 'admin_refund_detail_screen.dart';
 import 'admin_refunds_screen.dart';
@@ -17,8 +18,12 @@ Widget _framed(Widget screen) =>
 final adminRoutes = <RouteBase>[
   GoRoute(
     path: AppRoutes.admin,
-    builder: (_, __) => _framed(const AdminVerificationsScreen()),
+    builder: (_, __) => _framed(const AdminHomeScreen()),
     routes: [
+      GoRoute(
+        path: 'verifications',
+        builder: (_, __) => _framed(const AdminVerificationsScreen()),
+      ),
       GoRoute(
         path: 'verification/:id',
         builder:

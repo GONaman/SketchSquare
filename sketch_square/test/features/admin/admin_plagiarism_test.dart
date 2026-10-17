@@ -129,7 +129,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Already decided'), findsOneWidget);
-    expect(repo.statusQueries.length, 2);
+    // Dashboard count, first load and the post-409 refresh.
+    expect(repo.statusQueries.length, 3);
   });
 
   testWidgets('decided flags are read-only with the review note', (

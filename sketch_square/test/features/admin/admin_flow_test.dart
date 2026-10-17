@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sketch_square/core/network/api_exception.dart';
+import 'package:sketch_square/features/admin/presentation/admin_home_screen.dart';
 import 'package:sketch_square/features/admin/presentation/admin_verifications_screen.dart';
 import 'package:sketch_square/core/router/app_router.dart';
 import 'package:sketch_square/core/router/routes.dart';
@@ -30,7 +31,7 @@ Future<ProviderContainer> _pumpAdmin(
         documentLauncherProvider.overrideWithValue(launcher),
     ],
   );
-  container.read(appRouterProvider).go(AppRoutes.admin);
+  container.read(appRouterProvider).go(adminVerificationsPath);
   await tester.pumpAndSettle();
   return container;
 }
@@ -55,6 +56,11 @@ void main() {
       await tester.tap(find.text('Admin'));
       await tester.pumpAndSettle();
 
+      expect(inAppBar('Administration'), findsOneWidget);
+      expect(find.byKey(const Key('stat-verifications')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('open-verifications')));
+      await tester.pumpAndSettle();
+
       expect(inAppBar('Pending verifications'), findsOneWidget);
       expect(find.text('Asha Rao'), findsOneWidget);
     });
@@ -71,7 +77,7 @@ void main() {
 
       container.read(appRouterProvider).go(AppRoutes.admin);
       await tester.pumpAndSettle();
-      expect(inAppBar('Pending verifications'), findsNothing);
+      expect(inAppBar('Administration'), findsNothing);
       expect(find.byType(NavigationBar), findsOneWidget);
     });
 
