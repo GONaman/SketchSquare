@@ -275,6 +275,91 @@ paths:
           description: ""
       security: *a5
       tags: *a6
+  /drawings/{drawingId}/sheets/upload-url:
+    post:
+      operationId: SheetsController_uploadUrl
+      parameters:
+        - name: drawingId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlDto"
+      responses:
+        "200":
+          description: ""
+      security: &a7
+        - bearer: []
+      tags: &a8
+        - drawings
+  /drawings/{drawingId}/sheets:
+    post:
+      operationId: SheetsController_register
+      parameters:
+        - name: drawingId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterSheetDto"
+      responses:
+        "201":
+          description: ""
+      security: *a7
+      tags: *a8
+  /drawings/{drawingId}/sheets/{sheetId}:
+    patch:
+      operationId: SheetsController_update
+      parameters:
+        - name: drawingId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: sheetId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSheetDto"
+      responses:
+        "200":
+          description: ""
+      security: *a7
+      tags: *a8
+    delete:
+      operationId: SheetsController_remove
+      parameters:
+        - name: drawingId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: sheetId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+      security: *a7
+      tags: *a8
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -372,7 +457,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: &a7
+          enum: &a9
             - ft
             - m
         floors:
@@ -436,7 +521,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: *a7
+          enum: *a9
         floors:
           type: number
           minimum: 1
@@ -467,4 +552,69 @@ components:
           minimum: 0
           maximum: 100000000
         isFree:
+          type: boolean
+    UploadUrlDto:
+      type: object
+      properties:
+        fileName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        contentType:
+          type: string
+          minLength: 1
+          maxLength: 100
+        sizeBytes:
+          type: number
+          minimum: 1
+      required:
+        - fileName
+        - contentType
+        - sizeBytes
+    RegisterSheetDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - ARCHITECTURAL
+            - STRUCTURAL
+            - ELECTRICAL
+            - SANITARY
+            - PLUMBING
+            - HVAC
+            - OTHER
+        objectKey:
+          type: string
+          minLength: 1
+          maxLength: 400
+        isPreview:
+          type: boolean
+        fileName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        sizeBytes:
+          type: number
+          minimum: 1
+      required:
+        - type
+        - objectKey
+        - isPreview
+        - fileName
+        - sizeBytes
+    UpdateSheetDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - ARCHITECTURAL
+            - STRUCTURAL
+            - ELECTRICAL
+            - SANITARY
+            - PLUMBING
+            - HVAC
+            - OTHER
+        isPreview:
           type: boolean
