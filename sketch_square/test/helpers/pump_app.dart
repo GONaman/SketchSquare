@@ -11,10 +11,12 @@ import 'package:sketch_square/features/admin/presentation/admin_providers.dart';
 import 'package:sketch_square/features/auth/domain/user.dart';
 import 'package:sketch_square/features/auth/presentation/auth_repository_provider.dart';
 import 'package:sketch_square/features/auth/presentation/intro_seen_provider.dart';
+import 'package:sketch_square/features/notifications/data/notifications_providers.dart';
 import 'package:sketch_square/features/verification/presentation/verification_providers.dart';
 
 import 'fake_admin.dart';
 import 'fake_auth_repository.dart';
+import 'fake_notifications.dart';
 import 'fake_verification.dart';
 
 /// Pumps the full app with test-safe overrides (no network font fetches, no
@@ -57,6 +59,12 @@ Future<ProviderContainer> pumpApp(
         ),
         documentPickerProvider.overrideWithValue(FakeDocumentPicker()),
         adminRepositoryProvider.overrideWithValue(FakeAdminRepository()),
+        notificationsRepositoryProvider.overrideWithValue(
+          FakeNotificationsRepository(),
+        ),
+        deviceTokensRepositoryProvider.overrideWithValue(
+          FakeDeviceTokensRepository(),
+        ),
         ...overrides,
       ],
       child: const SketchSquareApp(),

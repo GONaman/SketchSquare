@@ -26,6 +26,7 @@ abstract final class AppRoutes {
   static const basketOrderResult = '/basket/order-result';
   static const purchases = '/profile/purchases';
   static const favorites = '/profile/favorites';
+  static const notifications = '/profile/notifications';
   static const profileEdit = '/profile/edit';
   static const settings = '/profile/settings';
   static const wallet = '/profile/wallet';

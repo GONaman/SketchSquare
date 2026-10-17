@@ -5,12 +5,14 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'core/widgets/offline_banner.dart';
+import 'features/notifications/presentation/push_registrar.dart';
 
 class SketchSquareApp extends ConsumerWidget {
   const SketchSquareApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(pushRegistrationProvider);
     return MaterialApp.router(
       title: 'SketchSquare',
       debugShowCheckedModeBanner: false,

@@ -6,7 +6,7 @@ part of 'auth_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authControllerHash() => r'b52dfba416eba478566453fbdc1d8a8312f3c34c';
+String _$authControllerHash() => r'9edb2d03e18ed027c7bf3e143ba17ef0d627c3e8';
 
 /// The app session. Starts as [AuthState.initializing], validates any stored
 /// tokens with `GET /me`, then settles on authenticated/unauthenticated.
