@@ -41,7 +41,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 ## Phase 5 — Purchasing
 - [x] 5.1 Cart + checkout + Razorpay (stub) + webhook + ledger
 - [ ] 5.2 Downloads + free quota + reviews
-- [ ] 5.3 Flutter basket/checkout/download/reviews
+- [x] 5.3 Flutter basket/checkout/download/reviews (basket, checkout, order result, purchases library + download/open/share, review sheet; the reviews *list* is part of the drawing detail screen and reuses `DrawingsRepository.listReviews`)
 
 ## Phase 6 — Seller side, wallet, profile
 - [ ] 6.1 Manage drawings + stats endpoints

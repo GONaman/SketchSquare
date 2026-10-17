@@ -5,6 +5,7 @@ import '../../auth/presentation/current_user_provider.dart';
 import '../data/basket_providers.dart';
 import '../domain/checkout_models.dart';
 import '../domain/payment_gateway.dart';
+import '../../purchases/presentation/purchases_controller.dart';
 import 'cart_controller.dart';
 
 part 'checkout_controller.g.dart';
@@ -122,6 +123,7 @@ class CheckoutController extends _$CheckoutController {
       case OrderStatus.paid:
         await ref.read(pendingCheckoutStoreProvider).clear();
         ref.invalidate(cartControllerProvider);
+        ref.invalidate(purchasesControllerProvider);
         state = CheckoutSuccess(orderId: orderId, amountPaise: amountPaise);
       case OrderStatus.failed:
         await ref.read(pendingCheckoutStoreProvider).clear();
