@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../core/network/api_exception.dart';
 import '../domain/sheet_upload_target.dart';
@@ -62,7 +63,8 @@ class FilePickerSheetPicker implements SheetPicker {
       allowMultiple: true,
       type: FileType.custom,
       allowedExtensions: SheetFileRules.allowedExtensions,
-      withData: false,
+      // Web has no file path to stream from; the browser hands over the bytes.
+      withData: kIsWeb,
       withReadStream: false,
     );
     if (result == null) return const [];
@@ -71,7 +73,10 @@ class FilePickerSheetPicker implements SheetPicker {
         PickedSheetFile(
           name: f.name,
           sizeBytes: f.size,
-          openRead: () => f.xFile.openRead(),
+          openRead: () {
+            final bytes = f.bytes;
+            return bytes != null ? Stream.value(bytes) : f.xFile.openRead();
+          },
         ),
     ];
   }

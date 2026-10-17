@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../core/router/routes.dart';
+import '../../../../core/widgets/widgets.dart' hide formatPaise;
 import '../../domain/money.dart';
 import '../../domain/sheet_upload_target.dart';
 import '../upload_flow_controller.dart';
 import '../upload_flow_state.dart';
+import 'form_widgets.dart';
+import 'listing_preview.dart';
 
 class ReviewStep extends ConsumerWidget {
   const ReviewStep({super.key});
@@ -16,18 +17,27 @@ class ReviewStep extends ConsumerWidget {
     final s = ref.watch(uploadFlowProvider);
     final c = ref.read(uploadFlowProvider.notifier);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final f = s.form;
     final blockers = s.publishBlockers;
     final category =
         s.categories.where((e) => e.id == f.categoryId).firstOrNull?.name ??
         '—';
     final area = f.plotAreaSqft;
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
 
-    Widget section(String title, UploadStep step, List<Widget> children) =>
-        Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
+    Widget card(String title, UploadStep step, List<Widget> children) =>
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: AppCard(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.xs,
+              AppSpacing.sm,
+              AppSpacing.lg,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -36,246 +46,158 @@ class ReviewStep extends ConsumerWidget {
                     Expanded(
                       child: Text(title, style: theme.textTheme.titleMedium),
                     ),
-                    TextButton(
+                    TextButton.icon(
                       key: ValueKey('edit-${step.name}'),
                       onPressed: () => c.goToStep(step),
-                      child: const Text('Edit'),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Edit'),
                     ),
                   ],
                 ),
-                ...children,
+                Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: children,
+                  ),
+                ),
               ],
             ),
           ),
         );
 
+    final facts = [
+      category,
+      if (f.city.trim().isNotEmpty) f.city.trim(),
+      if (area != null) '${area.round()} sq ft',
+      if (f.floors != null) '${f.floors} floor(s)',
+      if (f.bedrooms != null) '${f.bedrooms} bedroom(s)',
+      if (f.facing != null) '${f.facing} facing',
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
+        const StepIntro(
+          kicker: 'STEP 4 OF 4',
+          title: 'Review & publish',
+          subtitle: 'One last look. Buyers will see exactly this.',
+        ),
         if (blockers.isNotEmpty)
           Container(
             key: const ValueKey('publish-blockers'),
             width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: theme.colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(4),
+              color: scheme.errorContainer,
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Fix these before publishing',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onErrorContainer,
-                  ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 20,
+                      color: scheme.onErrorContainer,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Fix these before publishing',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: scheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: AppSpacing.xs),
                 for (final b in blockers)
                   Text(
                     '• $b',
-                    style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onErrorContainer,
+                    ),
                   ),
               ],
             ),
           ),
-        section('Details', UploadStep.details, [
+        const Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: ListingPreviewStage(),
+        ),
+        card('Details', UploadStep.details, [
           Text(f.title, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(f.description, maxLines: 4, overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 8),
-          Text(
-            [
-              category,
-              if (f.city.trim().isNotEmpty) f.city.trim(),
-              if (area != null) '${area.round()} sq ft',
-              if (f.floors != null) '${f.floors} floor(s)',
-              if (f.bedrooms != null) '${f.bedrooms} bedroom(s)',
-              if (f.facing != null) '${f.facing} facing',
-            ].join(' · '),
-            style: theme.textTheme.bodySmall,
-          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(facts.join(' · '), style: muted),
           if (f.tags.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
               child: Wrap(
-                spacing: 6,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
                 children: [for (final t in f.tags) Chip(label: Text(t))],
               ),
             ),
         ]),
-        section('Sheets', UploadStep.sheets, [
+        card('Sheets', UploadStep.sheets, [
           if (s.sheets.isEmpty) const Text('No sheets'),
           for (final i in s.sheets)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                '${i.name} · ${i.type.label}${i.isPreview ? ' · preview' : ''}',
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.description_outlined,
+                    size: 18,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      '${i.name} · ${i.type.label}${i.isPreview ? ' · preview' : ''}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
         ]),
-        section('Pricing', UploadStep.pricing, [
+        card('Pricing', UploadStep.pricing, [
           Text(
             f.isFree ? 'Free' : formatPaise(f.pricePaise),
             key: const ValueKey('review-price'),
-            style: theme.textTheme.titleSmall,
+            style: theme.textTheme.titleLarge?.tabular,
           ),
           if (!f.isFree && f.pricePaise >= 100)
             Text(
               'You receive ${formatPaise(sellerNetPaise(f.pricePaise))} '
               'after the platform fee.',
-              style: theme.textTheme.bodySmall,
+              style: muted,
             ),
         ]),
-        Text(
-          'Publishing generates watermarked previews. This can take a minute.',
-          style: theme.textTheme.bodySmall,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.water_drop_outlined, size: 16, color: scheme.primary),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                'Publishing generates watermarked previews. This can take a '
+                'minute.',
+                style: muted,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.sm),
       ],
     );
   }
 }
-
-/// Shown instead of the steps once the drawing is being processed or finished.
-class PublishStatusView extends ConsumerWidget {
-  const PublishStatusView({super.key, required this.onStartNew});
-
-  final VoidCallback onStartNew;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final s = ref.watch(uploadFlowProvider);
-    final c = ref.read(uploadFlowProvider.notifier);
-    final theme = Theme.of(context);
-
-    Widget layout({
-      required Widget leading,
-      required String title,
-      String? message,
-      required List<Widget> actions,
-    }) => Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            leading,
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleLarge,
-            ),
-            if (message != null) ...[
-              const SizedBox(height: 8),
-              Text(message, textAlign: TextAlign.center),
-            ],
-            const SizedBox(height: 24),
-            ...actions,
-          ],
-        ),
-      ),
-    );
-
-    switch (s.phase) {
-      case PublishPhase.idle:
-        return const SizedBox.shrink();
-      case PublishPhase.publishing:
-      case PublishPhase.processing:
-        return layout(
-          leading:
-              s.pollStalled
-                  ? Icon(
-                    Icons.hourglass_bottom,
-                    size: 48,
-                    color: theme.colorScheme.primary,
-                  )
-                  : const CircularProgressIndicator(
-                    key: ValueKey('processing-spinner'),
-                  ),
-          title:
-              s.pollStalled ? 'Still processing…' : 'Generating your previews…',
-          message:
-              s.pollStalled
-                  ? "We couldn't get an update. Your drawing is safe and "
-                      'processing continues on our side.'
-                  : 'Watermarking and rendering your sheets. You can leave '
-                      'this screen; your drawing will be here when you return.',
-          actions: [
-            if (s.pollStalled)
-              FilledButton(
-                key: const ValueKey('check-again'),
-                onPressed: c.resumePolling,
-                child: const Text('Check again'),
-              ),
-          ],
-        );
-      case PublishPhase.published:
-        return layout(
-          leading: Icon(
-            Icons.check_circle,
-            size: 56,
-            color: theme.colorScheme.primary,
-          ),
-          title: 'Your drawing is live',
-          message: '${s.form.title} is now visible in the marketplace.',
-          actions: [..._finishedActions(context, onStartNew)],
-        );
-      case PublishPhase.underReview:
-        return layout(
-          leading: Icon(
-            Icons.fact_check_outlined,
-            size: 56,
-            color: theme.colorScheme.primary,
-          ),
-          title: 'Under review by admins',
-          message:
-              '${s.form.title} looks similar to an existing drawing, so our '
-              'team will review it before it goes live. It is not visible to '
-              "others until then, and you'll be emailed the decision.",
-          actions: [..._finishedActions(context, onStartNew)],
-        );
-      case PublishPhase.failed:
-        return layout(
-          leading: Icon(
-            Icons.error_outline,
-            size: 56,
-            color: theme.colorScheme.error,
-          ),
-          title: "We couldn't process this drawing",
-          message: s.failureReason ?? 'Something went wrong while processing.',
-          actions: [
-            FilledButton(
-              key: const ValueKey('retry-publish'),
-              onPressed: c.retryPublish,
-              child: const Text('Try again'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              key: const ValueKey('edit-after-failure'),
-              onPressed: c.editAfterFailure,
-              child: const Text('Edit drawing'),
-            ),
-          ],
-        );
-    }
-  }
-}
-
-List<Widget> _finishedActions(BuildContext context, VoidCallback onStartNew) =>
-    [
-      FilledButton(
-        key: const ValueKey('start-new'),
-        onPressed: onStartNew,
-        child: const Text('Upload another drawing'),
-      ),
-      const SizedBox(height: 8),
-      OutlinedButton(
-        key: const ValueKey('open-manage-drawings'),
-        onPressed: () => context.push(AppRoutes.manageDrawings),
-        child: const Text('Manage drawings'),
-      ),
-    ];

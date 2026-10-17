@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/status_pill.dart';
+import '../../../../core/theme/app_tokens.dart';
 import '../../domain/drawing_form.dart';
 import '../../domain/drawing_form_validators.dart';
 import '../upload_flow_controller.dart';
 import 'form_widgets.dart';
+import 'plot_sketch.dart';
 
 class DetailsStep extends ConsumerWidget {
   const DetailsStep({super.key});
@@ -15,164 +18,219 @@ class DetailsStep extends ConsumerWidget {
     final c = ref.read(uploadFlowProvider.notifier);
     final f = s.form;
     final errors = s.showErrors ? s.detailErrors : const <String, String>{};
+    final left = s.detailErrors.length;
     final area = f.plotAreaSqft;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 8),
-        FormTextField(
-          key: const ValueKey('field-title'),
-          label: 'Title',
-          initialText: f.title,
-          errorText: errors['title'],
-          maxLength: DrawingFormValidators.titleMax,
-          textInputAction: TextInputAction.next,
-          onChanged: (v) => c.updateForm((f) => f.copyWith(title: v)),
+        StepIntro(
+          kicker: 'STEP 1 OF 4',
+          title: 'Describe your drawing',
+          subtitle:
+              'Specific listings get found. Buyers search by plot size, '
+              'city and category.',
+          trailing:
+              left == 0
+                  ? const StatusPill(
+                    label: 'All set',
+                    tone: StatusTone.success,
+                    icon: Icons.check,
+                  )
+                  : StatusPill(label: '$left to go', tone: StatusTone.neutral),
         ),
-        const SizedBox(height: 12),
-        FormTextField(
-          key: const ValueKey('field-description'),
-          label: 'Description',
-          initialText: f.description,
-          errorText: errors['description'],
-          maxLines: 5,
-          maxLength: DrawingFormValidators.descriptionMax,
-          keyboardType: TextInputType.multiline,
-          onChanged: (v) => c.updateForm((f) => f.copyWith(description: v)),
-        ),
-        const SizedBox(height: 12),
-        _CategoryField(errorText: errors['category']),
-        const SectionTitle('Plot size'),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: FormTextField(
-                key: const ValueKey('field-plot-length'),
-                label: 'Length',
-                initialText: _num(f.plotLength),
-                errorText: errors['plotLength'],
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [decimalFormatter],
+        FormSection(
+          title: 'The basics',
+          icon: Icons.edit_note,
+          child: Column(
+            children: [
+              FormTextField(
+                key: const ValueKey('field-title'),
+                label: 'Title',
+                hintText: 'e.g. 30×40 East-facing duplex',
+                initialText: f.title,
+                errorText: errors['title'],
+                maxLength: DrawingFormValidators.titleMax,
+                textInputAction: TextInputAction.next,
+                onChanged: (v) => c.updateForm((f) => f.copyWith(title: v)),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FormTextField(
+                key: const ValueKey('field-description'),
+                label: 'Description',
+                hintText: 'Rooms, vastu, structure, what is included…',
+                initialText: f.description,
+                errorText: errors['description'],
+                maxLines: 5,
+                maxLength: DrawingFormValidators.descriptionMax,
+                keyboardType: TextInputType.multiline,
                 onChanged:
-                    (v) => c.updateForm(
-                      (f) => f.copyWith(plotLength: double.tryParse(v)),
-                    ),
+                    (v) => c.updateForm((f) => f.copyWith(description: v)),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 16, left: 8, right: 8),
-              child: Text('×'),
-            ),
-            Expanded(
-              child: FormTextField(
-                key: const ValueKey('field-plot-breadth'),
-                label: 'Width',
-                initialText: _num(f.plotBreadth),
-                errorText: errors['plotBreadth'],
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [decimalFormatter],
-                onChanged:
-                    (v) => c.updateForm(
-                      (f) => f.copyWith(plotBreadth: double.tryParse(v)),
-                    ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            SegmentedButton<PlotUnit>(
-              key: const ValueKey('plot-unit'),
-              segments: [
-                for (final u in PlotUnit.values)
-                  ButtonSegment(value: u, label: Text(u.label)),
-              ],
-              selected: {f.unit},
-              onSelectionChanged:
-                  (v) => c.updateForm((f) => f.copyWith(unit: v.first)),
-            ),
-            const SizedBox(width: 12),
-            if (area != null)
-              Text(
-                '≈ ${area.round()} sq ft',
-                key: const ValueKey('plot-area'),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-          ],
-        ),
-        const SectionTitle('Layout'),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: FormTextField(
-                key: const ValueKey('field-floors'),
-                label: 'Floors',
-                initialText: f.floors?.toString() ?? '',
-                errorText: errors['floors'],
-                keyboardType: TextInputType.number,
-                inputFormatters: [digitsFormatter],
-                onChanged:
-                    (v) => c.updateForm(
-                      (f) => f.copyWith(floors: int.tryParse(v)),
-                    ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FormTextField(
-                key: const ValueKey('field-bedrooms'),
-                label: 'Bedrooms (optional)',
-                initialText: f.bedrooms?.toString() ?? '',
-                errorText: errors['bedrooms'],
-                keyboardType: TextInputType.number,
-                inputFormatters: [digitsFormatter],
-                onChanged:
-                    (v) => c.updateForm(
-                      (f) => f.copyWith(bedrooms: int.tryParse(v)),
-                    ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String?>(
-          key: const ValueKey('field-facing'),
-          value: f.facing,
-          decoration: const InputDecoration(
-            labelText: 'Facing (optional)',
-            border: OutlineInputBorder(),
+              const SizedBox(height: AppSpacing.md),
+              _CategoryField(errorText: errors['category']),
+            ],
           ),
-          items: [
-            const DropdownMenuItem(value: null, child: Text('Not specified')),
-            for (final d in facingOptions)
-              DropdownMenuItem(value: d, child: Text(d)),
-          ],
-          onChanged: (v) => c.updateForm((f) => f.copyWith(facing: v)),
         ),
-        const SizedBox(height: 12),
-        FormTextField(
-          key: const ValueKey('field-city'),
-          label: 'City',
-          initialText: f.city,
-          errorText: errors['city'],
-          textInputAction: TextInputAction.next,
-          onChanged: (v) => c.updateForm((f) => f.copyWith(city: v)),
+        FormSection(
+          title: 'Plot size',
+          subtitle: 'The number buyers search by',
+          icon: Icons.straighten,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: FormTextField(
+                      key: const ValueKey('field-plot-length'),
+                      label: 'Length',
+                      tabularFigures: true,
+                      initialText: _num(f.plotLength),
+                      errorText: errors['plotLength'],
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [decimalFormatter],
+                      onChanged:
+                          (v) => c.updateForm(
+                            (f) => f.copyWith(plotLength: double.tryParse(v)),
+                          ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(
+                      top: AppSpacing.lg,
+                      left: AppSpacing.sm,
+                      right: AppSpacing.sm,
+                    ),
+                    child: Text('×'),
+                  ),
+                  Expanded(
+                    child: FormTextField(
+                      key: const ValueKey('field-plot-breadth'),
+                      label: 'Width',
+                      tabularFigures: true,
+                      initialText: _num(f.plotBreadth),
+                      errorText: errors['plotBreadth'],
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [decimalFormatter],
+                      onChanged:
+                          (v) => c.updateForm(
+                            (f) => f.copyWith(plotBreadth: double.tryParse(v)),
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.sm,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  SegmentedButton<PlotUnit>(
+                    key: const ValueKey('plot-unit'),
+                    showSelectedIcon: false,
+                    segments: [
+                      for (final u in PlotUnit.values)
+                        ButtonSegment(value: u, label: Text(u.label)),
+                    ],
+                    selected: {f.unit},
+                    onSelectionChanged:
+                        (v) => c.updateForm((f) => f.copyWith(unit: v.first)),
+                  ),
+                  if (area != null)
+                    Text(
+                      '≈ ${area.round()} sq ft',
+                      key: const ValueKey('plot-area'),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              PlotSketch(
+                length: f.plotLength,
+                breadth: f.plotBreadth,
+                unitLabel: f.unit.label,
+              ),
+            ],
+          ),
         ),
-        const SectionTitle('Tags'),
-        _TagsEditor(
-          tags: f.tags,
-          errorText: errors['tags'],
-          onChanged: (tags) => c.updateForm((f) => f.copyWith(tags: tags)),
+        FormSection(
+          title: 'Layout',
+          icon: Icons.home_work_outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: FormTextField(
+                      key: const ValueKey('field-floors'),
+                      label: 'Floors',
+                      tabularFigures: true,
+                      initialText: f.floors?.toString() ?? '',
+                      errorText: errors['floors'],
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [digitsFormatter],
+                      onChanged:
+                          (v) => c.updateForm(
+                            (f) => f.copyWith(floors: int.tryParse(v)),
+                          ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: FormTextField(
+                      key: const ValueKey('field-bedrooms'),
+                      label: 'Bedrooms (optional)',
+                      tabularFigures: true,
+                      initialText: f.bedrooms?.toString() ?? '',
+                      errorText: errors['bedrooms'],
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [digitsFormatter],
+                      onChanged:
+                          (v) => c.updateForm(
+                            (f) => f.copyWith(bedrooms: int.tryParse(v)),
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _FacingPicker(
+                selected: f.facing,
+                onChanged: (v) => c.updateForm((f) => f.copyWith(facing: v)),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FormTextField(
+                key: const ValueKey('field-city'),
+                label: 'City',
+                prefixIcon: Icons.place_outlined,
+                initialText: f.city,
+                errorText: errors['city'],
+                textInputAction: TextInputAction.next,
+                onChanged: (v) => c.updateForm((f) => f.copyWith(city: v)),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 24),
+        FormSection(
+          title: 'Tags',
+          subtitle: 'Optional · up to ${DrawingFormValidators.maxTags}',
+          icon: Icons.sell_outlined,
+          child: _TagsEditor(
+            tags: f.tags,
+            errorText: errors['tags'],
+            onChanged: (tags) => c.updateForm((f) => f.copyWith(tags: tags)),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
       ],
     );
   }
@@ -180,6 +238,59 @@ class DetailsStep extends ConsumerWidget {
   static String _num(double? v) {
     if (v == null) return '';
     return v == v.roundToDouble() ? v.round().toString() : v.toString();
+  }
+}
+
+class _FacingPicker extends StatelessWidget {
+  const _FacingPicker({required this.selected, required this.onChanged});
+
+  final String? selected;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Facing', style: theme.textTheme.labelLarge),
+        const SizedBox(height: 2),
+        Text(
+          'Optional · tap again to clear',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        LayoutBuilder(
+          builder: (context, box) {
+            const gap = AppSpacing.sm;
+            final eight = (box.maxWidth - 7 * gap) / 8;
+            final chipW = eight >= 52 ? eight : (box.maxWidth - 3 * gap) / 4;
+            return Wrap(
+              key: const ValueKey('field-facing'),
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final d in facingOptions)
+                  SizedBox(
+                    width: chipW.floorToDouble(),
+                    child: ChoiceChip(
+                      label: SizedBox(
+                        width: double.infinity,
+                        child: Text(d, textAlign: TextAlign.center),
+                      ),
+                      selected: selected == d,
+                      showCheckmark: false,
+                      onSelected: (_) => onChanged(selected == d ? null : d),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
   }
 }
 
@@ -214,7 +325,6 @@ class _CategoryField extends ConsumerWidget {
       decoration: InputDecoration(
         labelText: s.categories.isEmpty ? 'Loading categories…' : 'Category',
         errorText: errorText,
-        border: const OutlineInputBorder(),
       ),
       items: [
         for (final cat in s.categories)
@@ -224,6 +334,8 @@ class _CategoryField extends ConsumerWidget {
     );
   }
 }
+
+const _suggestedTags = ['vastu', 'duplex', 'east-facing', 'parking', 'modern'];
 
 class _TagsEditor extends StatefulWidget {
   const _TagsEditor({
@@ -250,8 +362,8 @@ class _TagsEditorState extends State<_TagsEditor> {
     super.dispose();
   }
 
-  void _add() {
-    final raw = _controller.text.trim();
+  void _add([String? preset]) {
+    final raw = (preset ?? _controller.text).trim();
     if (raw.isEmpty) return;
     final problem = DrawingFormValidators.tag(raw);
     final duplicate = widget.tags.any(
@@ -265,13 +377,17 @@ class _TagsEditorState extends State<_TagsEditor> {
       setState(() => _error = 'Tag already added');
     } else {
       widget.onChanged([...widget.tags, raw]);
-      _controller.clear();
+      if (preset == null) _controller.clear();
       setState(() => _error = null);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final suggestions = [
+      for (final t in _suggestedTags)
+        if (!widget.tags.any((x) => x.toLowerCase() == t)) t,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -285,16 +401,22 @@ class _TagsEditorState extends State<_TagsEditor> {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _add(),
                 decoration: InputDecoration(
-                  labelText: 'Add a tag (e.g. vastu, duplex)',
+                  labelText: 'Add a tag',
+                  hintText: 'e.g. vastu, duplex',
                   errorText: _error ?? widget.errorText,
-                  border: const OutlineInputBorder(),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
               child: IconButton.filledTonal(
+                style: IconButton.styleFrom(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
                 key: const ValueKey('add-tag'),
                 tooltip: 'Add tag',
                 onPressed: _add,
@@ -305,10 +427,10 @@ class _TagsEditorState extends State<_TagsEditor> {
         ),
         if (widget.tags.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: AppSpacing.md),
             child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
               children: [
                 for (final t in widget.tags)
                   InputChip(
@@ -318,6 +440,31 @@ class _TagsEditorState extends State<_TagsEditor> {
                           for (final x in widget.tags)
                             if (x != t) x,
                         ]),
+                  ),
+              ],
+            ),
+          ),
+        if (suggestions.isNotEmpty &&
+            widget.tags.length < DrawingFormValidators.maxTags)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.md),
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'Suggested',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                for (final t in suggestions)
+                  ActionChip(
+                    key: ValueKey('suggest-$t'),
+                    avatar: const Icon(Icons.add, size: 16),
+                    label: Text(t),
+                    onPressed: () => _add(t),
                   ),
               ],
             ),

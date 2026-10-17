@@ -178,7 +178,7 @@ void main() {
       await tapKey(tester, 'pick-sheets');
 
       expect(find.text('1000 B · Uploading 50%'), findsOneWidget);
-      final bar = tester.widget<LinearProgressIndicator>(
+      final bar = tester.widget<CircularProgressIndicator>(
         find.byKey(const ValueKey('sheet-progress-plan.pdf')),
       );
       expect(bar.value, closeTo(0.5, 0.001));
