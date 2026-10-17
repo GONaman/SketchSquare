@@ -12,6 +12,7 @@ import {
   PROCESSING_ATTEMPTS,
   ProcessDrawingJob,
 } from './drawings.constants';
+import { ContributionService } from './contribution.service';
 import { DrawingsService } from './drawings.service';
 
 const validation = (message: string) =>
@@ -24,6 +25,7 @@ export class PublishService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly drawings: DrawingsService,
+    private readonly contribution: ContributionService,
     @InjectQueue(DRAWING_PROCESSING_QUEUE)
     private readonly queue: Queue<ProcessDrawingJob>,
   ) {}
@@ -58,12 +60,19 @@ export class PublishService {
       );
     }
 
-    const claimed = await this.prisma.drawing.updateMany({
-      where: {
-        id: drawingId,
-        status: { in: [DrawingStatus.DRAFT, DrawingStatus.FAILED] },
-      },
-      data: { status: DrawingStatus.PROCESSING, failureReason: null },
+    const claimed = await this.prisma.$transaction(async (tx) => {
+      if (drawing.pricePaise > 0) {
+        // Serialise paid publishes per architect so two concurrent requests cannot both slip past the contribution rule.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
+        await this.contribution.assertCanPublishPaid(userId, tx);
+      }
+      return tx.drawing.updateMany({
+        where: {
+          id: drawingId,
+          status: { in: [DrawingStatus.DRAFT, DrawingStatus.FAILED] },
+        },
+        data: { status: DrawingStatus.PROCESSING, failureReason: null },
+      });
     });
     if (claimed.count === 0) {
       // Lost a race: whoever won already queued the job (or the drawing moved on).
