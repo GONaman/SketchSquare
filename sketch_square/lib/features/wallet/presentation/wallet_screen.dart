@@ -9,6 +9,7 @@ import '../../../core/widgets/error_retry.dart';
 import '../../../core/widgets/load_more_sentinel.dart';
 import '../../upload/domain/money.dart';
 import '../domain/wallet_models.dart';
+import '../domain/wallet_validators.dart';
 import 'wallet_controllers.dart';
 import 'withdraw_sheet.dart';
 
@@ -97,8 +98,7 @@ class _BalanceCard extends StatelessWidget {
             if (summary.withdrawalBlocked) ...[
               const SizedBox(height: 8),
               Text(
-                'Withdrawals are currently blocked for your account. '
-                'Contact support.',
+                WalletValidators.withdrawalBlockedMessage,
                 key: const Key('wallet-blocked'),
                 style: TextStyle(color: theme.colorScheme.error),
               ),

@@ -114,6 +114,7 @@ void main() {
       await open(tester);
 
       expect(find.byKey(const Key('wallet-blocked')), findsOneWidget);
+      expect(find.textContaining('balance is negative'), findsOneWidget);
       final button = tester.widget<FilledButton>(
         find.byKey(const Key('withdraw-button')),
       );
@@ -186,7 +187,7 @@ void main() {
       await tester.tap(find.byKey(const Key('withdraw-submit')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('currently blocked'), findsOneWidget);
+      expect(find.textContaining('balance is negative'), findsOneWidget);
       expect(find.byKey(const Key('withdraw-submit')), findsOneWidget);
     });
   });

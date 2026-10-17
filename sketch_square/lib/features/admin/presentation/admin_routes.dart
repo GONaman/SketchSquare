@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/routes.dart';
+import 'admin_refund_detail_screen.dart';
+import 'admin_refunds_screen.dart';
 import 'admin_verification_detail_screen.dart';
 import 'admin_verifications_screen.dart';
 
@@ -16,6 +18,18 @@ final adminRoutes = <RouteBase>[
         builder:
             (_, state) =>
                 AdminVerificationDetailScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'refunds',
+        builder: (_, __) => const AdminRefundsScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder:
+                (_, state) =>
+                    AdminRefundDetailScreen(id: state.pathParameters['id']!),
+          ),
+        ],
       ),
     ],
   ),
