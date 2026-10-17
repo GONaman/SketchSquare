@@ -23,6 +23,9 @@ abstract final class AppRoutes {
   static const basketCheckout = '/basket/checkout';
   static const basketOrderResult = '/basket/order-result';
   static const purchases = '/profile/purchases';
+  static const profileEdit = '/profile/edit';
+  static const settings = '/profile/settings';
+  static const wallet = '/profile/wallet';
 
   /// Sub-route segment registered under every tab, for per-tab stack tests.
   static const detailSegment = 'details';
