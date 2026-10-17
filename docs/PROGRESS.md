@@ -53,7 +53,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 7.1 Security + authorization matrix test
 - [x] 7.2 Observability + perf
 - [ ] 7.3 Flutter polish
-- [ ] 7.4 Deployment docs + release build + TESTING.md
+- [x] 7.4 Deployment docs + release build + TESTING.md — backend part done (multi-stage `backend/Dockerfile` with migrate-on-start entrypoint, `infra/docker-compose.prod.yml` + `Caddyfile`, `docs/DEPLOY.md`, production startup guard); Flutter release build and TESTING.md pending
 
 ## Phase 8 — Future features
 - [x] 8.1 Favorites — backend done (`PUT/DELETE /drawings/:id/favorite`, `GET /me/favorites`, `viewer.isFavorite`); Flutter heart/list pending
