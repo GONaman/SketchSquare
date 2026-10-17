@@ -59,10 +59,12 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 8.1 Favorites — backend done (`PUT/DELETE /drawings/:id/favorite`, `GET /me/favorites`, `viewer.isFavorite`); Flutter heart/list pending
 - [x] 8.2 Express interest — backend done (`PUT/DELETE /drawings/:id/interest`, `GET /drawings/:id/interests`, `viewer.isInterested`); Flutter button/owner list pending; push on new interest comes with 8.5
 - [x] 8.3 Contribution rule
+- [x] 8.6 Refunds/disputes (Part 3) — backend: `GET /admin/purchases[/:id]`, `POST /admin/purchases/:id/refund`, `RefundProvider` (stub/Razorpay), TAX enum reserved; Flutter admin Refunds screen + wallet blocked message pending
 - [ ] 8.4 Plagiarism check + admin review queue
 - [ ] 8.5 Push notifications (stub)
 
 ## Needs manual check
+- Refunds (8.6): the real Razorpay refund call (`RazorpayRefundProvider`) is only unit-tested with a fake `fetch`; verify against Razorpay test keys (refund id, idempotency header, partial-failure retry). The stub provider is used whenever keys are unset (refused in production).
 - Admin area (2.6): "Open document" uses `url_launcher` (external app) on the presigned `documentUrl`; verify on a device. Approve/reject/list were only tested against fakes and a scripted Dio adapter, not the real backend (2.1/2.2).
 - Flutter intro video (`sketch_square/assets/videos/intro.mp4`) is a placeholder; TODO replace with the real ~30 s demo. `video_player` playback itself is only checked on a device/emulator (tests stub it).
 - Flutter document picker (`file_picker`) on iOS/macOS/Android: verify picking PDF/JPG/PNG on a real device (platform permissions/entitlements untested).

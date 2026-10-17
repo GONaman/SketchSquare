@@ -70,6 +70,8 @@ enum LedgerAccountType {
   PLATFORM_REVENUE
   PAYMENT_GATEWAY
   PAYOUT_CLEARING
+  // Reserved for GST/TCS/TDS (not used yet, see docs/DECISIONS.md RF7).
+  TAX
 }
 
 enum LedgerEntryType {
@@ -78,6 +80,14 @@ enum LedgerEntryType {
   WITHDRAWAL
   WITHDRAWAL_REVERSAL
   REFUND
+  // Reserved for GST/TCS/TDS (not used yet, see docs/DECISIONS.md RF7).
+  TAX
+}
+
+enum RefundProviderStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
 }
 
 enum WithdrawalStatus {
@@ -121,6 +131,7 @@ model User {
   withdrawals           Withdrawal[]
   bankAccount           BankAccount?
   auditLogs             AuditLog[]
+  refundsIssued         Refund[]           @relation("RefundAdmin")
 
   @@index([architectRating])
   @@index([city])
@@ -284,6 +295,7 @@ model Purchase {
 
   buyer   User    @relation(fields: [buyerId], references: [id])
   drawing Drawing @relation(fields: [drawingId], references: [id])
+  refund  Refund?
 
   // Partial unique index (buyerId, drawingId) WHERE status = 'PAID' is added in raw SQL.
   @@index([buyerId])
@@ -441,5 +453,27 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([actorId])
+  @@index([createdAt])
+}
+
+// Admin-issued refund of a PAID purchase; one per purchase. The money movement lives in the ledger (ledgerTxnId),
+// the gateway refund is tracked separately so it can be retried without touching the books again.
+model Refund {
+  id               String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  purchaseId       String               @unique @db.Uuid
+  adminId          String               @db.Uuid
+  reason           String
+  amountPaise      Int
+  ledgerTxnId      String               @db.Uuid
+  providerStatus   RefundProviderStatus @default(PENDING)
+  providerRefundId String?
+  providerError    String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id])
+  admin    User     @relation("RefundAdmin", fields: [adminId], references: [id])
+
+  @@index([adminId])
   @@index([createdAt])
 }
