@@ -29,7 +29,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 3.1 Drawings CRUD + categories
 - [ ] 3.2 Storage + sheets (presigned upload, magic bytes)
 - [ ] 3.3 Publish + processing worker (previews, pHash)
-- [ ] 3.4 WatermarkService
+- [x] 3.4 WatermarkService
 - [ ] 3.5 Flutter upload flow
 
 ## Phase 4 — Discovery
