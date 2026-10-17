@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/widgets/widgets.dart';
 import '../domain/drawing_search_query.dart';
 import '../domain/plot_size.dart';
 
@@ -58,6 +59,14 @@ class PlotSizeController extends ChangeNotifier {
     return result;
   }
 
+  /// The two numbers as typed (null unless both parse), without touching errors.
+  (double, double)? peekSize() {
+    final l = double.tryParse(lengthText.text.trim().replaceAll(',', '.'));
+    final b = double.tryParse(breadthText.text.trim().replaceAll(',', '.'));
+    if (l == null || b == null || l <= 0 || b <= 0) return null;
+    return (l, b);
+  }
+
   void clear() {
     lengthText.clear();
     breadthText.clear();
@@ -75,25 +84,48 @@ class PlotSizeController extends ChangeNotifier {
 }
 
 /// Length × breadth inputs with an ft/m toggle and optional tolerance slider.
+///
+/// With [trailing] (e.g. the search button) the unit toggle shrinks to `ft | m`
+/// and shares one row with it, which keeps hero cards short. With
+/// [showTolerance] the tolerance slider, the live size range it covers and the
+/// "rotated plots are included" note follow (filters sheet).
 class PlotSizeFields extends StatelessWidget {
   const PlotSizeFields({
     super.key,
     required this.controller,
     this.showTolerance = false,
     this.onSubmitted,
+    this.trailing,
   });
 
   final PlotSizeController controller;
   final bool showTolerance;
   final VoidCallback? onSubmitted;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
-        final theme = Theme.of(context);
         final suffix = controller.unit.apiValue;
+        final inline = trailing != null;
+        final unitToggle = SegmentedButton<LengthUnit>(
+          key: const Key('plot-unit'),
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(
+              value: LengthUnit.ft,
+              label: Text(inline ? 'ft' : 'Feet'),
+            ),
+            ButtonSegment(
+              value: LengthUnit.m,
+              label: Text(inline ? 'm' : 'Metres'),
+            ),
+          ],
+          selected: {controller.unit},
+          onSelectionChanged: (s) => controller.unit = s.first,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -127,42 +159,92 @@ class PlotSizeFields extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            SegmentedButton<LengthUnit>(
-              key: const Key('plot-unit'),
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: LengthUnit.ft, label: Text('Feet')),
-                ButtonSegment(value: LengthUnit.m, label: Text('Metres')),
-              ],
-              selected: {controller.unit},
-              onSelectionChanged: (s) => controller.unit = s.first,
-            ),
-            if (showTolerance) ...[
-              const SizedBox(height: 12),
-              Text(
-                'Tolerance ±${controller.tolerancePct}%',
-                style: theme.textTheme.labelLarge,
-              ),
-              Slider(
-                key: const Key('plot-tolerance'),
-                value: controller.tolerancePct.toDouble(),
-                min: minTolerancePct.toDouble(),
-                max: maxTolerancePct.toDouble(),
-                divisions: (maxTolerancePct - minTolerancePct) ~/ 5,
-                label: '±${controller.tolerancePct}%',
-                onChanged: (v) => controller.tolerancePct = v.round(),
-              ),
-              Text(
-                'Also matches the plot rotated (length and breadth swapped).',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+            const SizedBox(height: AppSpacing.md),
+            if (inline)
+              Row(
+                children: [
+                  unitToggle,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(child: trailing!),
+                ],
+              )
+            else
+              unitToggle,
+            if (showTolerance) _ToleranceBlock(controller: controller),
           ],
         );
       },
+    );
+  }
+}
+
+class _ToleranceBlock extends StatelessWidget {
+  const _ToleranceBlock({required this.controller});
+
+  final PlotSizeController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final pct = controller.tolerancePct;
+    final unit = controller.unit.apiValue;
+    final size = controller.peekSize();
+    final t = pct / 100;
+    String range(double v) =>
+        '${formatDimension(v * (1 - t))}–${formatDimension(v * (1 + t))}';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: AppSpacing.lg),
+        Row(
+          children: [
+            Expanded(
+              child: Text('Tolerance', style: theme.textTheme.labelLarge),
+            ),
+            StatusPill(
+              key: const Key('plot-tolerance-value'),
+              label: '±$pct%',
+              tone: StatusTone.info,
+              dense: true,
+            ),
+          ],
+        ),
+        Slider(
+          key: const Key('plot-tolerance'),
+          value: pct.toDouble(),
+          min: minTolerancePct.toDouble(),
+          max: maxTolerancePct.toDouble(),
+          divisions: (maxTolerancePct - minTolerancePct) ~/ 5,
+          label: '±$pct%',
+          onChanged: (v) => controller.tolerancePct = v.round(),
+        ),
+        AppCard(
+          style: AppCardStyle.tonal,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.crop_rotate_rounded, size: 18, color: scheme.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  size == null
+                      ? 'Plots are matched in both orientations, so '
+                          '30×40 also finds 40×30.'
+                      : 'Matches ${range(size.$1)} × ${range(size.$2)} $unit, '
+                          'and rotated plots (${formatDimension(size.$2)}×'
+                          '${formatDimension(size.$1)} $unit) too.',
+                  key: const Key('plot-rotation-note'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -193,6 +275,7 @@ class _DimensionField extends StatelessWidget {
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       textInputAction: action,
+      style: Theme.of(context).textTheme.titleMedium?.tabular,
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
       onSubmitted: onSubmitted == null ? null : (_) => onSubmitted!(),
       decoration: InputDecoration(

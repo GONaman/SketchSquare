@@ -158,8 +158,8 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Screen group | Status |
 | --- | --- |
 | Theme, bottom navigation, page transitions | Done |
-| Home (hero plot-size search, categories, feed) | Done |
-| Search (field, results grid, empty/error) | Done (filters sheet still stock) |
+| Home (hero plot-size search, categories, feed; hero ≈ 225 dp) | Done |
+| Search (sticky field + filter button, active chips + Clear all, result-count header + sort pill, plot-specific empty state with one-tap widen, filters sheet with plot size/tolerance preview, price range, chips, sort) | Done |
 | Shared `DrawingCard`, skeleton grid, Featured/Favorites/Architect grids | Done (inherited) |
 | Drawing detail (gallery has hero + new card chips; overview, reviews, purchase bar) | **To do** |
 | Architect profile header | **To do** |
