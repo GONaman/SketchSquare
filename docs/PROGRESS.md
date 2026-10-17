@@ -30,7 +30,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 3.2 Storage + sheets (presigned upload, magic bytes)
 - [ ] 3.3 Publish + processing worker (previews, pHash)
 - [x] 3.4 WatermarkService
-- [ ] 3.5 Flutter upload flow
+- [x] 3.5 Flutter upload flow (domain/data #11, controller #17, multi-step UI + tests)
 
 ## Phase 4 — Discovery
 - [ ] 4.1 Search endpoint (size tolerance + rotation, filters, sort)

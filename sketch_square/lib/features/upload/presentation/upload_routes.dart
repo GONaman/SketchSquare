@@ -8,7 +8,8 @@ import 'upload_screen.dart';
 final uploadRoutes = <RouteBase>[
   GoRoute(
     path: AppRoutes.upload,
-    builder: (_, __) => const UploadScreen(),
+    builder:
+        (_, state) => UploadScreen(draftId: state.uri.queryParameters['draft']),
     routes: [placeholderDetailRoute],
   ),
 ];
