@@ -309,7 +309,8 @@ mixin _$UploadFlowState {
  bool get showErrors; bool get saving;// Last save/restore/publish error to display in a banner.
  String? get error;// Transient notices, e.g. files rejected by client-side validation.
  List<String> get notices; PublishPhase get phase; String? get failureReason;// Polling gave up (offline / timeout) but the server may still be working.
- bool get pollStalled;
+ bool get pollStalled;// Contribution rule (8.3); null until loaded or if it couldn't be fetched.
+ ContributionStatus? get contribution;
 /// Create a copy of UploadFlowState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -320,16 +321,16 @@ $UploadFlowStateCopyWith<UploadFlowState> get copyWith => _$UploadFlowStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UploadFlowState&&(identical(other.loaded, loaded) || other.loaded == loaded)&&(identical(other.step, step) || other.step == step)&&(identical(other.form, form) || other.form == form)&&(identical(other.draftId, draftId) || other.draftId == draftId)&&const DeepCollectionEquality().equals(other.sheets, sheets)&&const DeepCollectionEquality().equals(other.categories, categories)&&(identical(other.categoriesError, categoriesError) || other.categoriesError == categoriesError)&&(identical(other.showErrors, showErrors) || other.showErrors == showErrors)&&(identical(other.saving, saving) || other.saving == saving)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.notices, notices)&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.failureReason, failureReason) || other.failureReason == failureReason)&&(identical(other.pollStalled, pollStalled) || other.pollStalled == pollStalled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UploadFlowState&&(identical(other.loaded, loaded) || other.loaded == loaded)&&(identical(other.step, step) || other.step == step)&&(identical(other.form, form) || other.form == form)&&(identical(other.draftId, draftId) || other.draftId == draftId)&&const DeepCollectionEquality().equals(other.sheets, sheets)&&const DeepCollectionEquality().equals(other.categories, categories)&&(identical(other.categoriesError, categoriesError) || other.categoriesError == categoriesError)&&(identical(other.showErrors, showErrors) || other.showErrors == showErrors)&&(identical(other.saving, saving) || other.saving == saving)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other.notices, notices)&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.failureReason, failureReason) || other.failureReason == failureReason)&&(identical(other.pollStalled, pollStalled) || other.pollStalled == pollStalled)&&(identical(other.contribution, contribution) || other.contribution == contribution));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loaded,step,form,draftId,const DeepCollectionEquality().hash(sheets),const DeepCollectionEquality().hash(categories),categoriesError,showErrors,saving,error,const DeepCollectionEquality().hash(notices),phase,failureReason,pollStalled);
+int get hashCode => Object.hash(runtimeType,loaded,step,form,draftId,const DeepCollectionEquality().hash(sheets),const DeepCollectionEquality().hash(categories),categoriesError,showErrors,saving,error,const DeepCollectionEquality().hash(notices),phase,failureReason,pollStalled,contribution);
 
 @override
 String toString() {
-  return 'UploadFlowState(loaded: $loaded, step: $step, form: $form, draftId: $draftId, sheets: $sheets, categories: $categories, categoriesError: $categoriesError, showErrors: $showErrors, saving: $saving, error: $error, notices: $notices, phase: $phase, failureReason: $failureReason, pollStalled: $pollStalled)';
+  return 'UploadFlowState(loaded: $loaded, step: $step, form: $form, draftId: $draftId, sheets: $sheets, categories: $categories, categoriesError: $categoriesError, showErrors: $showErrors, saving: $saving, error: $error, notices: $notices, phase: $phase, failureReason: $failureReason, pollStalled: $pollStalled, contribution: $contribution)';
 }
 
 
@@ -340,7 +341,7 @@ abstract mixin class $UploadFlowStateCopyWith<$Res>  {
   factory $UploadFlowStateCopyWith(UploadFlowState value, $Res Function(UploadFlowState) _then) = _$UploadFlowStateCopyWithImpl;
 @useResult
 $Res call({
- bool loaded, UploadStep step, DrawingForm form, String? draftId, List<SheetItem> sheets, List<CategoryRef> categories, String? categoriesError, bool showErrors, bool saving, String? error, List<String> notices, PublishPhase phase, String? failureReason, bool pollStalled
+ bool loaded, UploadStep step, DrawingForm form, String? draftId, List<SheetItem> sheets, List<CategoryRef> categories, String? categoriesError, bool showErrors, bool saving, String? error, List<String> notices, PublishPhase phase, String? failureReason, bool pollStalled, ContributionStatus? contribution
 });
 
 
@@ -357,7 +358,7 @@ class _$UploadFlowStateCopyWithImpl<$Res>
 
 /// Create a copy of UploadFlowState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? loaded = null,Object? step = null,Object? form = null,Object? draftId = freezed,Object? sheets = null,Object? categories = null,Object? categoriesError = freezed,Object? showErrors = null,Object? saving = null,Object? error = freezed,Object? notices = null,Object? phase = null,Object? failureReason = freezed,Object? pollStalled = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? loaded = null,Object? step = null,Object? form = null,Object? draftId = freezed,Object? sheets = null,Object? categories = null,Object? categoriesError = freezed,Object? showErrors = null,Object? saving = null,Object? error = freezed,Object? notices = null,Object? phase = null,Object? failureReason = freezed,Object? pollStalled = null,Object? contribution = freezed,}) {
   return _then(_self.copyWith(
 loaded: null == loaded ? _self.loaded : loaded // ignore: cast_nullable_to_non_nullable
 as bool,step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
@@ -373,7 +374,8 @@ as String?,notices: null == notices ? _self.notices : notices // ignore: cast_nu
 as List<String>,phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
 as PublishPhase,failureReason: freezed == failureReason ? _self.failureReason : failureReason // ignore: cast_nullable_to_non_nullable
 as String?,pollStalled: null == pollStalled ? _self.pollStalled : pollStalled // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,contribution: freezed == contribution ? _self.contribution : contribution // ignore: cast_nullable_to_non_nullable
+as ContributionStatus?,
   ));
 }
 /// Create a copy of UploadFlowState
@@ -467,10 +469,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool loaded,  UploadStep step,  DrawingForm form,  String? draftId,  List<SheetItem> sheets,  List<CategoryRef> categories,  String? categoriesError,  bool showErrors,  bool saving,  String? error,  List<String> notices,  PublishPhase phase,  String? failureReason,  bool pollStalled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool loaded,  UploadStep step,  DrawingForm form,  String? draftId,  List<SheetItem> sheets,  List<CategoryRef> categories,  String? categoriesError,  bool showErrors,  bool saving,  String? error,  List<String> notices,  PublishPhase phase,  String? failureReason,  bool pollStalled,  ContributionStatus? contribution)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UploadFlowState() when $default != null:
-return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_that.categories,_that.categoriesError,_that.showErrors,_that.saving,_that.error,_that.notices,_that.phase,_that.failureReason,_that.pollStalled);case _:
+return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_that.categories,_that.categoriesError,_that.showErrors,_that.saving,_that.error,_that.notices,_that.phase,_that.failureReason,_that.pollStalled,_that.contribution);case _:
   return orElse();
 
 }
@@ -488,10 +490,10 @@ return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool loaded,  UploadStep step,  DrawingForm form,  String? draftId,  List<SheetItem> sheets,  List<CategoryRef> categories,  String? categoriesError,  bool showErrors,  bool saving,  String? error,  List<String> notices,  PublishPhase phase,  String? failureReason,  bool pollStalled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool loaded,  UploadStep step,  DrawingForm form,  String? draftId,  List<SheetItem> sheets,  List<CategoryRef> categories,  String? categoriesError,  bool showErrors,  bool saving,  String? error,  List<String> notices,  PublishPhase phase,  String? failureReason,  bool pollStalled,  ContributionStatus? contribution)  $default,) {final _that = this;
 switch (_that) {
 case _UploadFlowState():
-return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_that.categories,_that.categoriesError,_that.showErrors,_that.saving,_that.error,_that.notices,_that.phase,_that.failureReason,_that.pollStalled);case _:
+return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_that.categories,_that.categoriesError,_that.showErrors,_that.saving,_that.error,_that.notices,_that.phase,_that.failureReason,_that.pollStalled,_that.contribution);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -508,10 +510,10 @@ return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool loaded,  UploadStep step,  DrawingForm form,  String? draftId,  List<SheetItem> sheets,  List<CategoryRef> categories,  String? categoriesError,  bool showErrors,  bool saving,  String? error,  List<String> notices,  PublishPhase phase,  String? failureReason,  bool pollStalled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool loaded,  UploadStep step,  DrawingForm form,  String? draftId,  List<SheetItem> sheets,  List<CategoryRef> categories,  String? categoriesError,  bool showErrors,  bool saving,  String? error,  List<String> notices,  PublishPhase phase,  String? failureReason,  bool pollStalled,  ContributionStatus? contribution)?  $default,) {final _that = this;
 switch (_that) {
 case _UploadFlowState() when $default != null:
-return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_that.categories,_that.categoriesError,_that.showErrors,_that.saving,_that.error,_that.notices,_that.phase,_that.failureReason,_that.pollStalled);case _:
+return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_that.categories,_that.categoriesError,_that.showErrors,_that.saving,_that.error,_that.notices,_that.phase,_that.failureReason,_that.pollStalled,_that.contribution);case _:
   return null;
 
 }
@@ -523,7 +525,7 @@ return $default(_that.loaded,_that.step,_that.form,_that.draftId,_that.sheets,_t
 
 
 class _UploadFlowState extends UploadFlowState {
-  const _UploadFlowState({this.loaded = false, this.step = UploadStep.details, this.form = const DrawingForm(), this.draftId, final  List<SheetItem> sheets = const <SheetItem>[], final  List<CategoryRef> categories = const <CategoryRef>[], this.categoriesError, this.showErrors = false, this.saving = false, this.error, final  List<String> notices = const <String>[], this.phase = PublishPhase.idle, this.failureReason, this.pollStalled = false}): _sheets = sheets,_categories = categories,_notices = notices,super._();
+  const _UploadFlowState({this.loaded = false, this.step = UploadStep.details, this.form = const DrawingForm(), this.draftId, final  List<SheetItem> sheets = const <SheetItem>[], final  List<CategoryRef> categories = const <CategoryRef>[], this.categoriesError, this.showErrors = false, this.saving = false, this.error, final  List<String> notices = const <String>[], this.phase = PublishPhase.idle, this.failureReason, this.pollStalled = false, this.contribution}): _sheets = sheets,_categories = categories,_notices = notices,super._();
   
 
 @override@JsonKey() final  bool loaded;
@@ -563,6 +565,8 @@ class _UploadFlowState extends UploadFlowState {
 @override final  String? failureReason;
 // Polling gave up (offline / timeout) but the server may still be working.
 @override@JsonKey() final  bool pollStalled;
+// Contribution rule (8.3); null until loaded or if it couldn't be fetched.
+@override final  ContributionStatus? contribution;
 
 /// Create a copy of UploadFlowState
 /// with the given fields replaced by the non-null parameter values.
@@ -574,16 +578,16 @@ _$UploadFlowStateCopyWith<_UploadFlowState> get copyWith => __$UploadFlowStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UploadFlowState&&(identical(other.loaded, loaded) || other.loaded == loaded)&&(identical(other.step, step) || other.step == step)&&(identical(other.form, form) || other.form == form)&&(identical(other.draftId, draftId) || other.draftId == draftId)&&const DeepCollectionEquality().equals(other._sheets, _sheets)&&const DeepCollectionEquality().equals(other._categories, _categories)&&(identical(other.categoriesError, categoriesError) || other.categoriesError == categoriesError)&&(identical(other.showErrors, showErrors) || other.showErrors == showErrors)&&(identical(other.saving, saving) || other.saving == saving)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other._notices, _notices)&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.failureReason, failureReason) || other.failureReason == failureReason)&&(identical(other.pollStalled, pollStalled) || other.pollStalled == pollStalled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UploadFlowState&&(identical(other.loaded, loaded) || other.loaded == loaded)&&(identical(other.step, step) || other.step == step)&&(identical(other.form, form) || other.form == form)&&(identical(other.draftId, draftId) || other.draftId == draftId)&&const DeepCollectionEquality().equals(other._sheets, _sheets)&&const DeepCollectionEquality().equals(other._categories, _categories)&&(identical(other.categoriesError, categoriesError) || other.categoriesError == categoriesError)&&(identical(other.showErrors, showErrors) || other.showErrors == showErrors)&&(identical(other.saving, saving) || other.saving == saving)&&(identical(other.error, error) || other.error == error)&&const DeepCollectionEquality().equals(other._notices, _notices)&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.failureReason, failureReason) || other.failureReason == failureReason)&&(identical(other.pollStalled, pollStalled) || other.pollStalled == pollStalled)&&(identical(other.contribution, contribution) || other.contribution == contribution));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loaded,step,form,draftId,const DeepCollectionEquality().hash(_sheets),const DeepCollectionEquality().hash(_categories),categoriesError,showErrors,saving,error,const DeepCollectionEquality().hash(_notices),phase,failureReason,pollStalled);
+int get hashCode => Object.hash(runtimeType,loaded,step,form,draftId,const DeepCollectionEquality().hash(_sheets),const DeepCollectionEquality().hash(_categories),categoriesError,showErrors,saving,error,const DeepCollectionEquality().hash(_notices),phase,failureReason,pollStalled,contribution);
 
 @override
 String toString() {
-  return 'UploadFlowState(loaded: $loaded, step: $step, form: $form, draftId: $draftId, sheets: $sheets, categories: $categories, categoriesError: $categoriesError, showErrors: $showErrors, saving: $saving, error: $error, notices: $notices, phase: $phase, failureReason: $failureReason, pollStalled: $pollStalled)';
+  return 'UploadFlowState(loaded: $loaded, step: $step, form: $form, draftId: $draftId, sheets: $sheets, categories: $categories, categoriesError: $categoriesError, showErrors: $showErrors, saving: $saving, error: $error, notices: $notices, phase: $phase, failureReason: $failureReason, pollStalled: $pollStalled, contribution: $contribution)';
 }
 
 
@@ -594,7 +598,7 @@ abstract mixin class _$UploadFlowStateCopyWith<$Res> implements $UploadFlowState
   factory _$UploadFlowStateCopyWith(_UploadFlowState value, $Res Function(_UploadFlowState) _then) = __$UploadFlowStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool loaded, UploadStep step, DrawingForm form, String? draftId, List<SheetItem> sheets, List<CategoryRef> categories, String? categoriesError, bool showErrors, bool saving, String? error, List<String> notices, PublishPhase phase, String? failureReason, bool pollStalled
+ bool loaded, UploadStep step, DrawingForm form, String? draftId, List<SheetItem> sheets, List<CategoryRef> categories, String? categoriesError, bool showErrors, bool saving, String? error, List<String> notices, PublishPhase phase, String? failureReason, bool pollStalled, ContributionStatus? contribution
 });
 
 
@@ -611,7 +615,7 @@ class __$UploadFlowStateCopyWithImpl<$Res>
 
 /// Create a copy of UploadFlowState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? loaded = null,Object? step = null,Object? form = null,Object? draftId = freezed,Object? sheets = null,Object? categories = null,Object? categoriesError = freezed,Object? showErrors = null,Object? saving = null,Object? error = freezed,Object? notices = null,Object? phase = null,Object? failureReason = freezed,Object? pollStalled = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? loaded = null,Object? step = null,Object? form = null,Object? draftId = freezed,Object? sheets = null,Object? categories = null,Object? categoriesError = freezed,Object? showErrors = null,Object? saving = null,Object? error = freezed,Object? notices = null,Object? phase = null,Object? failureReason = freezed,Object? pollStalled = null,Object? contribution = freezed,}) {
   return _then(_UploadFlowState(
 loaded: null == loaded ? _self.loaded : loaded // ignore: cast_nullable_to_non_nullable
 as bool,step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
@@ -627,7 +631,8 @@ as String?,notices: null == notices ? _self._notices : notices // ignore: cast_n
 as List<String>,phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
 as PublishPhase,failureReason: freezed == failureReason ? _self.failureReason : failureReason // ignore: cast_nullable_to_non_nullable
 as String?,pollStalled: null == pollStalled ? _self.pollStalled : pollStalled // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,contribution: freezed == contribution ? _self.contribution : contribution // ignore: cast_nullable_to_non_nullable
+as ContributionStatus?,
   ));
 }
 

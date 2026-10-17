@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sketch_square/core/network/api_exception.dart';
 import 'package:sketch_square/core/theme/app_theme.dart';
 import 'package:sketch_square/features/drawings/domain/drawing_summary.dart';
 import 'package:sketch_square/features/upload/data/upload_providers.dart';
+import 'package:sketch_square/features/upload/domain/contribution_status.dart';
 import 'package:sketch_square/features/upload/domain/draft_store.dart';
 import 'package:sketch_square/features/upload/presentation/upload_screen.dart';
 
@@ -302,7 +304,70 @@ void main() {
 
       repo.pollStatuses.add(DrawingStatus.underReview);
       await tapKey(tester, 'retry-publish');
-      expect(find.text('Submitted for review'), findsOneWidget);
+      expect(find.text('Under review by admins'), findsOneWidget);
+    });
+
+    testWidgets('shows the contribution rule and keeps Paid when allowed', (
+      tester,
+    ) async {
+      repo.contribution = const ContributionStatus(
+        guidance: 'Your first paid drawing is always allowed.',
+      );
+      await toPricing(tester);
+      expect(find.byKey(const ValueKey('contribution-banner')), findsOneWidget);
+      expect(find.textContaining('first paid drawing'), findsOneWidget);
+      expect(find.byKey(const ValueKey('contribution-blocked')), findsNothing);
+      expect(find.byKey(const ValueKey('field-price')), findsOneWidget);
+    });
+
+    testWidgets('disables Paid and blocks continue when contribution is due', (
+      tester,
+    ) async {
+      repo.contribution = const ContributionStatus(
+        paidPublished: 1,
+        freeNeeded: 1,
+        canPublishPaid: false,
+        guidance: 'Publish one free drawing before your next paid one.',
+      );
+      await toPricing(tester);
+      expect(find.textContaining('Publish one free drawing'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('contribution-blocked')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('make this one free'), findsOneWidget);
+
+      await tapKey(tester, 'continue');
+      expect(find.byKey(const ValueKey('review-price')), findsNothing);
+
+      await tester.tap(find.text('Free'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('contribution-blocked')), findsNothing);
+      await tapKey(tester, 'continue');
+      expect(find.byKey(const ValueKey('review-price')), findsOneWidget);
+    });
+
+    testWidgets('CONTRIBUTION_REQUIRED on publish shows a friendly message', (
+      tester,
+    ) async {
+      await toPricing(tester);
+      await tapKey(tester, 'continue');
+      repo.failNext(
+        'publish',
+        const ApiException(
+          code: ApiErrorCodes.contributionRequired,
+          message: 'raw server text',
+          statusCode: 403,
+          details: {'freeNeeded': 2},
+        ),
+      );
+      await tapKey(tester, 'publish');
+      expect(
+        find.textContaining('2 more published free drawings'),
+        findsOneWidget,
+      );
+      expect(find.text('raw server text'), findsNothing);
+      expect(repo.count('fetchContributionStatus'), greaterThan(1));
     });
 
     testWidgets('a stalled poll offers a manual re-check', (tester) async {
