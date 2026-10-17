@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/admin/presentation/admin_routes.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/auth/presentation/auth_routes.dart';
 import '../../features/auth/presentation/intro_seen_provider.dart';
@@ -34,6 +35,7 @@ GoRouter appRouter(Ref ref) {
         ),
     routes: [
       ...authRoutes,
+      ...adminRoutes,
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => AppShell(navigationShell: shell),
         // Branch order == bottom-nav order. Each feature owns its routes.

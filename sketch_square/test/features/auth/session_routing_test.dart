@@ -19,21 +19,21 @@ void main() {
     expect(inAppBar('Sign in'), findsOneWidget);
   });
 
-  testWidgets('PENDING and REJECTED users are pinned to verification', (
-    tester,
-  ) async {
-    for (final status in [
-      VerificationStatus.pending,
-      VerificationStatus.rejected,
-    ]) {
+  for (final (status, title) in [
+    (VerificationStatus.pending, 'Verification pending'),
+    (VerificationStatus.rejected, 'Verification rejected'),
+  ]) {
+    testWidgets('$status user is pinned to the verification screen', (
+      tester,
+    ) async {
       await pumpApp(
         tester,
         user: stubUser.copyWith(verificationStatus: status),
       );
-      expect(find.byType(NavigationBar), findsNothing, reason: '$status');
-      expect(inAppBar('Verification pending'), findsOneWidget);
-    }
-  });
+      expect(find.byType(NavigationBar), findsNothing);
+      expect(inAppBar(title), findsOneWidget);
+    });
+  }
 
   testWidgets('session expiry drops the user back to sign-in', (tester) async {
     final container = await pumpApp(tester);

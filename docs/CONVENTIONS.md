@@ -169,6 +169,12 @@ New logged-out screens must be added to `AppRoutes.publicRoutes`; new non-tab ro
 - The intro video is built through `introVideoBuilderProvider` (tests override it; `video_player` has no test platform). The asset is a placeholder (A11).
 - Widget tests of logged-out flows: `pumpLoggedOut(tester, {auth, verification, picker, introSeen})` in `test/helpers/auth_test_utils.dart` (tall viewport, fakes wired).
 
+### Verification status and admin
+- `VerificationStatusScreen` (`/verification-pending`) shows status, request details, rejection reason, refresh, and (re)submit via `VerificationForm`; status rule in A12.
+- Admin lives in `features/admin` (`adminRoutes` at top-level `/admin`, `/admin/verification/:id`), reached from the Profile tab only for role ADMIN; the guard also blocks non-admins.
+  `AdminRepository` / `DioAdminRepository` follow the contract; `PendingVerifications` is a paged AsyncNotifier. Tests use `FakeAdminRepository` and `makeAdminVerification`
+  (`test/helpers/fake_admin.dart`); `pumpApp` wires fakes for admin, verification and document picker by default. Override `documentLauncherProvider` instead of hitting url_launcher.
+
 ### Testing
 `pumpApp(tester, {signedIn = true, user, introSeen = true})` boots the whole app with a `FakeAuthRepository`; by default you are an approved architect
 on the shell, so existing feature tests are unaffected. Use `signedIn: false` for logged-out flows, `user:` for PENDING/REJECTED/ADMIN sessions.
