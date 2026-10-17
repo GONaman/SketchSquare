@@ -135,8 +135,9 @@ Also includes `bedrooms: int|null` and `tags: string[]`. Records a DrawingView (
 - `PUT /drawings/:id/favorite`, `DELETE /drawings/:id/favorite` → `204`; `GET /me/favorites` → page of `DrawingSummary`.
   Both writes are idempotent (repeating them is a `204` no-op). `PUT` only works on PUBLISHED drawings of APPROVED architects (else 404 `NOT_FOUND`; your own drawing is allowed); `DELETE` always `204`.
   `GET /me/favorites` is newest-favourited first and omits drawings that are no longer listable (removed/unpublished); it is not an extra `isFavorite` field on search tiles — use `viewer.isFavorite` on the detail, or treat every item of the favourites list as a favourite.
-- `PUT /drawings/:id/interest`, `DELETE /drawings/:id/interest` → `204`; `GET /drawings/:id/interests` owner → page of `{user:{id,fullName,city}, createdAt}`
-- `DrawingDetail.viewer` additionally gets `isFavorite: bool` (implemented), `isInterested: bool`
+- `PUT /drawings/:id/interest`, `DELETE /drawings/:id/interest` → `204` (both idempotent); `GET /drawings/:id/interests` owner only → page of `{user:{id,fullName,city}, createdAt}`, newest first (`GET /drawings/:id/interested` is an alias).
+  `PUT` rules: drawing must be PUBLISHED by an APPROVED architect (else 404 `NOT_FOUND`), must be **paid** (free → 400 `VALIDATION_ERROR`), must not be your own (403 `FORBIDDEN`). `DELETE` is always `204`. The list is 403 `FORBIDDEN` for non-owners (admins included) and 404 for unknown drawings; it still works for the owner after the drawing is removed.
+- `DrawingDetail.viewer` additionally gets `isFavorite: bool`, `isInterested: bool`
 - `POST /me/device-tokens` body `{token, platform}` → `204` (FCM)
 
 ## Ops

@@ -40,6 +40,7 @@ export interface ViewerFlags {
   isPurchased: boolean;
   inCart: boolean;
   isFavorite: boolean;
+  isInterested: boolean;
   canDownload: boolean;
   freeDownloadsRemaining: number | null;
   myReview: ReviewView | null;
@@ -247,8 +248,8 @@ export class DrawingDetailService {
     d: { id: string; pricePaise: number; status: string },
     isOwner: boolean,
   ): Promise<ViewerFlags> {
-    const [purchase, inCart, favorite, claim, me, myReview] = await Promise.all(
-      [
+    const [purchase, inCart, favorite, interest, claim, me, myReview] =
+      await Promise.all([
         this.prisma.purchase.findFirst({
           where: { buyerId: viewer.id, drawingId: d.id, status: 'PAID' },
           select: { id: true },
@@ -258,6 +259,10 @@ export class DrawingDetailService {
           select: { userId: true },
         }),
         this.prisma.favorite.findUnique({
+          where: { userId_drawingId: { userId: viewer.id, drawingId: d.id } },
+          select: { userId: true },
+        }),
+        this.prisma.interest.findUnique({
           where: { userId_drawingId: { userId: viewer.id, drawingId: d.id } },
           select: { userId: true },
         }),
@@ -275,8 +280,7 @@ export class DrawingDetailService {
           },
           select: REVIEW_SELECT,
         }),
-      ],
-    );
+      ]);
     const isPurchased = purchase !== null;
     const isFree = d.pricePaise === 0;
     const limit = this.config.get('FREE_DOWNLOAD_LIMIT', { infer: true });
@@ -287,6 +291,7 @@ export class DrawingDetailService {
       isPurchased,
       inCart: inCart !== null,
       isFavorite: favorite !== null,
+      isInterested: interest !== null,
       canDownload:
         isOwner || isPurchased || (isFree && (claim !== null || canClaimFree)),
       freeDownloadsRemaining: isFree && !isOwner ? remaining : null,
