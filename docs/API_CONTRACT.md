@@ -108,7 +108,8 @@ DrawingDetail = DrawingSummary & {
               "freeDownloadsRemaining": int|null, "myReview": Review|null }
 }
 ```
-Records a DrawingView (deduped per viewer per 24 h) except for the owner. Non-published drawings are visible only to the owner/admin.
+Also includes `bedrooms: int|null` and `tags: string[]`. Records a DrawingView (deduped per viewer per 24 h; the returned `viewCount` includes it) except for the owner, admins and non-published drawings. Non-published drawings (and published ones of non-APPROVED architects) are visible only to the owner/admin and 404 for everyone else; `failureReason` is only returned to them. `sheets` lists every sheet's metadata but only preview sheets carry a watermarked `previewUrl`. `viewer.canDownload` mirrors the download entitlement (owner, PAID purchase, or a free drawing that is already claimed / within the free quota); `viewer.freeDownloadsRemaining` is the caller's remaining free quota on free drawings (else null).
+`GET /drawings/:id/reviews?cursor&limit` → page of `Review`, newest first (same visibility as the detail).
 
 ## Cart, checkout, payments, downloads
 - `GET /cart` → `{ items: [DrawingSummary], totalPaise }`; `POST /cart` body `{drawingId}` → cart; `DELETE /cart/:drawingId` → cart.
