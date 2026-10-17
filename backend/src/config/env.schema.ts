@@ -91,6 +91,10 @@ const envObject = z.object({
   RAZORPAYX_KEY_SECRET: optionalString,
   RAZORPAYX_ACCOUNT_NUMBER: optionalString,
   RAZORPAYX_WEBHOOK_SECRET: optionalString,
+  // FCM push: the real sender only activates when all three are set (service-account key; `\n` in the key is unescaped).
+  FCM_PROJECT_ID: optionalString,
+  FCM_CLIENT_EMAIL: optionalString,
+  FCM_PRIVATE_KEY: optionalString,
   // Stub payouts settle after this delay so the app can show the in-progress state (0 = immediately).
   STUB_PAYOUT_DELAY_MS: int(2000),
 });

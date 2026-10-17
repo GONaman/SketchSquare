@@ -139,6 +139,8 @@ model User {
   auditLogs             AuditLog[]
   refundsIssued         Refund[]              @relation("RefundAdmin")
   plagiarismReviews     PlagiarismFlag[]
+  deviceTokens          DeviceToken[]
+  notifications         Notification[]
 
   @@index([architectRating])
   @@index([city])
@@ -513,4 +515,36 @@ model Refund {
 
   @@index([adminId])
   @@index([createdAt])
+}
+
+// FCM/APNs registration tokens. A token belongs to one device, so it is unique and moves to the latest user that registers it.
+model DeviceToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// In-app notification feed; every push is backed by a row. `dedupeKey` makes an event notify a user at most once.
+model Notification {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @db.Uuid
+  type      String
+  title     String
+  body      String
+  data      Json      @default("{}")
+  dedupeKey String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
 }

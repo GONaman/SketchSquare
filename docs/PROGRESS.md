@@ -61,7 +61,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 8.3 Contribution rule
 - [x] 8.6 Refunds/disputes (Part 3) — backend: `GET /admin/purchases[/:id]`, `POST /admin/purchases/:id/refund`, `RefundProvider` (stub/Razorpay), TAX enum reserved; Flutter: Admin → Refunds screens (search, detail, refund with reason + confirm) and a clearer negative-balance withdrawal-blocked message in the wallet
 - [x] 8.4 Plagiarism check + admin review queue — backend: SHA-256 hard block + pHash flagging in the processing job, `GET /admin/plagiarism-flags`, `POST …/:id/approve|reject` + emails; Flutter admin review screen + uploader messaging pending; pHash threshold needs tuning on real plans
-- [ ] 8.5 Push notifications (stub)
+- [x] 8.5 Push notifications — backend done (`PushService` with FCM v1 sender when `FCM_*` env set, otherwise a logging stub; `POST/DELETE /me/device-tokens`, `GET /me/notifications`, `POST /me/notifications/read`; events: verification result, sale, withdrawal paid/failed, new review, interest); Flutter token registration + inbox pending
 
 ## Needs manual check
 - Refunds (8.6): Flutter Admin → Refunds screens and the wallet's negative-balance message were only tested against fakes and a scripted Dio adapter; try a real refund end to end (search → detail → refund → buyer loses access, seller wallet drops, Withdraw disabled) on a device and eyeball the dialog and the negative-balance warning. The real Razorpay refund call (`RazorpayRefundProvider`) is only unit-tested with a fake `fetch`; verify against Razorpay test keys (refund id, idempotency header, partial-failure retry). The stub provider is used whenever keys are unset (refused in production).

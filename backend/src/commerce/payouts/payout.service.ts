@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma, WithdrawalStatus } from '@prisma/client';
 import { LedgerService } from '../../ledger/ledger.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { lockUser } from '../shared/locks';
 import {
@@ -25,6 +26,7 @@ export class PayoutService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ledger: LedgerService,
+    private readonly notifications: NotificationsService,
     @Inject(PAYOUT_PROVIDER) private readonly provider: PayoutProvider,
   ) {}
 
@@ -91,7 +93,24 @@ export class PayoutService {
       where: { id: withdrawalId, status: { in: OPEN } },
       data: { status: 'PAID', failureReason: null },
     });
-    return res.count === 1;
+    if (res.count !== 1) return false;
+    const w = await tx.withdrawal.findUnique({
+      where: { id: withdrawalId },
+      select: { userId: true, amountPaise: true },
+    });
+    if (w) {
+      await this.notifications.notify(
+        w.userId,
+        'WITHDRAWAL_STATUS',
+        {
+          withdrawalId,
+          status: 'PAID',
+          amountPaise: w.amountPaise,
+        },
+        tx,
+      );
+    }
+    return true;
   }
 
   async fail(
@@ -138,6 +157,17 @@ export class PayoutService {
           referenceId: withdrawalId,
         },
       ],
+      tx,
+    );
+    await this.notifications.notify(
+      w.userId,
+      'WITHDRAWAL_STATUS',
+      {
+        withdrawalId,
+        status: 'FAILED',
+        amountPaise: w.amountPaise,
+        reason,
+      },
       tx,
     );
     this.logger.warn(

@@ -23,6 +23,8 @@ erDiagram
   User ||--o{ DrawingView : views
   User ||--o{ Interest : marks
   User ||--o{ Favorite : saves
+  User ||--o{ DeviceToken : registers
+  User ||--o{ Notification : receives
   User ||--o{ CartItem : carts
   User ||--o{ FreeDownload : claims
   User ||--o{ LedgerEntry : "wallet owner"
@@ -179,6 +181,23 @@ erDiagram
   Favorite {
     uuid userId PK
     uuid drawingId PK
+  }
+  DeviceToken {
+    uuid id PK
+    uuid userId FK
+    string token UK "FCM registration token"
+    string platform "android|ios|web"
+  }
+  Notification {
+    uuid id PK
+    uuid userId FK
+    string type
+    string title
+    string body
+    json data
+    string dedupeKey "unique per user; makes events idempotent"
+    datetime readAt
+    datetime createdAt
   }
   CartItem {
     uuid userId PK
