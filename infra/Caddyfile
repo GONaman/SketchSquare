@@ -1,0 +1,13 @@
+{$API_DOMAIN} {
+	# Never expose the operational endpoint publicly; Prometheus scrapes it from inside the network with METRICS_TOKEN.
+	@metrics path /metrics
+	respond @metrics 404
+	reverse_proxy api:3000 {
+		health_uri /health
+		health_interval 5s
+	}
+}
+
+{$FILES_DOMAIN} {
+	reverse_proxy minio:9000
+}

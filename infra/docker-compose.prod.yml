@@ -1,0 +1,145 @@
+# Example single-host production stack: API + Postgres + Redis + MinIO (S3) behind Caddy (automatic HTTPS).
+# It is a starting point, not a turnkey setup: on AWS/Render/Railway/Fly prefer managed Postgres/Redis/S3 and run only
+# the `api` service (see docs/DEPLOY.md).
+#
+#   create infra/.env.prod from the variable checklist in docs/DEPLOY.md (it is git-ignored), then:
+#   docker compose --env-file infra/.env.prod -f infra/docker-compose.prod.yml up -d --build
+#
+# The API refuses to boot in production with dev secrets or stub providers (see "Startup guard" in docs/DEPLOY.md).
+name: sketchsquare-prod
+
+services:
+  api:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      CORS_ORIGINS: ${CORS_ORIGINS:?comma-separated origins, e.g. https://app.example.com}
+      APP_BASE_URL: ${APP_BASE_URL:?public web/app URL, e.g. https://app.example.com}
+      TRUST_PROXY: "1" # Caddy is one hop in front of the API
+      DATABASE_URL: postgresql://sketchsquare:${POSTGRES_PASSWORD:?}@postgres:5432/sketchsquare
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_ENDPOINT: https://${FILES_DOMAIN:?files.example.com}
+      S3_PREVIEWS_PUBLIC_URL: https://${FILES_DOMAIN}/previews
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?openssl rand -base64 48}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?openssl rand -base64 48}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:?}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:?}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:?}
+      PAYOUT_PROVIDER: razorpayx
+      RAZORPAYX_KEY_ID: ${RAZORPAYX_KEY_ID:?}
+      RAZORPAYX_KEY_SECRET: ${RAZORPAYX_KEY_SECRET:?}
+      RAZORPAYX_ACCOUNT_NUMBER: ${RAZORPAYX_ACCOUNT_NUMBER:?}
+      RAZORPAYX_WEBHOOK_SECRET: ${RAZORPAYX_WEBHOOK_SECRET:?}
+      SMTP_HOST: ${SMTP_HOST:?}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:?}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+      FCM_CLIENT_EMAIL: ${FCM_CLIENT_EMAIL:-}
+      FCM_PRIVATE_KEY: ${FCM_PRIVATE_KEY:-}
+      # Lets Caddy notice the 503 from /health before the listener closes, then finish in-flight requests.
+      SHUTDOWN_DRAIN_MS: "5000"
+      SHUTDOWN_TIMEOUT_MS: "20000"
+    stop_grace_period: 40s
+    expose:
+      - "3000"
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sketchsquare
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: sketchsquare
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sketchsquare -d sketchsquare"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: bitnamilegacy/minio:latest
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?}
+    volumes:
+      - miniodata:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Bucket policy: originals and kyc stay private (presigned URLs only); only previews are anonymously readable.
+  minio-init:
+    image: bitnamilegacy/minio:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$S3_ACCESS_KEY_ID $$S3_SECRET_ACCESS_KEY &&
+      mc mb --ignore-existing local/originals local/previews local/kyc &&
+      mc anonymous set none local/originals &&
+      mc anonymous set none local/kyc &&
+      mc anonymous set download local/previews
+      "
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - api
+      - minio
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?api.example.com}
+      FILES_DOMAIN: ${FILES_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  caddydata:
+  caddyconfig:

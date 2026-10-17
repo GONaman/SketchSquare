@@ -1,4 +1,11 @@
 node_modules
 dist
-.env
 coverage
+.env
+.env.*
+!.env.example
+test
+scripts
+*.md
+Dockerfile
+.dockerignore
