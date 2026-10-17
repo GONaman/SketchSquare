@@ -13,7 +13,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 
 ## Phase 1 — Database schema
 - [x] 1.1 Prisma schema + migration (enums, indexes, partial unique, FTS)
-- [ ] 1.2 Seed script
+- [x] 1.2 Seed script
 - [x] 1.3 Ledger zero-sum guard + test
 - [x] 1.4 docs/data-model.md
 
