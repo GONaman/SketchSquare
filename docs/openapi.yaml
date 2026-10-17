@@ -581,6 +581,130 @@ paths:
           description: ""
       security: *a10
       tags: *a11
+  /me/drawings:
+    get:
+      operationId: MyDrawingsController_list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+        - name: status
+          required: false
+          in: query
+          description: Defaults to every status except REMOVED
+          schema:
+            type: string
+            enum:
+              - DRAFT
+              - PROCESSING
+              - PUBLISHED
+              - UNDER_REVIEW
+              - REMOVED
+              - FAILED
+      responses:
+        "200":
+          description: ""
+      security:
+        - bearer: []
+      tags:
+        - drawings
+  /drawings/{id}/buyers:
+    get:
+      operationId: SellerController_buyers
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: &a12
+        - bearer: []
+      tags: &a13
+        - drawings
+  /drawings/{id}/viewers:
+    get:
+      operationId: SellerController_viewers
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: *a12
+      tags: *a13
+  /drawings/{id}/reviews:
+    get:
+      operationId: SellerController_reviews
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: *a12
+      tags: *a13
   /drawings/search:
     get:
       operationId: SearchController_searchDrawings
@@ -766,9 +890,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a12
+      security: &a14
         - bearer: []
-      tags: &a13
+      tags: &a15
         - discovery
   /category-requests:
     post:
@@ -787,8 +911,8 @@ paths:
             application/json:
               schema:
                 type: object
-      security: *a12
-      tags: *a13
+      security: *a14
+      tags: *a15
   /admin/category-requests:
     get:
       operationId: CategoriesController_listRequests
@@ -820,8 +944,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a12
-      tags: *a13
+      security: *a14
+      tags: *a15
   /admin/category-requests/{id}/approve:
     post:
       operationId: CategoriesController_approve
@@ -834,8 +958,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a12
-      tags: *a13
+      security: *a14
+      tags: *a15
   /admin/category-requests/{id}/reject:
     post:
       operationId: CategoriesController_reject
@@ -848,8 +972,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a12
-      tags: *a13
+      security: *a14
+      tags: *a15
   /cities:
     get:
       operationId: CitiesController_list
@@ -887,9 +1011,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a14
+      security: &a16
         - bearer: []
-      tags: &a15
+      tags: &a17
         - discovery
   /architects/{id}:
     get:
@@ -917,8 +1041,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /architects/{id}/drawings:
     get:
       operationId: ArchitectsController_drawings
@@ -945,8 +1069,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -1141,7 +1265,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: &a16
+          enum: &a18
             - ft
             - m
         floors:
@@ -1205,7 +1329,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: *a16
+          enum: *a18
         floors:
           type: number
           minimum: 1
