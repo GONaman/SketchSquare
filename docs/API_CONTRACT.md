@@ -65,7 +65,7 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
 ## Profile
 - `GET /me` `[auth]` → `User`
 - `PATCH /me` `[auth]` body `{phone?,city?}` → `User` (sending `fullName` or `address` → 400 `VALIDATION_ERROR` "cannot be changed")
-- `POST /me/avatar/upload-url` body `{contentType}` → `{uploadUrl, objectKey}`; then `POST /me/avatar/confirm` body `{objectKey}` → `User` (backend resizes to 512px)
+- `POST /me/avatar/upload-url` body `{contentType}` → `{uploadUrl, objectKey, headers}` (PUT the image with that `Content-Type`; jpeg/png/webp, ≤ 5 MB); then `POST /me/avatar/confirm` body `{objectKey}` → `User` (backend resizes to 512px)
 
 ## Categories, cities, architects
 - `GET /categories` → `[{id,name,slug}]` (active only). `POST /category-requests` body `{name}` (2–60 chars) → `201 {id,requestedName,status}`; 409 `CONFLICT` if an active category already has that name; repeating your own pending request returns it unchanged.
