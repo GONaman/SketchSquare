@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sketch_square/core/network/api_exception.dart';
 import 'package:sketch_square/core/network/cursor_page.dart';
 import 'package:sketch_square/features/architects/data/architects_providers.dart';
@@ -13,6 +17,7 @@ import 'package:sketch_square/features/drawings/domain/drawing_search_query.dart
 import 'package:sketch_square/features/drawings/domain/drawing_summary.dart';
 import 'package:sketch_square/features/drawings/domain/drawings_repository.dart';
 import 'package:sketch_square/features/drawings/domain/review.dart';
+import 'package:sketch_square/features/drawings/presentation/drawing_gallery.dart';
 
 Map<String, dynamic> architectJson({
   String id = 'a1',
@@ -144,6 +149,7 @@ class FakeDrawingsRepository implements DrawingsRepository {
     this.cities = const [],
     DrawingDetail? detail,
     this.searchError,
+    this.detailError,
     this.requestedCategories,
   }) : detail = detail ?? DrawingDetail.fromJson(detailJson());
 
@@ -152,6 +158,7 @@ class FakeDrawingsRepository implements DrawingsRepository {
   List<CityCount> cities;
   DrawingDetail detail;
   ApiException? searchError;
+  ApiException? detailError;
   List<String>? requestedCategories;
 
   final searchCalls = <({DrawingSearchQuery query, String? cursor})>[];
@@ -175,7 +182,10 @@ class FakeDrawingsRepository implements DrawingsRepository {
   }
 
   @override
-  Future<DrawingDetail> getDrawing(String id) async => detail;
+  Future<DrawingDetail> getDrawing(String id) async {
+    if (detailError != null) throw detailError!;
+    return detail;
+  }
 
   @override
   Future<CursorPage<Review>> listReviews(
@@ -199,17 +209,24 @@ class FakeDrawingsRepository implements DrawingsRepository {
 }
 
 class FakeArchitectsRepository implements ArchitectsRepository {
-  FakeArchitectsRepository({this.topList = const [], ArchitectProfile? profile})
-    : profile =
-          profile ??
-          ArchitectProfile(
-            architect: ArchitectSummary.fromJson(architectJson()),
-            drawings: CursorPage(items: [summary('d1')]),
-          );
+  FakeArchitectsRepository({
+    this.topList = const [],
+    ArchitectProfile? profile,
+    this.morePages = const [],
+  }) : profile =
+           profile ??
+           ArchitectProfile(
+             architect: ArchitectSummary.fromJson(architectJson()),
+             drawings: CursorPage(items: [summary('d1')]),
+           );
 
   List<TopArchitect> topList;
   ArchitectProfile profile;
   final topCities = <String?>[];
+
+  /// Pages served by [listDrawings] in order (the first page is in [profile]).
+  List<CursorPage<DrawingSummary>> morePages;
+  final listCursors = <String?>[];
 
   @override
   Future<List<TopArchitect>> top({String? city}) async {
@@ -225,7 +242,11 @@ class FakeArchitectsRepository implements ArchitectsRepository {
     String architectId, {
     String? cursor,
     int limit = CursorPage.defaultLimit,
-  }) async => const CursorPage(items: []);
+  }) async {
+    listCursors.add(cursor);
+    final i = listCursors.length - 1;
+    return i < morePages.length ? morePages[i] : const CursorPage(items: []);
+  }
 }
 
 class FakeDrawingActions implements DrawingActionsRepository {
@@ -261,4 +282,19 @@ List<Override> discoveryFakes({
   drawingActionsRepositoryProvider.overrideWithValue(
     actions ?? FakeDrawingActions(),
   ),
+  galleryImageResolverProvider.overrideWithValue((_) => _pixel),
 ];
+
+final _pixel = MemoryImage(
+  base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGP4DwQACfsD/fteaysAAAAASUVORK5CYII=',
+  ),
+);
+
+/// Decodes the stub gallery image up front: image decoding needs real async,
+/// and an undecoded image keeps PhotoView's spinner animating (pumpAndSettle
+/// would time out).
+Future<void> precacheGalleryImage(WidgetTester tester) async {
+  final context = tester.element(find.byType(MaterialApp));
+  await tester.runAsync(() => precacheImage(_pixel, context));
+}

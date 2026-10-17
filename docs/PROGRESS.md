@@ -36,7 +36,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 4.1 Search endpoint (size tolerance + rotation, filters, sort)
 - [ ] 4.2 Detail, categories, cities, architects
 - [x] 4.3 Flutter home + search + filters
-- [ ] 4.4 Flutter featured + drawing detail
+- [x] 4.4 Flutter featured + drawing detail
 
 ## Phase 5 — Purchasing
 - [x] 5.1 Cart + checkout + Razorpay (stub) + webhook + ledger
@@ -69,3 +69,4 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - Password-reset email link does not open the app (no deep-link setup); users paste the code from the email (A10).
 - Discovery (4.3): eyeball the drawing grid on real devices and at large text scales; check keyboard/focus behaviour of the search field and plot-size fields; verify cursor paging and `sizeMatch` against the real backend once 4.1 is merged; cached-image behaviour of `DrawingPreviewImage` is untested.
 - Search: full-text `q` uses `plainto_tsquery` (no prefix matching; stopword-only queries match nothing). Perf numbers are from 50k synthetic rows on local Postgres; re-check with real data volume (data-model.md, SR6).
+- Drawing detail (4.4): pinch-zoom/swipe of the `photo_view` gallery (and the full-screen preview) on a real device; the "Download" button is a placeholder snackbar until the download flow (5.3) lands; favorites call `PUT/DELETE /drawings/:id/favorite`, which the backend only implements in Phase 8 (the heart reverts with the server's error until then).
