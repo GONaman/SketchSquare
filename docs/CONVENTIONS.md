@@ -188,3 +188,16 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - Plot size: `PlotSizeController` + `PlotSizeFields`; validation lives in `domain/plot_size.dart` (`validatePlotSize`). Money/size formatting only through `presentation/formatters.dart` (`formatPaise` etc.).
 - Tests: fakes and JSON builders in `test/features/drawings/fixtures.dart` (`discoveryFakes()`, `FakeDrawingsRepository` records `searchCalls`). The shell keeps Home mounted behind Search, so filter `searchCalls` by query when asserting. Never `pumpAndSettle` while a page request is in flight (spinner animates forever).
 
+
+## Flutter upload (`sketch_square/lib/features/upload`, Phase 3.5)
+
+- Layers: `domain/` (pure: `DrawingForm`, validators, `money.dart`, `SheetFileRules`, repository interfaces), `data/` (Dio repo, presigned `DioSheetUploader`,
+  `FilePickerSheetPicker`, `SharedPrefsDraftStore`), `presentation/` (`UploadFlow` controller + `widgets/` per step). Everything external is behind an interface with a provider.
+- `uploadFlowProvider` is `keepAlive`: the flow survives tab switches. `UploadScreen` calls `ensureLoaded({resumeDraftId})`; deep-link to a draft with `/upload?draft=<id>`.
+- Upload state machine per sheet: `queued → uploading(progress) → registering → done | failed`. Files upload sequentially; a failed registration keeps `objectKey`
+  so retry skips the PUT. Stale async work is dropped through a generation counter (`startNew`, reload, dispose).
+- Resume-safe: server DRAFT (+ sheets) is the source of truth, a local snapshot (`upload.draft.v1`) holds unsynced form edits and the step. Picked-but-not-uploaded files are not restored.
+- Publish: `POST /drawings/:id/publish` then poll `GET /drawings/:id` (2 s, ≤150 tries; 5 consecutive errors → `pollStalled`, resume with `resumePolling`).
+- Client limits (title/description lengths, plot range, fee estimate) are UI guard rails; the backend is authoritative and its `ApiException` messages are surfaced.
+- Testing: `test/features/upload/fakes.dart` has `FakeUploadRepository`, `FakeSheetUploader` (`hold` completer to freeze progress), `FakeSheetPicker`, `InMemoryDraftStore`;
+  override `uploadDelayProvider` with `(_) async {}` so polling is instant. Widget tests pump `UploadScreen` in a tall (800×3000) viewport to avoid scrolling.
