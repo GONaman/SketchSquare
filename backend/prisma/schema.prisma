@@ -6,3 +6,437 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// Conventions: table/column names are Prisma's defaults (PascalCase tables, camelCase columns), so raw SQL must quote them.
+// Money is integer paise. Lengths are feet. CHECK constraints, the partial unique index, triggers and the
+// full-text generated column live in raw SQL migrations (see docs/data-model.md).
+
+enum Role {
+  ARCHITECT
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DrawingStatus {
+  DRAFT
+  PROCESSING
+  PUBLISHED
+  UNDER_REVIEW
+  REMOVED
+  FAILED
+}
+
+enum Facing {
+  N
+  NE
+  E
+  SE
+  S
+  SW
+  W
+  NW
+}
+
+enum SheetType {
+  ARCHITECTURAL
+  STRUCTURAL
+  ELECTRICAL
+  SANITARY
+  PLUMBING
+  HVAC
+  OTHER
+}
+
+enum PurchaseStatus {
+  CREATED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum LedgerAccountType {
+  USER_WALLET
+  PLATFORM_REVENUE
+  PAYMENT_GATEWAY
+  PAYOUT_CLEARING
+}
+
+enum LedgerEntryType {
+  SALE
+  PLATFORM_FEE
+  WITHDRAWAL
+  WITHDRAWAL_REVERSAL
+  REFUND
+}
+
+enum WithdrawalStatus {
+  REQUESTED
+  PROCESSING
+  PAID
+  FAILED
+}
+
+model User {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String             @unique
+  passwordHash         String
+  fullName             String
+  address              String
+  phone                String
+  avatarUrl            String?
+  city                 String
+  role                 Role               @default(ARCHITECT)
+  verificationStatus   VerificationStatus @default(PENDING)
+  architectRating      Float              @default(0)
+  architectRatingCount Int                @default(0)
+  freeDownloadsUsed    Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  refreshTokens         RefreshToken[]
+  passwordResetTokens   PasswordResetToken[]
+  verificationRequests  VerificationRequest[] @relation("VerificationSubmitter")
+  reviewedVerifications VerificationRequest[] @relation("VerificationReviewer")
+  categoryRequests      CategoryRequest[]
+  drawings              Drawing[]
+  purchases             Purchase[]
+  reviews               Review[]
+  drawingViews          DrawingView[]
+  interests             Interest[]
+  favorites             Favorite[]
+  cartItems             CartItem[]
+  freeDownloads         FreeDownload[]
+  ledgerEntries         LedgerEntry[]
+  withdrawals           Withdrawal[]
+  bankAccount           BankAccount?
+  auditLogs             AuditLog[]
+
+  @@index([architectRating])
+  @@index([city])
+}
+
+// Refresh tokens are opaque random strings; only the SHA-256 hash is stored. All tokens descended from one
+// login share a familyId so reuse of a rotated token can revoke the whole family.
+model RefreshToken {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @db.Uuid
+  familyId     String    @db.Uuid
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?   @db.Uuid
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationRequest {
+  id                    String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String             @db.Uuid
+  coaRegistrationNumber String
+  documentKey           String
+  status                VerificationStatus @default(PENDING)
+  reviewerId            String?            @db.Uuid
+  reviewNote            String?
+  submittedAt           DateTime           @default(now())
+  reviewedAt            DateTime?
+
+  user     User  @relation("VerificationSubmitter", fields: [userId], references: [id])
+  reviewer User? @relation("VerificationReviewer", fields: [reviewerId], references: [id])
+
+  @@index([status, submittedAt])
+  @@index([userId])
+}
+
+model Category {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name     String  @unique
+  slug     String  @unique
+  isActive Boolean @default(true)
+
+  drawings Drawing[]
+}
+
+model CategoryRequest {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String        @db.Uuid
+  requestedName String
+  status        RequestStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  reviewedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([status, createdAt])
+}
+
+model Drawing {
+  id            String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  architectId   String                   @db.Uuid
+  title         String
+  description   String
+  categoryId    String                   @db.Uuid
+  city          String
+  plotLengthFt  Float
+  plotBreadthFt Float
+  // Maintained by a DB trigger (length * breadth); never write it from the app.
+  plotAreaSqft  Float                    @default(0)
+  floors        Int                      @default(1)
+  facing        Facing?
+  pricePaise    Int                      @default(0)
+  status        DrawingStatus            @default(DRAFT)
+  failureReason String?
+  avgRating     Float                    @default(0)
+  ratingCount   Int                      @default(0)
+  viewCount     Int                      @default(0)
+  purchaseCount Int                      @default(0)
+  // Generated column over title (weight A) + description (weight B); queried with plainto_tsquery / @@.
+  searchVector  Unsupported("tsvector")? @default(dbgenerated())
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  architect User     @relation(fields: [architectId], references: [id])
+  category  Category @relation(fields: [categoryId], references: [id])
+
+  sheets        DrawingSheet[]
+  purchases     Purchase[]
+  reviews       Review[]
+  views         DrawingView[]
+  interests     Interest[]
+  favorites     Favorite[]
+  cartItems     CartItem[]
+  freeDownloads FreeDownload[]
+
+  @@index([status, categoryId])
+  @@index([status, createdAt(sort: Desc)])
+  @@index([city])
+  @@index([plotLengthFt, plotBreadthFt])
+  @@index([pricePaise])
+  @@index([avgRating])
+  @@index([architectId])
+  @@index([searchVector], type: Gin)
+}
+
+model DrawingSheet {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drawingId    String    @db.Uuid
+  type         SheetType @default(OTHER)
+  originalKey  String
+  originalMime String
+  fileName     String
+  sizeBytes    Int
+  isPreview    Boolean   @default(false)
+  previewKey   String?
+  // 64-bit perceptual hash of the preview as 16 hex chars (plagiarism check, Phase 8).
+  pHash        String?
+  // SHA-256 of the original file as hex (exact-duplicate check, Phase 8).
+  sha256       String?
+  createdAt    DateTime  @default(now())
+
+  drawing Drawing @relation(fields: [drawingId], references: [id], onDelete: Cascade)
+
+  @@index([drawingId])
+  @@index([sha256])
+}
+
+model Purchase {
+  id                String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  buyerId           String         @db.Uuid
+  drawingId         String         @db.Uuid
+  pricePaise        Int
+  platformFeePaise  Int
+  status            PurchaseStatus @default(CREATED)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  createdAt         DateTime       @default(now())
+  paidAt            DateTime?
+  updatedAt         DateTime       @updatedAt
+
+  buyer   User    @relation(fields: [buyerId], references: [id])
+  drawing Drawing @relation(fields: [drawingId], references: [id])
+
+  // Partial unique index (buyerId, drawingId) WHERE status = 'PAID' is added in raw SQL.
+  @@index([buyerId])
+  @@index([drawingId])
+  @@index([razorpayOrderId])
+}
+
+// A user's claim on a free drawing; counts against FREE_DOWNLOAD_LIMIT and entitles them to review.
+model FreeDownload {
+  userId    String   @db.Uuid
+  drawingId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  drawing Drawing @relation(fields: [drawingId], references: [id])
+
+  @@id([userId, drawingId])
+  @@index([drawingId])
+}
+
+model Review {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  buyerId   String   @db.Uuid
+  drawingId String   @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  buyer   User    @relation(fields: [buyerId], references: [id])
+  drawing Drawing @relation(fields: [drawingId], references: [id])
+
+  @@unique([buyerId, drawingId])
+  @@index([drawingId, createdAt(sort: Desc)])
+}
+
+model DrawingView {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drawingId String   @db.Uuid
+  viewerId  String   @db.Uuid
+  viewedAt  DateTime @default(now())
+
+  drawing Drawing @relation(fields: [drawingId], references: [id], onDelete: Cascade)
+  viewer  User    @relation(fields: [viewerId], references: [id])
+
+  @@index([drawingId, viewedAt])
+  @@index([drawingId, viewerId, viewedAt])
+}
+
+model Interest {
+  userId    String   @db.Uuid
+  drawingId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drawing Drawing @relation(fields: [drawingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, drawingId])
+  @@index([drawingId, createdAt])
+}
+
+model Favorite {
+  userId    String   @db.Uuid
+  drawingId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drawing Drawing @relation(fields: [drawingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, drawingId])
+  @@index([userId, createdAt])
+}
+
+model CartItem {
+  userId    String   @db.Uuid
+  drawingId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  drawing Drawing @relation(fields: [drawingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, drawingId])
+}
+
+// Append-only double-entry ledger. Every txnId must sum to zero (deferred constraint trigger, see migration).
+model LedgerEntry {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  txnId          String            @db.Uuid
+  accountType    LedgerAccountType
+  accountOwnerId String?           @db.Uuid
+  amountPaise    Int
+  entryType      LedgerEntryType
+  referenceId    String?
+  createdAt      DateTime          @default(now())
+
+  accountOwner User? @relation(fields: [accountOwnerId], references: [id], onDelete: Restrict)
+
+  @@index([accountOwnerId, accountType])
+  @@index([txnId])
+  @@index([referenceId])
+}
+
+model BankAccount {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                String   @unique @db.Uuid
+  holderName            String
+  ifsc                  String
+  accountNumberLast4    String
+  providerFundAccountId String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  withdrawals Withdrawal[]
+}
+
+model Withdrawal {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String           @db.Uuid
+  bankAccountId String?          @db.Uuid
+  amountPaise   Int
+  status        WithdrawalStatus @default(REQUESTED)
+  providerRef   String?
+  failureReason String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+}
+
+// Idempotency store for payment/payout webhooks: insert before processing, skip on unique violation.
+model ProcessedWebhookEvent {
+  provider    String
+  eventId     String
+  eventType   String
+  processedAt DateTime @default(now())
+
+  @@id([provider, eventId])
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId    String?  @db.Uuid
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
