@@ -43,6 +43,19 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: backend/package-lock.json
+      - name: Start MinIO (top-level dirs act as buckets)
+        working-directory: .
+        run: |
+          mkdir -p /tmp/minio/originals /tmp/minio/previews /tmp/minio/kyc
+          docker run -d --name minio -p 9000:9000 -v /tmp/minio:/data \
+            -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+            minio/minio server /data
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:9000/minio/health/live && exit 0
+            sleep 1
+          done
+          docker logs minio
+          exit 1
       - run: npm ci
       - run: npm run lint
       - run: npx prisma migrate deploy
