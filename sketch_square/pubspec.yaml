@@ -53,6 +53,7 @@ dependencies:
   path_provider: ^2.1.5
   open_filex: ^5.0.0
   share_plus: ^12.0.2
+  sentry_flutter: ^9.30.1
 
 dev_dependencies:
   flutter_test:
