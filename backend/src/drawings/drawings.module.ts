@@ -1,5 +1,6 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { PlagiarismModule } from '../plagiarism/plagiarism.module';
 import { WatermarkModule } from '../watermark/watermark.module';
 import { ContributionController } from './contribution.controller';
 import { ContributionService } from './contribution.service';
@@ -17,6 +18,7 @@ import { SheetsService } from './sheets.service';
 @Module({
   imports: [
     WatermarkModule,
+    PlagiarismModule,
     BullModule.registerQueue({ name: DRAWING_PROCESSING_QUEUE }),
   ],
   controllers: [

@@ -35,4 +35,15 @@ describe('renderEmail', () => {
     expect(r.html).toContain('href="http://x/reset-password?token=tok123"');
     expect(r.text).toContain('Reset code: tok123');
   });
+
+  it('renders the under-review email and escapes the title', () => {
+    const r = renderEmail({
+      name: 'drawing-under-review',
+      data: { to: 'a@b.c', fullName: 'Asha', title: '<i>Villa</i>' },
+    });
+    expect(r.subject).toContain('under review');
+    expect(r.html).toContain('&lt;i&gt;Villa&lt;/i&gt;');
+    expect(r.html).not.toContain('<i>Villa');
+    expect(r.text).toContain('"<i>Villa</i>"');
+  });
 });

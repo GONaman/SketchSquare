@@ -20,12 +20,21 @@ function makeProcessing(drawing: unknown) {
     renderImagePreview: jest.fn(),
     renderPdfPreview: jest.fn(),
   };
+  const plagiarism = {
+    findExactDuplicate: jest.fn().mockResolvedValue(null),
+    findSimilarPreviews: jest.fn().mockResolvedValue([]),
+  };
+  const mail = {
+    sendDrawingUnderReview: jest.fn().mockResolvedValue(undefined),
+  };
   const svc = new DrawingProcessingService(
     prisma as never,
     storage as never,
     watermark as never,
+    plagiarism as never,
+    mail as never,
   );
-  return { svc, prisma, storage, watermark };
+  return { svc, prisma, storage, watermark, plagiarism, mail };
 }
 
 describe('DrawingProcessingService', () => {
@@ -67,6 +76,24 @@ describe('DrawingProcessingService', () => {
     await expect(svc.process('d1')).rejects.toThrow('NoSuchKey');
     expect(prisma.$transaction).not.toHaveBeenCalled();
     expect(storage.putPreview).not.toHaveBeenCalled();
+  });
+
+  it('hard-blocks an exact duplicate before rendering anything', async () => {
+    const { svc, storage, prisma, plagiarism } = makeProcessing({
+      status: DrawingStatus.PROCESSING,
+      sheets: [{ id: 's', isPreview: true, fileName: 'plan.pdf' }],
+      architect: { fullName: 'A', email: 'a@b.c' },
+    });
+    plagiarism.findExactDuplicate.mockResolvedValue({ fileName: 'plan.pdf' });
+    await expect(svc.process('d1')).resolves.toBe('blocked');
+    expect(storage.getOriginalBuffer).not.toHaveBeenCalled();
+    expect(prisma.drawing.updateMany).toHaveBeenCalledWith({
+      where: { id: 'd1', status: 'PROCESSING' },
+      data: {
+        status: 'FAILED',
+        failureReason: expect.stringContaining('plan.pdf') as string,
+      },
+    });
   });
 
   it('markFailed only moves PROCESSING drawings and truncates the reason', async () => {

@@ -32,6 +32,7 @@ erDiagram
   BankAccount ||--o{ Withdrawal : "paid to"
   Category ||--o{ Drawing : groups
   Drawing ||--o{ DrawingSheet : contains
+  Drawing ||--o{ PlagiarismFlag : flagged
   Drawing ||--o{ Purchase : sold
   Drawing ||--o{ Review : reviewed
   Drawing ||--o{ DrawingView : viewed
@@ -119,6 +120,18 @@ erDiagram
     string previewKey
     string pHash
     string sha256
+  }
+  PlagiarismFlag {
+    uuid id PK
+    uuid drawingId FK "flagged drawing"
+    uuid matchedDrawingId FK
+    uuid sheetId FK
+    uuid matchedSheetId FK
+    int hammingDistance
+    enum status "PENDING|APPROVED|REJECTED"
+    string reviewNote
+    uuid reviewedById FK
+    datetime reviewedAt
   }
   Purchase {
     uuid id PK
@@ -252,7 +265,7 @@ Refund of the sale above (one txn, `entryType = REFUND`, `referenceId = purchase
 ## Notable modelling choices
 - `FreeDownload (userId, drawingId)` records free claims: it backs the `FREE_DOWNLOAD_LIMIT` quota and entitles the user to review a free drawing.
 - `User.freeDownloadsUsed`, `Drawing.avgRating/ratingCount/viewCount/purchaseCount` and `User.architectRating(+Count)` are denormalised counters kept up to date by the services that change the underlying rows.
-- `DrawingSheet.sha256` / `pHash` are filled by the processing pipeline (Phase 3) and used by the plagiarism check (Phase 8).
+- `DrawingSheet.sha256` is set when a sheet is registered and `pHash` by the processing pipeline (Phase 3); both feed the plagiarism check (Phase 8): an exact `sha256` match with another architect's live drawing hard-blocks (FAILED), a close `pHash` on a similar plot creates a `PlagiarismFlag` (PENDING → APPROVED/REJECTED by an admin) and puts the drawing UNDER_REVIEW. A flag links the flagged drawing/sheet to the matched drawing/sheet with the Hamming distance.
 - `RefreshToken` stores only a SHA-256 hash; all tokens from one login share `familyId` so reuse of a rotated token revokes the family.
 - Test DB: `npm run test:e2e` runs `prisma migrate deploy` against `sketchsquare_test` (global setup) and `resetDb()` truncates between specs.
 

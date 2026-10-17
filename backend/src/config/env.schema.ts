@@ -67,6 +67,9 @@ export const envSchema = z.object({
   MIN_WITHDRAWAL_PAISE: int(50000),
   // Contribution rule: free drawings an architect must have published per paid drawing they already have (0 = rule off).
   CONTRIBUTION_FREE_PER_PAID: int(1),
+  // Plagiarism check at publish time: max pHash Hamming distance (of 64 bits) that flags a drawing, and the plot-size window compared.
+  PLAGIARISM_PHASH_THRESHOLD: z.coerce.number().int().min(0).max(64).default(8),
+  PLAGIARISM_PLOT_TOLERANCE_PCT: z.coerce.number().min(0).max(50).default(5),
 
   // Razorpay: when the key id/secret are unset the checkout runs in stub mode.
   RAZORPAY_KEY_ID: optionalString,
