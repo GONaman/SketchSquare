@@ -58,7 +58,7 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
 - `GET /admin/verifications/:id` → same + `documentUrl` (presigned, 5 min) + `reviewNote`
 - `POST /admin/verifications/:id/approve` → `{ok:true}`; `POST /admin/verifications/:id/reject` body `{note}` → `{ok:true}`
 - `GET /admin/category-requests?status=PENDING` → page of `{id, requestedName, status, user:{id,fullName}, createdAt}`;
-  `POST /admin/category-requests/:id/approve` (creates the Category) / `.../reject`
+  oldest first, cursor-paged. `POST /admin/category-requests/:id/approve` (creates or re-activates the Category) → `{ok:true, category:{id,name,slug}}` / `.../reject` → `{ok:true}`; 409 `CONFLICT` if the request was already decided.
 - `POST /admin/purchases/:id/refund` → `{ok:true}` (Part 3 refunds)
 - Phase 8: `GET /admin/review-queue` → page of `{ drawing: DrawingSummary, flaggedAgainst: DrawingSummary[], reason }`, `POST /admin/review-queue/:drawingId/approve|reject`
 
@@ -68,10 +68,10 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
 - `POST /me/avatar/upload-url` body `{contentType}` → `{uploadUrl, objectKey}`; then `POST /me/avatar/confirm` body `{objectKey}` → `User` (backend resizes to 512px)
 
 ## Categories, cities, architects
-- `GET /categories` → `[{id,name,slug}]` (active only). `POST /category-requests` body `{name}` → `201 {id,requestedName,status}`
-- `GET /cities` → `[{city, count}]` (cities with published drawings)
-- `GET /architects/top?city=` → `[ArchitectSummary & {drawingCount}]` (need ≥3 ratings; sorted by rating desc)
-- `GET /architects/:id` → `{ architect: ArchitectSummary, drawings: page of DrawingSummary }` (first page; `GET /architects/:id/drawings?cursor` for more)
+- `GET /categories` → `[{id,name,slug}]` (active only). `POST /category-requests` body `{name}` (2–60 chars) → `201 {id,requestedName,status}`; 409 `CONFLICT` if an active category already has that name; repeating your own pending request returns it unchanged.
+- `GET /cities` → `[{city, count}]` (cities with searchable drawings, most drawings first; spellings differing only by case are merged)
+- `GET /architects/top?city=` → `[ArchitectSummary & {drawingCount}]` (APPROVED architects with ≥3 ratings, sorted by rating desc then rating count; max 20; `city` is the architect's city, case-insensitive)
+- `GET /architects/:id` → `{ architect: ArchitectSummary, drawings: page of DrawingSummary }` (first page, newest first; `GET /architects/:id/drawings?cursor&limit` for more; 404 unless the architect is APPROVED)
 
 ## Drawings — seller side
 - `POST /drawings` body `{title,description,categoryId,city,plotLength,plotBreadth,unit:"ft"|"m",floors,facing?,bedrooms?:int(0-20),tags?:string[](≤8, each ≤24 chars),pricePaise,isFree?}` → `201 DrawingDetail` (DRAFT).
