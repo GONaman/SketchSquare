@@ -148,6 +148,56 @@ paths:
       summary: Signature-verified (HMAC over the raw body) and idempotent by `x-razorpay-event-id`.
       tags:
         - payments
+  /drawings:
+    post:
+      operationId: DrawingsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDrawingDto"
+      responses:
+        "201":
+          description: ""
+      security: &a5
+        - bearer: []
+      tags: &a6
+        - drawings
+  /drawings/{id}:
+    patch:
+      operationId: DrawingsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDrawingDto"
+      responses:
+        "200":
+          description: ""
+      security: *a5
+      tags: *a6
+    delete:
+      operationId: DrawingsController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+      security: *a5
+      tags: *a6
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -194,3 +244,137 @@ components:
           maxLength: 100
       required:
         - orderId
+    CreateDrawingDto:
+      type: object
+      properties:
+        plotLength:
+          type: number
+          maximum: 100000
+          minimum: 1
+          description: Plot length in `unit`
+          example: 40
+        pricePaise:
+          type: number
+          minimum: 0
+          maximum: 100000000
+          description: Integer paise. Required unless `isFree` is true.
+        isFree:
+          type: boolean
+          description: Forces pricePaise = 0
+        title:
+          type: string
+          minLength: 3
+          maxLength: 120
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        categoryId:
+          type: string
+          format: uuid
+        city:
+          type: string
+          minLength: 1
+          maxLength: 80
+        plotBreadth:
+          type: number
+          maximum: 100000
+          minimum: 1
+        unit:
+          type: string
+          enum: &a7
+            - ft
+            - m
+        floors:
+          type: number
+          minimum: 1
+          maximum: 100
+        facing:
+          type: string
+          enum:
+            - W
+            - S
+            - N
+            - NE
+            - E
+            - SE
+            - SW
+            - NW
+        bedrooms:
+          type: number
+          minimum: 0
+          maximum: 20
+        tags:
+          maxItems: 8
+          type: array
+          items:
+            type: string
+            maxLength: 24
+      required:
+        - title
+        - description
+        - categoryId
+        - city
+        - plotBreadth
+        - unit
+        - floors
+    UpdateDrawingDto:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 120
+        description:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        categoryId:
+          type: string
+          format: uuid
+        city:
+          type: string
+          minLength: 1
+          maxLength: 80
+        plotLength:
+          type: number
+          maximum: 100000
+          minimum: 1
+        plotBreadth:
+          type: number
+          maximum: 100000
+          minimum: 1
+        unit:
+          type: string
+          enum: *a7
+        floors:
+          type: number
+          minimum: 1
+          maximum: 100
+        facing:
+          type: string
+          enum:
+            - W
+            - S
+            - N
+            - NE
+            - E
+            - SE
+            - SW
+            - NW
+        bedrooms:
+          type: number
+          minimum: 0
+          maximum: 20
+        tags:
+          maxItems: 8
+          type: array
+          items:
+            type: string
+            maxLength: 24
+        pricePaise:
+          type: number
+          minimum: 0
+          maximum: 100000000
+        isFree:
+          type: boolean

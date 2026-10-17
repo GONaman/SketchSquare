@@ -26,7 +26,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 2.6 Flutter pending screen + admin area
 
 ## Phase 3 — Upload pipeline
-- [ ] 3.1 Drawings CRUD + categories
+- [x] 3.1 Drawings CRUD + categories (seller create/patch/delete; category list/requests live in the discovery module)
 - [ ] 3.2 Storage + sheets (presigned upload, magic bytes)
 - [ ] 3.3 Publish + processing worker (previews, pHash)
 - [x] 3.4 WatermarkService
