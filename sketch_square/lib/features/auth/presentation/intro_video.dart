@@ -68,21 +68,29 @@ class _IntroVideoState extends State<IntroVideo> {
         ),
       );
     }
-    return ColoredBox(
-      color: Theme.of(context).colorScheme.primary,
-      child: BlueprintGrid(
-        color: Colors.white,
-        child: Center(
-          child:
-              _failed
-                  ? const Icon(
-                    Icons.architecture,
-                    size: 72,
-                    color: Colors.white70,
-                  )
-                  : const SizedBox.shrink(),
-        ),
-      ),
+    return const IntroFallback();
+  }
+}
+
+/// Static backdrop shown while the video loads and whenever it cannot play
+/// (e.g. the placeholder asset is missing or undecodable).
+class IntroFallback extends StatelessWidget {
+  const IntroFallback({super.key});
+
+  static const asset = 'assets/branding/intro_fallback.png';
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      asset,
+      key: const Key('intro-fallback'),
+      fit: BoxFit.cover,
+      excludeFromSemantics: true,
+      errorBuilder:
+          (context, _, __) => ColoredBox(
+            color: Theme.of(context).colorScheme.primary,
+            child: const BlueprintGrid(color: Colors.white, child: SizedBox()),
+          ),
     );
   }
 }

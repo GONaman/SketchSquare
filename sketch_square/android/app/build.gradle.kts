@@ -1,9 +1,24 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Release signing comes from android/key.properties (gitignored) or, in CI,
+// from SKETCHSQUARE_* environment variables. See docs/TESTING.md ("Android release build").
+val keyProps = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) FileInputStream(file).use { load(it) }
+}
+
+fun signingValue(propName: String, envName: String): String? =
+    keyProps.getProperty(propName) ?: System.getenv(envName)
+
+val releaseStoreFile = signingValue("storeFile", "SKETCHSQUARE_KEYSTORE_PATH")
 
 android {
     namespace = "com.sketchsquare.sketch_square"
@@ -20,21 +35,36 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.sketchsquare.sketch_square"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        applicationId = "com.sketchsquare.app"
+        // Required by a plugin dependency (Sentry/video); Android 6.0+.
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = signingValue("storePassword", "SKETCHSQUARE_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "SKETCHSQUARE_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "SKETCHSQUARE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig =
+                if (releaseStoreFile != null) {
+                    signingConfigs.getByName("release")
+                } else {
+                    // No release key configured: debug-sign so local release builds
+                    // work. Such an APK must never be uploaded to a store.
+                    logger.warn("SketchSquare: no release keystore configured, signing with the debug key")
+                    signingConfigs.getByName("debug")
+                }
         }
     }
 }
