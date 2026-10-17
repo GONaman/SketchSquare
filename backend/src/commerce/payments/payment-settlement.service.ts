@@ -2,6 +2,7 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Prisma, PurchaseStatus } from '@prisma/client';
 import { ApiException } from '../../common/errors/api-exception';
 import { LedgerService } from '../../ledger/ledger.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { lockUser } from '../shared/locks';
 
@@ -34,6 +35,7 @@ export class PaymentSettlementService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ledger: LedgerService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async captureOrder(
@@ -67,7 +69,7 @@ export class PaymentSettlementService {
     const purchases = await tx.purchase.findMany({
       where: { razorpayOrderId: orderId },
       orderBy: [{ drawingId: 'asc' }, { id: 'asc' }],
-      include: { drawing: { select: { architectId: true } } },
+      include: { drawing: { select: { architectId: true, title: true } } },
     });
     await tx.$queryRaw`SELECT "id" FROM "Purchase" WHERE "razorpayOrderId" = ${orderId} ORDER BY "drawingId", "id" FOR UPDATE`;
     // Re-read under the lock: statuses may have changed while we waited for it.
@@ -163,6 +165,17 @@ export class PaymentSettlementService {
       await tx.cartItem.deleteMany({
         where: { userId: p.buyerId, drawingId: p.drawingId },
       });
+      await this.notifications.notify(
+        p.drawing.architectId,
+        'SALE_MADE',
+        {
+          purchaseId: p.id,
+          drawingId: p.drawingId,
+          drawingTitle: p.drawing.title,
+          amountPaise: net,
+        },
+        tx,
+      );
       newlyPaid.push(p.id);
     }
 

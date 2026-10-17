@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ApiException } from '../../common/errors/api-exception';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { lockUser } from '../shared/locks';
 
@@ -17,7 +18,10 @@ const round2 = (n: number | null): number =>
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /**
    * One review per (buyer, drawing), editable. Only people who own the drawing (PAID purchase or free claim) and are
@@ -32,7 +36,7 @@ export class ReviewsService {
   ): Promise<ReviewView> {
     const drawing = await this.prisma.drawing.findUnique({
       where: { id: drawingId },
-      select: { architectId: true },
+      select: { architectId: true, title: true },
     });
     if (!drawing) {
       throw new ApiException(
@@ -94,6 +98,19 @@ export class ReviewsService {
           architectRatingCount: perArchitect._count._all,
         },
       });
+
+      await this.notifications.notify(
+        drawing.architectId,
+        'NEW_REVIEW',
+        {
+          reviewId: review.id,
+          drawingId,
+          drawingTitle: drawing.title,
+          rating: review.rating,
+          reviewerName: reviewer.fullName,
+        },
+        tx,
+      );
 
       return {
         id: review.id,

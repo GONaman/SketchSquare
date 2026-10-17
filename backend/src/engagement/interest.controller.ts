@@ -31,7 +31,7 @@ export class InterestController {
     @CurrentUser() user: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
-    await this.interest.add(user.id, id);
+    await this.interest.add(user, id);
   }
 
   @Delete('interest')

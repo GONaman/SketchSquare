@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
 import { decodeCursor, Page, PageQueryDto, toPage } from '../common/pagination';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 interface InterestCursor extends Record<string, unknown> {
@@ -15,20 +16,26 @@ export interface InterestedUser {
 
 @Injectable()
 export class InterestService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /**
    * Idempotent. Only for published, paid drawings of approved architects that the caller does not own.
-   * Returns whether a new interest was recorded (false on a repeat), so callers can notify only once.
+   * Returns whether a new interest was recorded (false on a repeat).
    */
-  async add(userId: string, drawingId: string): Promise<boolean> {
+  async add(
+    user: { id: string; fullName: string },
+    drawingId: string,
+  ): Promise<boolean> {
     const drawing = await this.prisma.drawing.findFirst({
       where: {
         id: drawingId,
         status: 'PUBLISHED',
         architect: { verificationStatus: 'APPROVED' },
       },
-      select: { architectId: true, pricePaise: true },
+      select: { architectId: true, pricePaise: true, title: true },
     });
     if (!drawing) {
       throw new ApiException(
@@ -37,7 +44,7 @@ export class InterestService {
         'Drawing not found',
       );
     }
-    if (drawing.architectId === userId) {
+    if (drawing.architectId === user.id) {
       throw new ApiException(
         HttpStatus.FORBIDDEN,
         'FORBIDDEN',
@@ -52,9 +59,22 @@ export class InterestService {
       );
     }
     const { count } = await this.prisma.interest.createMany({
-      data: [{ userId, drawingId }],
+      data: [{ userId: user.id, drawingId }],
       skipDuplicates: true,
     });
+    // Notified once per (drawing, user): the notification's dedupe key survives un-interest/re-interest toggling.
+    if (count > 0) {
+      await this.notifications.notify(
+        drawing.architectId,
+        'INTEREST_RECEIVED',
+        {
+          drawingId,
+          drawingTitle: drawing.title,
+          userId: user.id,
+          userName: user.fullName,
+        },
+      );
+    }
     return count > 0;
   }
 

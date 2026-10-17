@@ -157,7 +157,15 @@ Also includes `bedrooms: int|null` and `tags: string[]`. Records a DrawingView (
 - `PUT /drawings/:id/interest`, `DELETE /drawings/:id/interest` → `204` (both idempotent); `GET /drawings/:id/interests` owner only → page of `{user:{id,fullName,city}, createdAt}`, newest first (`GET /drawings/:id/interested` is an alias).
   `PUT` rules: drawing must be PUBLISHED by an APPROVED architect (else 404 `NOT_FOUND`), must be **paid** (free → 400 `VALIDATION_ERROR`), must not be your own (403 `FORBIDDEN`). `DELETE` is always `204`. The list is 403 `FORBIDDEN` for non-owners (admins included) and 404 for unknown drawings; it still works for the owner after the drawing is removed.
 - `DrawingDetail.viewer` additionally gets `isFavorite: bool`, `isInterested: bool`
-- `POST /me/device-tokens` body `{token, platform}` → `204` (FCM)
+- `POST /me/device-tokens` body `{token, platform: "android"|"ios"|"web"}` → `204`; `DELETE /me/device-tokens` body `{token}` → `204` (call on logout). `/me/devices` is an alias of both. Idempotent; a token already registered by another user moves to the caller; delete only removes your own token. Available to unverified accounts too (so they receive their verification result). Invalid input → 400 `VALIDATION_ERROR`.
+- `GET /me/notifications` (cursor page, newest first) → `{ items: Notification[], nextCursor, unreadCount }`; `Notification { id, type, title, body, data: Record<string,string>, readAt: string|null, createdAt }`. `POST /me/notifications/read` body `{ids?: uuid[]}` → `204` (omit `ids` to mark all read; ids of other users are ignored).
+- Notification `type` + `data` (same map is the push `data`, plus `notificationId`; use it for deep links):
+  - `VERIFICATION_RESULT` — `{status: "APPROVED"|"REJECTED"}` (to the applicant)
+  - `SALE_MADE` — `{drawingId, purchaseId}` (to the seller; body shows the net amount)
+  - `WITHDRAWAL_STATUS` — `{withdrawalId, status: "PAID"|"FAILED"}` (only terminal states)
+  - `NEW_REVIEW` — `{drawingId, reviewId}` (to the author; once per review, edits do not re-notify)
+  - `INTEREST_RECEIVED` — `{drawingId}` (to the owner; once per interested user per drawing)
+  Push is delivered through FCM when the server has FCM credentials, otherwise it is only logged (the in-app list always works).
 
 ## Ops
 - `GET /health` `[public]` → `{ status:"ok", checks: { db, redis, s3 } }`; `GET /docs` Swagger UI.

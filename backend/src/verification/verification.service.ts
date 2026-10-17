@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { ApiException } from '../common/errors/api-exception';
 import { Page, decodeCursor, toPage } from '../common/pagination';
 import { MailService } from '../mail/mail.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { detectDocument, MAX_DOCUMENT_BYTES } from './document-type';
 import { KycStorageService } from './kyc-storage.service';
@@ -46,6 +47,7 @@ export class VerificationService {
     private readonly prisma: PrismaService,
     private readonly kyc: KycStorageService,
     private readonly mail: MailService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async submit(
@@ -174,6 +176,10 @@ export class VerificationService {
   async approve(id: string, adminId: string) {
     const v = await this.review(id, adminId, 'APPROVED', null);
     await this.mail.sendWelcome(v.user.email, v.user.fullName);
+    await this.notifications.notify(v.user.id, 'VERIFICATION_RESULT', {
+      requestId: v.id,
+      status: 'APPROVED',
+    });
     return { ok: true };
   }
 
@@ -184,6 +190,11 @@ export class VerificationService {
       v.user.fullName,
       note,
     );
+    await this.notifications.notify(v.user.id, 'VERIFICATION_RESULT', {
+      requestId: v.id,
+      status: 'REJECTED',
+      note,
+    });
     return { ok: true };
   }
 

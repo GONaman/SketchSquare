@@ -1611,6 +1611,114 @@ paths:
                 type: object
       security: *a32
       tags: *a33
+  /me/device-tokens:
+    post:
+      operationId: NotificationsController_register[0]
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDeviceTokenDto"
+      responses:
+        "204":
+          description: ""
+      security: &a34
+        - bearer: []
+      summary: Register (or re-assign) a push device token
+      tags: &a35
+        - notifications
+    delete:
+      operationId: NotificationsController_unregister[0]
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RemoveDeviceTokenDto"
+      responses:
+        "204":
+          description: ""
+      security: *a34
+      summary: Unregister a push device token (e.g. on logout)
+      tags: *a35
+  /me/devices:
+    post:
+      operationId: NotificationsController_register[1]
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDeviceTokenDto"
+      responses:
+        "204":
+          description: ""
+      security: *a34
+      summary: Register (or re-assign) a push device token
+      tags: *a35
+    delete:
+      operationId: NotificationsController_unregister[1]
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RemoveDeviceTokenDto"
+      responses:
+        "204":
+          description: ""
+      security: *a34
+      summary: Unregister a push device token (e.g. on logout)
+      tags: *a35
+  /me/notifications:
+    get:
+      operationId: NotificationsController_list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: *a34
+      summary: In-app notifications, newest first, with the unread count
+      tags: *a35
+  /me/notifications/read:
+    post:
+      operationId: NotificationsController_read
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkReadDto"
+      responses:
+        "204":
+          description: ""
+      security: *a34
+      summary: Mark notifications as read (all if no ids given)
+      tags: *a35
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -1833,7 +1941,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: &a34
+          enum: &a36
             - ft
             - m
         floors:
@@ -1897,7 +2005,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: *a34
+          enum: *a36
         floors:
           type: number
           minimum: 1
@@ -2028,3 +2136,39 @@ components:
           maxLength: 500
       required:
         - reason
+    RegisterDeviceTokenDto:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 10
+          maxLength: 4096
+          description: FCM registration token
+        platform:
+          enum:
+            - android
+            - ios
+            - web
+          type: string
+      required:
+        - token
+        - platform
+    RemoveDeviceTokenDto:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 10
+          maxLength: 4096
+      required:
+        - token
+    MarkReadDto:
+      type: object
+      properties:
+        ids:
+          maxItems: 100
+          description: Notification ids to mark as read; omit to mark all as read
+          type: array
+          items:
+            type: string
+            format: uuid
