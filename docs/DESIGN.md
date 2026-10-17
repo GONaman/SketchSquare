@@ -167,7 +167,7 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Auth: intro, splash, verification status, Privacy/Terms | **To do** |
 | Upload flow | **To do** |
 | Basket + checkout + order result | Done |
-| Purchases library + download/review sheet | **To do** |
+| Purchases library + download/review sheet | Done |
 | Profile, wallet (bank, payouts), settings, edit profile | **To do** |
 | Manage drawings (`ManagedDrawingCard`) | **To do** |
 | Admin (verifications, refunds, plagiarism, categories) | **To do** |

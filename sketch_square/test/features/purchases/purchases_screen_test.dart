@@ -35,6 +35,9 @@ void main() {
   });
 
   Future<void> openPurchases(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final container = await pumpApp(
       tester,
       overrides: [
@@ -57,8 +60,8 @@ void main() {
     expect(find.text('My purchases'), findsOneWidget);
     expect(find.text('Modern Villa'), findsOneWidget);
     expect(find.text('Free Duplex'), findsOneWidget);
-    expect(find.textContaining('₹1,500 ·'), findsOneWidget);
-    expect(find.textContaining('Free · '), findsOneWidget);
+    expect(find.text('₹1,500'), findsOneWidget);
+    expect(find.text('Free'), findsOneWidget);
     expect(find.text('Free downloads: 3 of 20 used'), findsOneWidget);
   });
 
