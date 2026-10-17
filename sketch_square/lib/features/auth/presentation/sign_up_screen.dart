@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../legal/presentation/legal_consent_text.dart';
 import '../../verification/domain/verification_request.dart';
 import '../../verification/presentation/verification_form.dart';
@@ -13,6 +14,8 @@ import '../domain/auth_validators.dart';
 import 'auth_controller.dart';
 import 'widgets/auth_form_scaffold.dart';
 import 'widgets/form_widgets.dart';
+import 'widgets/password_strength_meter.dart';
+import 'widgets/step_progress.dart';
 
 /// Two steps: (1) basic details, (2) architect verification (COA number +
 /// document). The account is created when step 2 is submitted, then the
@@ -123,76 +126,101 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       showBack: !_accountCreated,
       // Reached with `go` (see A7), so there is no route to pop.
       onBack: () => context.go(AppRoutes.signIn),
+      kicker: _step == 0 ? 'Step 1 of 2' : 'Step 2 of 2',
       heading: _step == 0 ? 'Your details' : 'Verify you are an architect',
       subtitle:
           _step == 0
-              ? 'Step 1 of 2. Name and address cannot be changed later.'
-              : 'Step 2 of 2. We review every architect, usually within 24 hours.',
-      children: [if (_step == 0) _detailsStep() else _verificationStep()],
+              ? 'Name and address cannot be changed later.'
+              : 'We review every architect, usually within 24 hours.',
+      children: [
+        StepProgress(labels: const ['Details', 'Verification'], current: _step),
+        const SizedBox(height: AppSpacing.xl),
+        AnimatedSwitcher(
+          duration: AppMotion.base,
+          switchInCurve: AppMotion.curve,
+          child: KeyedSubtree(
+            key: ValueKey(_step),
+            child: _step == 0 ? _detailsStep() : _verificationStep(),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _detailsStep() {
     String? server(String f) => _serverErrors[f];
+    const gap = SizedBox(height: AppSpacing.lg);
     return Form(
       key: _formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextFormField(
+          const FormSectionLabel('Personal', icon: Icons.person_outline),
+          AppTextField(
             controller: _name,
+            label: 'Full name',
+            prefixIcon: Icons.badge_outlined,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.name],
             validator: AuthValidators.fullName,
             forceErrorText: server('fullName'),
             onChanged: (_) => _clearServerError('fullName'),
-            decoration: const InputDecoration(labelText: 'Full name'),
           ),
-          const SizedBox(height: 16),
-          TextFormField(
+          gap,
+          AppTextField(
             controller: _email,
+            label: 'Email',
+            prefixIcon: Icons.mail_outline_rounded,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.email],
             validator: AuthValidators.email,
             forceErrorText: server('email'),
             onChanged: (_) => _clearServerError('email'),
-            decoration: const InputDecoration(labelText: 'Email'),
           ),
-          const SizedBox(height: 16),
-          TextFormField(
+          gap,
+          AppTextField(
             controller: _phone,
+            label: 'Phone',
+            hint: '+91 98765 43210',
+            prefixIcon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
             textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.telephoneNumber],
             validator: AuthValidators.phone,
             forceErrorText: server('phone'),
             onChanged: (_) => _clearServerError('phone'),
-            decoration: const InputDecoration(
-              labelText: 'Phone',
-              hintText: '+91 98765 43210',
-            ),
           ),
-          const SizedBox(height: 16),
-          TextFormField(
+          const SizedBox(height: AppSpacing.xl),
+          const FormSectionLabel('Office', icon: Icons.apartment_rounded),
+          AppTextField(
             controller: _address,
+            label: 'Office address',
+            prefixIcon: Icons.location_on_outlined,
             textCapitalization: TextCapitalization.sentences,
             textInputAction: TextInputAction.next,
             maxLines: 2,
+            autofillHints: const [AutofillHints.fullStreetAddress],
             validator: AuthValidators.address,
             forceErrorText: server('address'),
             onChanged: (_) => _clearServerError('address'),
-            decoration: const InputDecoration(labelText: 'Office address'),
           ),
-          const SizedBox(height: 16),
-          TextFormField(
+          gap,
+          AppTextField(
             controller: _city,
+            label: 'City',
+            prefixIcon: Icons.location_city_rounded,
             textCapitalization: TextCapitalization.words,
             textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.addressCity],
             validator: AuthValidators.city,
             forceErrorText: server('city'),
             onChanged: (_) => _clearServerError('city'),
-            decoration: const InputDecoration(labelText: 'City'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.xl),
+          const FormSectionLabel('Security', icon: Icons.lock_outline_rounded),
           PasswordField(
             controller: _password,
             label: 'Password',
@@ -201,7 +229,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             textInputAction: TextInputAction.next,
             onChanged: (_) => _clearServerError('password'),
           ),
-          const SizedBox(height: 16),
+          PasswordStrengthMeter(controller: _password),
+          gap,
           PasswordField(
             controller: _confirm,
             label: 'Confirm password',
@@ -210,12 +239,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             onSubmitted: (_) => _next(),
           ),
           if (_error != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             FormErrorBanner(_error!),
           ],
-          const SizedBox(height: 24),
-          FilledButton(onPressed: _next, child: const Text('Next')),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xl),
+          PrimaryButton(label: 'Next', onPressed: _next),
+          const SizedBox(height: AppSpacing.sm),
           const LegalConsentText(),
         ],
       ),
@@ -227,7 +256,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       submitLabel: _accountCreated ? 'Upload document' : 'Create account',
       onSubmit: _createAccountAndUpload,
       extraActions: [
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         if (!_accountCreated) const LegalConsentText(),
         if (!_accountCreated)
           TextButton(

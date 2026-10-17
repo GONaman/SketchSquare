@@ -27,6 +27,9 @@ class AppTextField extends StatelessWidget {
     this.enabled = true,
     this.autofocus = false,
     this.tabularFigures = false,
+    this.forceErrorText,
+    this.textCapitalization = TextCapitalization.none,
+    this.autovalidateMode,
   });
 
   final TextEditingController? controller;
@@ -53,6 +56,11 @@ class AppTextField extends StatelessWidget {
   /// Use for numeric input (dimensions, prices) so digits align.
   final bool tabularFigures;
 
+  /// Server-side error shown regardless of the validator (see `TextFormField`).
+  final String? forceErrorText;
+  final TextCapitalization textCapitalization;
+  final AutovalidateMode? autovalidateMode;
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -62,6 +70,9 @@ class AppTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
+      textCapitalization: textCapitalization,
+      forceErrorText: forceErrorText,
+      autovalidateMode: autovalidateMode,
       autofillHints: autofillHints,
       inputFormatters: inputFormatters,
       validator: validator,

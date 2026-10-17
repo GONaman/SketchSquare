@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/widgets/widgets.dart';
 
 /// Inline error shown above a form's submit button.
 class FormErrorBanner extends StatelessWidget {
@@ -11,24 +12,71 @@ class FormErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: scheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: scheme.errorContainer,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 20,
+              color: scheme.onErrorContainer,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onErrorContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Small uppercase label that groups related fields in a long form.
+class FormSectionLabel extends StatelessWidget {
+  const FormSectionLabel(this.label, {super.key, this.icon});
+
+  final String label;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.error_outline, size: 20, color: scheme.onErrorContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(color: scheme.onErrorContainer),
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: theme.colorScheme.primary),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Flexible(
+            child: Semantics(
+              header: true,
+              child: Text(
+                label.toUpperCase(),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  letterSpacing: 1.2,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
         ],
       ),
     );

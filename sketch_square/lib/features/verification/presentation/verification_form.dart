@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../auth/domain/auth_validators.dart';
 import '../../auth/presentation/widgets/form_widgets.dart';
 import '../domain/verification_request.dart';
@@ -85,14 +86,18 @@ class _VerificationFormState extends ConsumerState<VerificationForm> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     return Form(
       key: _formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextFormField(
+          AppTextField(
             controller: _coa,
+            label: 'COA registration number',
+            hint: 'e.g. CA/2015/12345',
+            prefixIcon: Icons.verified_user_outlined,
             enabled: !_busy,
             textCapitalization: TextCapitalization.characters,
             validator: AuthValidators.coaNumber,
@@ -102,51 +107,149 @@ class _VerificationFormState extends ConsumerState<VerificationForm> {
                 setState(() => _coaServerError = null);
               }
             },
-            decoration: const InputDecoration(
-              labelText: 'COA registration number',
-              hintText: 'e.g. CA/2015/12345',
-            ),
           ),
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            onPressed: _busy ? null : _pick,
-            icon: const Icon(Icons.attach_file),
-            label: Text(
-              _document == null
-                  ? 'Attach COA certificate or ID (PDF, JPG, PNG)'
-                  : _document!.fileName,
-              overflow: TextOverflow.ellipsis,
-            ),
+          const SizedBox(height: AppSpacing.lg),
+          _DocumentTile(
+            fileName: _document?.fileName,
+            error: _documentError,
+            onTap: _busy ? null : _pick,
           ),
-          if (_documentError != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 6, left: 12),
-              child: Text(
-                _documentError!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: scheme.error),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-            ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Stored privately. Only our reviewers can see your document.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
           if (_error != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             FormErrorBanner(_error!),
           ],
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _busy ? null : _submit,
-            child:
-                _busy
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : Text(widget.submitLabel),
+          const SizedBox(height: AppSpacing.xl),
+          PrimaryButton(
+            label: widget.submitLabel,
+            loading: _busy,
+            onPressed: _submit,
           ),
           ...widget.extraActions,
         ],
       ),
+    );
+  }
+}
+
+/// Upload target: shows the prompt, the chosen file, or a validation error.
+class _DocumentTile extends StatelessWidget {
+  const _DocumentTile({
+    required this.fileName,
+    required this.error,
+    required this.onTap,
+  });
+
+  final String? fileName;
+  final String? error;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final sem = AppSemanticColors.of(context);
+    final picked = fileName != null;
+    final hasError = error != null;
+    final accent =
+        hasError ? scheme.error : (picked ? sem.success : scheme.primary);
+    final radius = BorderRadius.circular(AppRadius.md);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          button: true,
+          child: Material(
+            color:
+                picked
+                    ? sem.successContainer.withValues(alpha: 0.5)
+                    : scheme.surfaceContainerLowest,
+            shape: RoundedRectangleBorder(
+              borderRadius: radius,
+              side: BorderSide(
+                color: hasError ? scheme.error : scheme.outline,
+                width: hasError ? 1.5 : 1,
+              ),
+            ),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: radius,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: AppMotion.base,
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accent.withValues(alpha: 0.12),
+                      ),
+                      child: Icon(
+                        picked
+                            ? Icons.check_circle_outline_rounded
+                            : Icons.upload_file_rounded,
+                        color: accent,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            picked ? fileName! : 'Attach COA certificate or ID',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: AppSpacing.xxs),
+                          Text(
+                            picked
+                                ? 'Tap to choose a different file'
+                                : 'PDF, JPG or PNG',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (hasError)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: AppSpacing.md),
+            child: Text(
+              error!,
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+            ),
+          ),
+      ],
     );
   }
 }
