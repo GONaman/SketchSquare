@@ -8,8 +8,8 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 0.2 infra/docker-compose.yml (postgres, redis, minio + bucket init, mailpit)
 - [x] 0.3 backend NestJS scaffold (config, swagger, health, Prisma, lint/test)
 - [x] 0.4 Flutter core (theme, dio, error model, secure storage, router, 5-tab shell)
-- [ ] 0.5 Root README
-- [ ] 0.6 GitHub Actions CI
+- [x] 0.5 Root README
+- [x] 0.6 GitHub Actions CI
 
 ## Phase 1 — Database schema
 - [x] 1.1 Prisma schema + migration (enums, indexes, partial unique, FTS)
