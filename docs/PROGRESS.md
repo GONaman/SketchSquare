@@ -56,7 +56,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 7.4 Deployment docs + release build + TESTING.md
 
 ## Phase 8 — Future features
-- [x] 8.1 Favorites — backend done (`PUT/DELETE /drawings/:id/favorite`, `GET /me/favorites`, `viewer.isFavorite`); Flutter heart/list pending
+- [x] 8.1 Favorites — backend done (`PUT/DELETE /drawings/:id/favorite`, `GET /me/favorites`, `viewer.isFavorite`); Flutter done: detail heart (optimistic + rollback) and Favorites list under Profile (`/profile/favorites`, heart on its tiles). Needs manual check: search/home tiles carry no favorite state (the API's `DrawingSummary` has no `isFavorite`)
 - [x] 8.2 Express interest — backend done (`PUT/DELETE /drawings/:id/interest`, `GET /drawings/:id/interests`, `viewer.isInterested`); Flutter button/owner list pending; push on new interest comes with 8.5
 - [x] 8.3 Contribution rule — backend + Flutter (Upload → Pricing shows `GET /me/contribution-status` guidance, disables Paid when `canPublishPaid` is false, friendly `CONTRIBUTION_REQUIRED` message)
 - [x] 8.6 Refunds/disputes (Part 3) — backend: `GET /admin/purchases[/:id]`, `POST /admin/purchases/:id/refund`, `RefundProvider` (stub/Razorpay), TAX enum reserved; Flutter: Admin → Refunds screens (search, detail, refund with reason + confirm) and a clearer negative-balance withdrawal-blocked message in the wallet

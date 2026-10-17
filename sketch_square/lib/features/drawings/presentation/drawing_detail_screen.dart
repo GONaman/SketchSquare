@@ -8,6 +8,7 @@ import '../../../core/widgets/error_retry.dart';
 import '../../architects/domain/architect_summary.dart';
 import '../../architects/presentation/architect_profile_screen.dart';
 import '../../basket/presentation/cart_controller.dart';
+import '../../favorites/presentation/favorites_controller.dart';
 import '../data/drawings_providers.dart';
 import '../domain/drawing_detail.dart';
 import '../domain/sheet.dart';
@@ -82,6 +83,7 @@ class _DrawingDetailScreenState extends ConsumerState<DrawingDetailScreen> {
       await ref
           .read(drawingActionsRepositoryProvider)
           .setFavorite(widget.drawingId, favorite: next);
+      ref.invalidate(favoritesControllerProvider);
     } catch (e) {
       if (!mounted) return;
       setState(() => _favorite = current);

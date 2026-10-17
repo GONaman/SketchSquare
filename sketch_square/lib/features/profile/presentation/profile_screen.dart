@@ -51,6 +51,13 @@ class ProfileScreen extends ConsumerWidget {
                     onTap: () => context.push(AppRoutes.purchases),
                   ),
                   _NavTile(
+                    key: const Key('tile-favorites'),
+                    icon: Icons.favorite_border,
+                    title: 'Favorites',
+                    subtitle: 'Drawings you saved',
+                    onTap: () => context.push(AppRoutes.favorites),
+                  ),
+                  _NavTile(
                     key: const Key('tile-wallet'),
                     icon: Icons.account_balance_wallet_outlined,
                     title: 'Wallet',
