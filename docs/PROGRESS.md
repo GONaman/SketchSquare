@@ -46,7 +46,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 ## Phase 6 — Seller side, wallet, profile
 - [x] 6.1 Manage drawings + stats endpoints
 - [x] 6.2 Wallet + bank account + withdrawals + payouts (stub payouts; RazorpayX via env)
-- [ ] 6.3 Profile endpoints
+- [x] 6.3 Profile endpoints (GET/PATCH /me, avatar upload-url + confirm)
 - [x] 6.4 Flutter profile, manage drawings, wallet — profile (identity, public stats, edit phone/city, avatar upload, settings with theme + sign out); manage drawings (seller list, filters, stats, edit published, remove; route `AppRoutes.manageDrawings`); wallet (balance, ledger, bank account, withdraw, payout history). Written against the contract; the backend wallet endpoints (6.2) and profile endpoints (6.3) are not merged yet, so wallet/avatar flows are verified with fakes + Dio contract tests only
 
 ## Phase 7 — Hardening

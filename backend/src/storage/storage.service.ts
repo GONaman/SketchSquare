@@ -82,11 +82,14 @@ export class StorageService {
       : s3;
   }
 
-  /** Presigned PUT for the private originals bucket; type and exact length are part of the signature. */
+  /**
+   * Presigned PUT for the private originals bucket; the type is part of the signature, and so is the exact length
+   * when `sizeBytes` is given (callers that cannot know it up front must verify the size after upload).
+   */
   async presignOriginalUpload(params: {
     key: string;
     contentType: string;
-    sizeBytes: number;
+    sizeBytes?: number;
     expiresInSeconds?: number;
   }): Promise<PresignedUpload> {
     const command = new PutObjectCommand({
@@ -95,9 +98,11 @@ export class StorageService {
       ContentType: params.contentType,
       ContentLength: params.sizeBytes,
     });
+    const signable = ['content-type'];
+    if (params.sizeBytes !== undefined) signable.push('content-length');
     const uploadUrl = await getSignedUrl(this.signer, command, {
       expiresIn: params.expiresInSeconds ?? UPLOAD_URL_TTL_SECONDS,
-      signableHeaders: new Set(['content-type', 'content-length']),
+      signableHeaders: new Set(signable),
     });
     return { uploadUrl, headers: { 'Content-Type': params.contentType } };
   }

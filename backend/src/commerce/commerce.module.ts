@@ -31,6 +31,8 @@ import { RazorpayXPayoutProvider } from './payouts/razorpayx.provider';
 import { RazorpayXWebhookController } from './payouts/razorpayx-webhook.controller';
 import { RazorpayXWebhookService } from './payouts/razorpayx-webhook.service';
 import { StubPayoutProvider } from './payouts/stub-payout.provider';
+import { ProfileController } from './profile/profile.controller';
+import { ProfileService } from './profile/profile.service';
 import { ReviewsController } from './reviews/reviews.controller';
 import { ReviewsService } from './reviews/reviews.service';
 import { WalletController } from './wallet/wallet.controller';
@@ -51,6 +53,7 @@ import { WalletService } from './wallet/wallet.service';
     LibraryController,
     ReviewsController,
     WalletController,
+    ProfileController,
     RazorpayXWebhookController,
   ],
   providers: [
@@ -62,6 +65,7 @@ import { WalletService } from './wallet/wallet.service';
     LibraryService,
     ReviewsService,
     WalletService,
+    ProfileService,
     PayoutService,
     PayoutProcessor,
     PayoutRecoveryService,
