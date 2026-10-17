@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sketch_square/core/network/api_exception.dart';
 import 'package:sketch_square/core/router/app_router.dart';
+import 'package:sketch_square/core/router/route_utils.dart';
 import 'package:sketch_square/core/router/routes.dart';
 import 'package:sketch_square/core/theme/theme_mode_provider.dart';
 import 'package:sketch_square/features/architects/data/architects_providers.dart';
@@ -113,7 +114,8 @@ void main() {
   testWidgets('unregistered routes degrade to "Coming soon"', (tester) async {
     await open(tester);
 
-    await tester.tap(find.byKey(const Key('tile-my-drawings')));
+    final context = tester.element(find.byKey(const Key('tile-my-drawings')));
+    pushIfRegistered(context, '/profile/not-built-yet');
     await tester.pump();
     expect(find.text('Coming soon'), findsOneWidget);
   });
