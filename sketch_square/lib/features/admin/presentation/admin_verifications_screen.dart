@@ -21,7 +21,17 @@ class AdminVerificationsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(pendingVerificationsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Pending verifications')),
+      appBar: AppBar(
+        title: const Text('Pending verifications'),
+        actions: [
+          IconButton(
+            key: const Key('open-refunds'),
+            icon: const Icon(Icons.receipt_long_outlined),
+            tooltip: 'Refunds',
+            onPressed: () => context.push('${AppRoutes.admin}/refunds'),
+          ),
+        ],
+      ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error:

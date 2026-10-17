@@ -40,11 +40,18 @@ abstract final class WalletValidators {
     return null;
   }
 
+  /// Shown wherever a negative balance (e.g. after a refunded sale) blocks
+  /// withdrawals; the server code is `WITHDRAWAL_BLOCKED`.
+  static const withdrawalBlockedMessage =
+      'Withdrawals are blocked while your balance is negative, for example '
+      'after a refunded sale. New sales will bring it back up. '
+      'Contact support if you need help.';
+
   /// [input] is a rupee string. The wallet balance reported by the server is
   /// the withdrawable amount (pending payouts are already deducted from it).
   static String? withdrawalAmount(String? input, WalletSummary wallet) {
     if (wallet.withdrawalBlocked) {
-      return 'Withdrawals are currently blocked for your account';
+      return withdrawalBlockedMessage;
     }
     if (wallet.bankAccount == null) return 'Add a bank account first';
     final paise = parseRupeesToPaise(input ?? '');
@@ -66,8 +73,7 @@ abstract final class WalletValidators {
       'Your balance is too low for this withdrawal.',
     ApiErrorCodes.belowMinWithdrawal =>
       'The amount is below the minimum withdrawal.',
-    ApiErrorCodes.withdrawalBlocked =>
-      'Withdrawals are currently blocked for your account. Contact support.',
+    ApiErrorCodes.withdrawalBlocked => withdrawalBlockedMessage,
     _ => e.message,
   };
 }
