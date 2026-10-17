@@ -17,6 +17,7 @@ import { redisConnectionFromUrl } from './redis-connection';
         connection: redisConnectionFromUrl(
           config.get('REDIS_URL', { infer: true }),
         ),
+        prefix: config.get('QUEUE_PREFIX', { infer: true }),
         defaultJobOptions: {
           removeOnComplete: 1000,
           removeOnFail: 5000,

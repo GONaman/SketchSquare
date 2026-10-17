@@ -275,6 +275,20 @@ paths:
           description: ""
       security: *a5
       tags: *a6
+  /drawings/{id}/publish:
+    post:
+      operationId: DrawingsController_publish
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "202":
+          description: ""
+      security: *a5
+      tags: *a6
   /drawings/{drawingId}/sheets/upload-url:
     post:
       operationId: SheetsController_uploadUrl

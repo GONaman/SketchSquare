@@ -28,6 +28,8 @@ export const envSchema = z.object({
     'postgresql://sketch:sketch@localhost:5432/sketchsquare',
   ),
   REDIS_URL: withDevDefault('redis://localhost:6379'),
+  // Key prefix for BullMQ queues; tests set a unique one so parallel runs/dev servers never consume each other's jobs.
+  QUEUE_PREFIX: z.string().min(1).default('bull'),
 
   S3_ENDPOINT: withDevDefault('http://localhost:9000'),
   // Host used inside presigned URLs handed to clients (an emulator needs 10.0.2.2 instead of localhost).
