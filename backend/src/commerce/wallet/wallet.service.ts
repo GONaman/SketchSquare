@@ -291,7 +291,10 @@ export class WalletService {
     }[],
   ): Promise<Map<string, string>> {
     const saleRefs = entries
-      .filter((e) => e.entryType === 'SALE' && e.referenceId)
+      .filter(
+        (e) =>
+          (e.entryType === 'SALE' || e.entryType === 'REFUND') && e.referenceId,
+      )
       .map((e) => e.referenceId as string);
     const purchases = saleRefs.length
       ? await this.prisma.purchase.findMany({
@@ -323,9 +326,11 @@ export class WalletService {
         case 'WITHDRAWAL_REVERSAL':
           out.set(e.id, 'Withdrawal failed – amount returned');
           break;
-        case 'REFUND':
-          out.set(e.id, 'Refund');
+        case 'REFUND': {
+          const title = e.referenceId ? titles.get(e.referenceId) : undefined;
+          out.set(e.id, title ? `Refund of "${title}"` : 'Refund');
           break;
+        }
         default:
           out.set(e.id, e.entryType);
       }

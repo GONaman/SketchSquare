@@ -59,7 +59,16 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
 - `POST /admin/verifications/:id/approve` → `{ok:true}`; `POST /admin/verifications/:id/reject` body `{note}` → `{ok:true}`
 - `GET /admin/category-requests?status=PENDING` → page of `{id, requestedName, status, user:{id,fullName}, createdAt}`;
   oldest first, cursor-paged. `POST /admin/category-requests/:id/approve` (creates or re-activates the Category) → `{ok:true, category:{id,name,slug}}` / `.../reject` → `{ok:true}`; 409 `CONFLICT` if the request was already decided.
-- `POST /admin/purchases/:id/refund` → `{ok:true}` (Part 3 refunds)
+- `GET /admin/purchases?q&status=CREATED|PAID|FAILED|REFUNDED&buyerId&drawingId&cursor&limit` → page of
+  `AdminPurchase { id, status, pricePaise, platformFeePaise, sellerNetPaise, razorpayOrderId, razorpayPaymentId, createdAt, paidAt, buyer:{id,fullName,email}, seller:{id,fullName,email}, drawing:{id,title}, refund: AdminRefund|null }`,
+  newest first (`createdAt desc, id desc`), all statuses when `status` is omitted. `q` is a case-insensitive match on purchase id (UUID), Razorpay order/payment id, buyer/seller name or email, drawing title.
+- `GET /admin/purchases/:id` → `AdminPurchase` + `sellerBalancePaise` (the seller's current wallet balance, may be negative); 404 `NOT_FOUND`.
+- `POST /admin/purchases/:id/refund` body `{reason}` (trimmed, 3–500 chars) → `200 {ok:true, alreadyRefunded:boolean, refund: AdminRefund}`.
+  `AdminRefund { id, reason, amountPaise, refundedAt, refundedBy:{id,fullName}, providerStatus:"PENDING"|"SUCCEEDED"|"FAILED", providerRefundId:string|null, providerError:string|null }`.
+  Full refunds only. One DB transaction (row-locked, idempotent): purchase `PAID→REFUNDED`, reversing `REFUND` ledger entries
+  (`PAYMENT_GATEWAY +price`, seller `USER_WALLET −net`, `PLATFORM_REVENUE −fee`; zero-sum), `purchaseCount −1`, `AuditLog`. The gateway call runs after the commit; if it fails the refund stays booked with `providerStatus:"FAILED"` and calling again retries only the gateway (`alreadyRefunded:true`).
+  Errors: 400 `VALIDATION_ERROR` (missing/short reason), 403 `FORBIDDEN` (non-admin), 404 `NOT_FOUND`, 409 `CONFLICT` (purchase is not PAID/REFUNDED).
+  Effects: the refunded purchase no longer entitles the buyer (download → 403 `FORBIDDEN`, gone from `/me/purchases`, cannot review/edit a review). The seller's wallet may go negative; `POST /wallet/withdrawals` then returns 403 `WITHDRAWAL_BLOCKED` until the balance is ≥ 0 (`GET /wallet` `withdrawalBlocked:true`).
 - Phase 8: `GET /admin/review-queue` → page of `{ drawing: DrawingSummary, flaggedAgainst: DrawingSummary[], reason }`, `POST /admin/review-queue/:drawingId/approve|reject`
 
 ## Profile

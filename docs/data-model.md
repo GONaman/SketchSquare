@@ -131,6 +131,17 @@ erDiagram
     string razorpayPaymentId
     datetime paidAt
   }
+  Refund {
+    uuid id PK
+    uuid purchaseId FK "unique"
+    uuid adminId FK
+    string reason
+    int amountPaise
+    uuid ledgerTxnId
+    enum providerStatus "PENDING|SUCCEEDED|FAILED"
+    string providerRefundId
+    string providerError
+  }
   FreeDownload {
     uuid userId PK
     uuid drawingId PK
@@ -227,6 +238,16 @@ Example sale of ₹499 (49900 paise), 10% platform fee:
 | PAYMENT_GATEWAY | -49900 | SALE |
 | USER_WALLET (architect) | +44910 | SALE |
 | PLATFORM_REVENUE | +4990 | PLATFORM_FEE |
+
+Refund of the sale above (one txn, `entryType = REFUND`, `referenceId = purchaseId`):
+
+| account | amountPaise |
+|---|---|
+| PAYMENT_GATEWAY | +49900 |
+| USER_WALLET (architect) | -44910 |
+| PLATFORM_REVENUE | -4990 |
+
+`TAX` exists as a reserved value of both `LedgerAccountType` and `LedgerEntryType` (migration `20261017150000_refunds`) so GST/TCS/TDS legs can be added later without an enum migration. Nothing posts it yet.
 
 ## Notable modelling choices
 - `FreeDownload (userId, drawingId)` records free claims: it backs the `FREE_DOWNLOAD_LIMIT` quota and entitles the user to review a free drawing.
