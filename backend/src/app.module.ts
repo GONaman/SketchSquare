@@ -4,6 +4,7 @@ import { AppConfigModule } from './config/config.module';
 import { CommerceModule } from './commerce/commerce.module';
 import { HealthModule } from './health/health.module';
 import { LedgerModule } from './ledger/ledger.module';
+import { MailModule } from './mail/mail.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { QueueModule } from './queue/queue.module';
 import { RedisModule } from './redis/redis.module';
@@ -18,6 +19,7 @@ import { StorageModule } from './storage/storage.module';
     QueueModule,
     HealthModule,
     // Feature modules: add one line per module below.
+    MailModule,
     AuthModule,
     LedgerModule,
     CommerceModule,

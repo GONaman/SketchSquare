@@ -18,7 +18,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 1.4 docs/data-model.md
 
 ## Phase 2 — Auth, onboarding, verification
-- [ ] 2.1 Backend auth (signup/login/refresh/logout/reset)
+- [x] 2.1 Backend auth (signup/login/refresh/logout/reset)
 - [ ] 2.2 Backend verification + admin + email jobs + global guard
 - [ ] 2.3 Backend e2e tests
 - [x] 2.4 Flutter auth core (interceptor, router guard)
