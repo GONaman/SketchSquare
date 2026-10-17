@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../drawings/domain/drawing_summary.dart';
+import 'contribution_status.dart';
 import 'drawing_form.dart';
 import 'drawing_record.dart';
 import 'sheet_upload_target.dart';
@@ -59,6 +60,9 @@ abstract interface class UploadRepository {
   });
 
   Future<void> deleteSheet(String drawingId, String sheetId);
+
+  /// `GET /me/contribution-status`.
+  Future<ContributionStatus> fetchContributionStatus();
 
   /// `POST /drawings/:id/publish` → 202 `{status: "PROCESSING"}`.
   Future<DrawingStatus> publish(String drawingId);

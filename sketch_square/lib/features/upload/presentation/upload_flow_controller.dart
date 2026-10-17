@@ -55,6 +55,7 @@ class UploadFlow extends _$UploadFlow {
         (resumeDraftId == null || resumeDraftId == state.draftId);
     if (alreadyActive) {
       if (state.categories.isEmpty) unawaited(loadCategories());
+      unawaited(loadContribution());
       return;
     }
 
@@ -64,8 +65,12 @@ class UploadFlow extends _$UploadFlow {
       t.cancel();
     }
     _cancelTokens.clear();
-    state = UploadFlowState(categories: state.categories);
+    state = UploadFlowState(
+      categories: state.categories,
+      contribution: state.contribution,
+    );
     unawaited(loadCategories());
+    unawaited(loadContribution());
 
     StoredDraft? stored;
     try {
@@ -156,6 +161,15 @@ class UploadFlow extends _$UploadFlow {
     if (phase == PublishPhase.processing) unawaited(_poll());
   }
 
+  /// Refreshes the contribution rule status; failures leave the last value
+  /// (the server still enforces the rule at publish time).
+  Future<void> loadContribution() async {
+    try {
+      final status = await _repo.fetchContributionStatus();
+      state = state.copyWith(contribution: status);
+    } on ApiException catch (_) {}
+  }
+
   Future<void> loadCategories() async {
     try {
       final cats = await _repo.fetchCategories();
@@ -193,7 +207,12 @@ class UploadFlow extends _$UploadFlow {
     }
     _cancelTokens.clear();
     await _store.clear();
-    state = UploadFlowState(categories: state.categories, loaded: true);
+    state = UploadFlowState(
+      categories: state.categories,
+      contribution: state.contribution,
+      loaded: true,
+    );
+    unawaited(loadContribution());
   }
 
   void dismissError() => state = state.copyWith(error: null);
@@ -217,6 +236,7 @@ class UploadFlow extends _$UploadFlow {
       return;
     }
     state = state.copyWith(step: step, showErrors: false);
+    if (step == UploadStep.pricing) unawaited(loadContribution());
     _persist();
   }
 
@@ -263,6 +283,7 @@ class UploadFlow extends _$UploadFlow {
     );
     _persist();
     if (state.step == UploadStep.sheets) unawaited(_pump());
+    if (state.step == UploadStep.pricing) unawaited(loadContribution());
   }
 
   // ------------------------------------------------------------------ draft
@@ -604,8 +625,27 @@ class UploadFlow extends _$UploadFlow {
       }
     } on ApiException catch (e) {
       if (gen != _generation) return;
+      if (e.code == ApiErrorCodes.contributionRequired) {
+        state = state.copyWith(
+          phase: PublishPhase.idle,
+          error: _contributionMessage(e),
+        );
+        unawaited(loadContribution());
+        return;
+      }
       state = state.copyWith(phase: PublishPhase.idle, error: e.message);
     }
+  }
+
+  String _contributionMessage(ApiException e) {
+    final needed = switch (e.details) {
+      {'freeNeeded': final num n} when n > 0 => n.toInt(),
+      _ => 1,
+    };
+    final free = needed == 1 ? 'free drawing' : 'free drawings';
+    return 'You need $needed more published $free before you can publish '
+        'another paid drawing. Publish a free drawing first, or switch this '
+        'one to Free.';
   }
 
   /// Retry polling after it stalled.

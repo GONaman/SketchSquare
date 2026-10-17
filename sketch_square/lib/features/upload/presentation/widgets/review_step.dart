@@ -231,10 +231,11 @@ class PublishStatusView extends ConsumerWidget {
             size: 56,
             color: theme.colorScheme.primary,
           ),
-          title: 'Submitted for review',
+          title: 'Under review by admins',
           message:
-              'Our team will review ${s.form.title} before it goes live. '
-              "You'll be notified when it is approved.",
+              '${s.form.title} looks similar to an existing drawing, so our '
+              'team will review it before it goes live. It is not visible to '
+              "others until then, and you'll be emailed the decision.",
           actions: [..._finishedActions(context, onStartNew)],
         );
       case PublishPhase.failed:

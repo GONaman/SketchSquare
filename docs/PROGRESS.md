@@ -58,7 +58,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 ## Phase 8 — Future features
 - [x] 8.1 Favorites — backend done (`PUT/DELETE /drawings/:id/favorite`, `GET /me/favorites`, `viewer.isFavorite`); Flutter heart/list pending
 - [x] 8.2 Express interest — backend done (`PUT/DELETE /drawings/:id/interest`, `GET /drawings/:id/interests`, `viewer.isInterested`); Flutter button/owner list pending; push on new interest comes with 8.5
-- [x] 8.3 Contribution rule
+- [x] 8.3 Contribution rule — backend + Flutter (Upload → Pricing shows `GET /me/contribution-status` guidance, disables Paid when `canPublishPaid` is false, friendly `CONTRIBUTION_REQUIRED` message)
 - [x] 8.6 Refunds/disputes (Part 3) — backend: `GET /admin/purchases[/:id]`, `POST /admin/purchases/:id/refund`, `RefundProvider` (stub/Razorpay), TAX enum reserved; Flutter: Admin → Refunds screens (search, detail, refund with reason + confirm) and a clearer negative-balance withdrawal-blocked message in the wallet
 - [x] 8.4 Plagiarism check + admin review queue — backend: SHA-256 hard block + pHash flagging in the processing job, `GET /admin/plagiarism-flags`, `POST …/:id/approve|reject` + emails; Flutter admin review screen + uploader messaging pending; pHash threshold needs tuning on real plans
 - [x] 8.5 Push notifications — backend done (`PushService` with FCM v1 sender when `FCM_*` env set, otherwise a logging stub; `POST/DELETE /me/device-tokens`, `GET /me/notifications`, `POST /me/notifications/read`; events: verification result, sale, withdrawal paid/failed, new review, interest); Flutter token registration + inbox pending
