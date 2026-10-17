@@ -7,6 +7,7 @@ import 'package:sketch_square/core/providers.dart';
 import 'package:sketch_square/core/storage/secure_storage.dart';
 import 'package:sketch_square/core/storage/token_store.dart';
 import 'package:sketch_square/core/theme/app_theme.dart';
+import 'package:sketch_square/core/widgets/brand_mark.dart';
 import 'package:sketch_square/features/admin/presentation/admin_providers.dart';
 import 'package:sketch_square/features/auth/domain/user.dart';
 import 'package:sketch_square/features/auth/presentation/auth_repository_provider.dart';
@@ -75,5 +76,8 @@ Future<ProviderContainer> pumpApp(
 }
 
 /// Finds [text] inside the current AppBar (tab labels also appear in the nav bar).
-Finder inAppBar(String text) =>
-    find.descendant(of: find.byType(AppBar), matching: find.text(text));
+/// The Home tab's app bar shows the [Wordmark] instead of a "Home" title.
+Finder inAppBar(String text) => find.descendant(
+  of: find.byType(AppBar),
+  matching: text == 'Home' ? find.byType(Wordmark) : find.text(text),
+);

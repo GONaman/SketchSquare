@@ -14,6 +14,7 @@ import '../data/drawings_providers.dart';
 import '../domain/drawing_detail.dart';
 import '../domain/sheet.dart';
 import 'discovery_paths.dart';
+import 'drawing_card.dart' show drawingHeroTag;
 import 'drawing_gallery.dart';
 import 'drawing_purchase_bar.dart';
 import 'drawing_reviews_section.dart';
@@ -135,7 +136,10 @@ class _DrawingDetailScreenState extends ConsumerState<DrawingDetailScreen> {
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            DrawingGallery(urls: d.previewUrls),
+            DrawingGallery(
+              urls: d.previewUrls,
+              heroTag: drawingHeroTag(context, d.summary.id),
+            ),
             _Overview(detail: d),
             if (!d.viewer.isOwner && !d.summary.isFree && !d.viewer.isPurchased)
               InterestButton(

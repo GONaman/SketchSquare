@@ -96,10 +96,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onSubmitted: _submitNow,
           decoration: InputDecoration(
             hintText: 'Search drawings',
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
-            filled: false,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            prefixIcon: const Icon(Icons.search_rounded),
             suffixIcon: ListenableBuilder(
               listenable: _text,
               builder:

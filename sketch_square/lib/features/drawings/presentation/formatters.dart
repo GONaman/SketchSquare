@@ -3,22 +3,7 @@ import 'package:intl/intl.dart';
 import '../domain/drawing_summary.dart';
 import '../domain/plot_size.dart';
 
-final _rupees = NumberFormat.currency(
-  locale: 'en_IN',
-  symbol: '₹',
-  decimalDigits: 0,
-);
-final _rupeesWithPaise = NumberFormat.currency(
-  locale: 'en_IN',
-  symbol: '₹',
-  decimalDigits: 2,
-);
-
-/// Integer paise -> `₹1,499` (or `₹1,499.50` when there are paise).
-String formatPaise(int paise) =>
-    paise % 100 == 0
-        ? _rupees.format(paise ~/ 100)
-        : _rupeesWithPaise.format(paise / 100);
+export '../../../core/format/price.dart' show formatPaise;
 
 /// `40×30.5 ft`
 String formatPlotSize(DrawingSummary d) =>

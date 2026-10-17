@@ -111,7 +111,7 @@ class PlotSizeFields extends StatelessWidget {
                   ),
                 ),
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(10, 16, 10, 0),
+                  padding: EdgeInsets.fromLTRB(6, 16, 6, 0),
                   child: Icon(Icons.close, size: 18),
                 ),
                 Expanded(

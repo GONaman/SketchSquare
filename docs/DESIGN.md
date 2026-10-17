@@ -1,0 +1,150 @@
+# SketchSquare design system — "Blueprint / Studio"
+
+> **Status: tokens + shared kit are merged. Redesign the remaining screen groups on top of it** (see
+> [Adoption status](#adoption-status)). Home, Search, the shared `DrawingCard` and the bottom bar already use it —
+> copy their patterns.
+
+The look: warm drafting-paper neutrals, a deep blueprint-blue primary, a copper accent used sparingly (the "red pencil"),
+Space Grotesk display type (technical lettering) over Inter body text, blueprint-grid motifs and dimension-line glyphs
+instead of stock icons. Premium, calm, precise — it should feel like a drafting studio, not a template.
+
+Everything lives in `sketch_square/lib/core/`. Import the kit with one line:
+
+```dart
+import 'package:sketch_square/core/widgets/widgets.dart'; // kit + tokens + price formatter
+```
+
+## Rules of thumb
+
+**Do**
+- Take colours from `Theme.of(context).colorScheme` and `AppSemanticColors.of(context)`; spacing from `AppSpacing`,
+  radii from `AppRadius`, durations from `AppMotion`. Never hard-code a colour, radius or `EdgeInsets` number that has a token.
+- Use kit widgets before writing a new `Container`/`Card`/`ElevatedButton`. If the kit lacks something two screens need, add it
+  to `core/widgets` (and here) instead of copy-pasting.
+- Use `PriceText`/`formatPaise` for every price and `PlotSizeBadge`/`formatPlotSize` for every plot size (tabular figures).
+- Every list/grid that loads shows a skeleton (`DrawingCardSkeleton`, `ListRowSkeleton`, `ShimmerBox`), never a lone spinner.
+- Empty and error states are `EmptyState` / `ErrorState` (or the API-compatible `BlueprintEmptyState` / `ErrorRetry`).
+- Keep hit targets ≥ 48 dp and labelled; test at text scale 1.3 and in dark mode (`test/a11y/` does this for every route).
+- Wrap rows that can get long in `Flexible`/`Expanded`/`Wrap`; titles get `maxLines` + ellipsis.
+
+**Don't**
+- Don't colour-code meaning without text (`StatusPill` always carries a label).
+- Don't use the copper accent for more than one element per screen (it marks the hero/primary-adjacent highlight).
+- Don't nest cards inside cards; separate with spacing or `Divider`.
+- Don't add infinite animations (the shimmer is capped at 8 loops on purpose) or animation that ignores
+  `MediaQuery.disableAnimations`.
+- Don't introduce new fonts, ad-hoc shadows (`AppElevation`) or full-screen spinners.
+
+## Tokens (`core/theme/`)
+
+| File | What |
+| --- | --- |
+| `app_colors.dart` | `AppColors` constants + `AppSemanticColors` theme extension |
+| `app_tokens.dart` | `AppSpacing`, `AppRadius`, `AppElevation`, `AppMotion` |
+| `app_typography.dart` | `AppTypography.textTheme`, `TextStyle.tabular` extension |
+| `app_theme.dart` | `AppTheme.light()` / `AppTheme.dark()` — full Material 3 + component themes |
+| `app_page_transitions.dart` | Fade + 4 % rise page transition (Android/desktop/web; Cupertino slide on iOS/macOS) |
+
+### Colour
+
+| Role | Light | Dark |
+| --- | --- | --- |
+| Primary (blueprint blue) | `#1F3A93` | `#9DB1F5` |
+| Ink (hero surfaces, wordmark) | `#0B1E52` | same |
+| Background (drafting paper) | `#F6F5F1` | `#0B0F17` |
+| Surface / card | `#FFFFFF` | `#131925` |
+| Text / muted text | `#0F1729` / `#555F73` | `#F0F2F7` / `#9EA8BB` |
+| Outline / soft outline | `#DAD7CE` / `#E9E7E0` | `#2B3548` / `#1F2839` |
+| Accent (copper) | `#B5541B` (tint `#FBE8DA`) | `#F2AA7B` |
+| Success (emerald) | `#16714A` | `#74D4A4` |
+| Warning (amber) | `#B7791F` | `#F3C969` |
+| Error | `#B3261E` | `#F2B8B5` |
+
+Use `colorScheme.primary/onPrimary/primaryContainer/surface*/outline*/error` for standard roles and
+`AppSemanticColors.of(context)` (`success`, `warning`, `accent`, `ink`, `onInk`, their containers) for the rest.
+Elevation is subtle: surfaces step through `surfaceContainerLowest → Highest`; shadows only via `AppElevation.level1/2(brightness)`.
+
+### Spacing, radius, motion
+
+- `AppSpacing`: `xxs 2 · xs 4 · sm 8 · md 12 · lg 16 · xl 24 · xxl 32 · huge 48`, and `gutter 20` (screen horizontal padding).
+- `AppRadius`: `xs 6 · sm 10 · md 14 (controls) · lg 20 (cards) · xl 28 (hero/sheets) · pill`. Helpers: `cardRadius`, `controlRadius`, `chipRadius`.
+- `AppMotion`: `fast 120 ms · base 220 ms · slow 360 ms`, curves `curve` (easeOutCubic) and `emphasized`.
+
+### Typography
+
+Space Grotesk for `display*`, `headline*`, `titleLarge`; Inter for everything else. Loaded through `google_fonts`
+(falls back to the platform font offline; tests set `AppTheme.useGoogleFonts = false`).
+
+| Style | Size | Use |
+| --- | --- | --- |
+| displayLarge/Medium | 44 / 36 | marketing/intro only |
+| headlineMedium/Small | 28 / 24 | hero headings |
+| titleLarge | 19 | app-bar titles, `SectionHeader` |
+| titleMedium / titleSmall | 16 / 14 | card titles, prices |
+| bodyLarge / Medium / Small | 16 / 14 / 12.5 | body, secondary text |
+| labelLarge / Medium / Small | 14 / 12 / 11 | buttons, chips, badges, nav labels |
+
+Dimensions, plot sizes, prices and counters use tabular figures: `style.tabular` (already applied inside `PriceText`,
+`PlotSizeBadge`, `StatTile`, `AppTextField(tabularFigures: true)`).
+
+## Components (`core/widgets/`, all exported by `widgets.dart`)
+
+| Widget | Purpose / key params |
+| --- | --- |
+| `AppCard` | Surface container. `style: elevated \| outlined \| tonal`, `onTap` (adds `TapScale` + ink), `padding`, `semanticLabel`. |
+| `SectionHeader` | Title + optional `subtitle` and `actionLabel/onAction` ("See all"). Default padding already has the gutter. |
+| `PrimaryButton` / `SecondaryButton` | `label`, `onPressed`, `icon`, `loading` (spinner, taps ignored), `expand` (default full width), `accent` (copper, Primary only). |
+| `AppTextField` | Form field with consistent label/hint/helper/error, `prefixIcon`, `suffix(Text)`, `obscureText`, `validator`, `tabularFigures`. |
+| `StatTile` | Big tabular number + label + optional icon/`onTap` (wallet, profile, admin dashboards). |
+| `StatusPill` | Small label chip. `tone: neutral \| info \| success \| warning \| danger \| accent`, optional `icon`, `dense`. |
+| `AppAvatar` | Initials avatar with network image fallback (`name`, `url`, `size`). |
+| `PlotSizeBadge` | `30×40 ft` with a proportional plot glyph. `onImage` = frosted dark variant for photos, `large` for detail headers. |
+| `PriceText` / `RatingLabel` | `PriceText(paise:, compact:)` (₹9,999 / ₹1.2L); rating star + value or "New". |
+| `Shimmer`, `ShimmerBox`, `DrawingCardSkeleton`, `ListRowSkeleton` | Skeleton loaders. Wrap custom skeletons in `Shimmer`. |
+| `EmptyState` / `ErrorState` | Blueprint illustration + title/message/action. `variant: plan \| plot \| broken`, `tone`, `compact`. `ErrorState(message:, onRetry:)`. |
+| `BlueprintIllustration`, `BlueprintGrid(Painter)` | CustomPaint motifs for custom heroes (no image assets). |
+| `BrandMark`, `Wordmark` | Logo tile and "SketchSquare" lock-up (Home app bar). |
+| `TapScale` | Press-in micro-interaction (0.98) for any tappable surface. |
+| `DrawingThumbnail` | Small rounded preview with shimmer placeholder (rows, lists). |
+| `DrawingCard` (`features/drawings`) | Image-first tile: hero-tagged preview, plot-size badge, size-match chip, title, city, price/FREE, rating. Same API: `drawing`, `onTap`, `favoriteAction`. |
+
+Shared formatters: `core/format/price.dart` → `formatPaise(int)` (`₹1,24,999`) and `formatPaiseCompact(int)`.
+`features/drawings/presentation/formatters.dart` re-exports `formatPaise` for existing imports.
+
+### Patterns
+
+- **Screen scaffold:** `Scaffold` + `AppBar` (themed: flat, left-aligned title) + body padded by `AppSpacing.gutter`. Sections are
+  separated by `SectionHeader`s (top padding `AppSpacing.xl`).
+- **Hero block:** ink gradient + `BlueprintGridPainter` + copper kicker label + white `PlotSizeFields`/form on a surface card
+  (see Home `_PlotSizeHero`).
+- **Lists/grids:** `pagedDrawingSlivers` already renders skeleton → cards → load-more → error/empty states.
+- **Hero transition:** `drawingHeroTag(context, id)` tags the card preview and the detail gallery (`DrawingGallery(heroTag:)`); the tag
+  is scoped per tab Navigator so the same drawing in two tabs never collides.
+- **Motion:** pages fade + rise (220 ms); bottom-bar icon pops on select; cards/buttons scale on press; skeleton shimmer is finite.
+- **Forms:** `AppTextField` for fields, `PrimaryButton(loading:)` for submit, errors inline (not only snackbars).
+- **Sheets/dialogs/snackbars** are themed (28 dp top radius + drag handle, floating snackbars) — use the stock widgets.
+
+## Testing
+
+`test/core/widget_kit_test.dart` renders the kit at 1.3× text in light and dark. `test/a11y/` visits every route in both themes at
+1.3×. `inAppBar('Home')` in tests matches the `Wordmark` (the Home tab has no text title).
+`pumpApp` sets `AppTheme.useGoogleFonts = false`; widget tests must do the same.
+
+## Adoption status
+
+| Screen group | Status |
+| --- | --- |
+| Theme, bottom navigation, page transitions | Done |
+| Home (hero plot-size search, categories, feed) | Done |
+| Search (field, results grid, empty/error) | Done (filters sheet still stock) |
+| Shared `DrawingCard`, skeleton grid, Featured/Favorites/Architect grids | Done (inherited) |
+| Drawing detail (gallery has hero + new card chips; overview, reviews, purchase bar) | **To do** |
+| Architect profile header | **To do** |
+| Auth: intro, sign-in, sign-up, forgot/reset, pending verification | **To do** |
+| Upload flow | **To do** |
+| Basket + checkout, purchases | **To do** |
+| Profile, wallet (bank, payouts), settings, edit profile | **To do** |
+| Manage drawings (`ManagedDrawingCard`) | **To do** |
+| Admin (verifications, refunds, plagiarism, categories) | **To do** |
+
+When you finish a group, update this table in the same PR.
