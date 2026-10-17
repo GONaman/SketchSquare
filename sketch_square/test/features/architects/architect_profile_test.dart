@@ -4,6 +4,7 @@ import 'package:sketch_square/core/network/cursor_page.dart';
 import 'package:sketch_square/core/router/app_router.dart';
 import 'package:sketch_square/features/architects/domain/architect_profile.dart';
 import 'package:sketch_square/features/architects/domain/architect_summary.dart';
+import 'package:sketch_square/features/drawings/presentation/drawing_detail_screen.dart';
 
 import '../../helpers/pump_app.dart';
 import '../drawings/fixtures.dart';
@@ -93,6 +94,7 @@ void main() {
     await tester.tap(find.text('Plan d1'));
     await tester.pumpAndSettle();
 
-    expect(inAppBar('Modern villa'), findsOneWidget);
+    expect(find.byType(DrawingDetailScreen), findsOneWidget);
+    expect(find.text('Modern villa', skipOffstage: false), findsWidgets);
   });
 }

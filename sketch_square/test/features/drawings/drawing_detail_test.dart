@@ -112,8 +112,9 @@ void main() {
       expect(find.byKey(const Key('detail-price')), findsOneWidget);
       expect(find.text('₹499'), findsWidgets);
       expect(find.text('40×30.5 ft'), findsOneWidget);
-      expect(find.text('2 floors'), findsOneWidget);
-      expect(find.text('N facing'), findsOneWidget);
+      expect(find.text('Floors'), findsOneWidget);
+      expect(find.text('N'), findsOneWidget);
+      expect(find.text('Facing'), findsOneWidget);
       expect(find.text('A spacious family home.'), findsOneWidget);
       expect(find.text('Preview · watermarked'), findsOneWidget);
       // Two preview sheets feed the gallery; the structural sheet is not shown.
@@ -277,7 +278,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(ctx.actions.favorites, {'d1': true});
-      expect(find.byIcon(Icons.favorite), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('favorite-button')));
       await tester.pumpAndSettle();
@@ -296,7 +297,7 @@ void main() {
       await tester.tap(find.byKey(const Key('favorite-button')));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_border_rounded), findsOneWidget);
       expect(find.text('Unable to reach the server.'), findsOneWidget);
     });
   });

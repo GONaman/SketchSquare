@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/app_card.dart';
 import '../data/interest_providers.dart';
 
 /// "I'm interested" toggle on a paid drawing the viewer does not own. Flips
@@ -49,38 +51,36 @@ class _InterestButtonState extends ConsumerState<InterestButton> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _interested
-                      ? "You've told the architect you're interested."
-                      : 'Not ready to buy? Let the architect know you like it.',
-                  key: const Key('interest-text'),
-                  style: theme.textTheme.bodyMedium,
-                ),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+      child: AppCard(
+        style: AppCardStyle.tonal,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                _interested
+                    ? "You've told the architect you're interested."
+                    : 'Not ready to buy? Let the architect know you like it.',
+                key: const Key('interest-text'),
+                style: theme.textTheme.bodyMedium,
               ),
-              const SizedBox(width: 12),
-              _interested
-                  ? FilledButton.tonalIcon(
-                    key: const Key('interest-button'),
-                    onPressed: _busy ? null : _toggle,
-                    icon: const Icon(Icons.thumb_up),
-                    label: const Text("I'm interested"),
-                  )
-                  : OutlinedButton.icon(
-                    key: const Key('interest-button'),
-                    onPressed: _busy ? null : _toggle,
-                    icon: const Icon(Icons.thumb_up_outlined),
-                    label: const Text("I'm interested"),
-                  ),
-            ],
-          ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            _interested
+                ? FilledButton.tonalIcon(
+                  key: const Key('interest-button'),
+                  onPressed: _busy ? null : _toggle,
+                  icon: const Icon(Icons.thumb_up),
+                  label: const Text("I'm interested"),
+                )
+                : OutlinedButton.icon(
+                  key: const Key('interest-button'),
+                  onPressed: _busy ? null : _toggle,
+                  icon: const Icon(Icons.thumb_up_outlined),
+                  label: const Text("I'm interested"),
+                ),
+          ],
         ),
       ),
     );
