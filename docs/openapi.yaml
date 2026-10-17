@@ -310,6 +310,128 @@ paths:
         - bearer: []
       tags:
         - reviews
+  /wallet:
+    get:
+      operationId: WalletController_get
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: &a6
+        - bearer: []
+      tags: &a7
+        - wallet
+  /wallet/ledger:
+    get:
+      operationId: WalletController_ledger
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: *a6
+      tags: *a7
+  /wallet/bank-account:
+    post:
+      operationId: WalletController_bankAccount
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BankAccountDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: *a6
+      tags: *a7
+  /wallet/withdrawals:
+    post:
+      operationId: WalletController_withdraw
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWithdrawalDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: *a6
+      tags: *a7
+    get:
+      operationId: WalletController_withdrawals
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: *a6
+      tags: *a7
+  /payments/razorpayx/webhook:
+    post:
+      operationId: RazorpayXWebhookController_webhook
+      parameters:
+        - name: x-razorpay-signature
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: x-razorpay-event-id
+          required: true
+          in: header
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      summary: "Payout status callbacks: signature-verified (HMAC over the raw body) and idempotent by `x-razorpay-event-id`."
+      tags:
+        - payments
   /drawings:
     post:
       operationId: DrawingsController_create
@@ -323,9 +445,9 @@ paths:
       responses:
         "201":
           description: ""
-      security: &a6
+      security: &a8
         - bearer: []
-      tags: &a7
+      tags: &a9
         - drawings
   /drawings/{id}:
     patch:
@@ -345,8 +467,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a6
-      tags: *a7
+      security: *a8
+      tags: *a9
     delete:
       operationId: DrawingsController_remove
       parameters:
@@ -358,8 +480,8 @@ paths:
       responses:
         "204":
           description: ""
-      security: *a6
-      tags: *a7
+      security: *a8
+      tags: *a9
     get:
       operationId: DrawingDetailController_get
       parameters:
@@ -375,10 +497,10 @@ paths:
             application/json:
               schema:
                 type: object
-      security: &a12
+      security: &a14
         - bearer: []
       summary: Drawing detail with watermarked previews and viewer flags; non-published drawings are owner/admin only
-      tags: &a13
+      tags: &a15
         - discovery
   /drawings/{id}/publish:
     post:
@@ -392,8 +514,8 @@ paths:
       responses:
         "202":
           description: ""
-      security: *a6
-      tags: *a7
+      security: *a8
+      tags: *a9
   /drawings/{drawingId}/sheets/upload-url:
     post:
       operationId: SheetsController_uploadUrl
@@ -412,9 +534,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: &a8
+      security: &a10
         - bearer: []
-      tags: &a9
+      tags: &a11
         - drawings
   /drawings/{drawingId}/sheets:
     post:
@@ -434,8 +556,8 @@ paths:
       responses:
         "201":
           description: ""
-      security: *a8
-      tags: *a9
+      security: *a10
+      tags: *a11
   /drawings/{drawingId}/sheets/{sheetId}:
     patch:
       operationId: SheetsController_update
@@ -459,8 +581,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a8
-      tags: *a9
+      security: *a10
+      tags: *a11
     delete:
       operationId: SheetsController_remove
       parameters:
@@ -477,8 +599,8 @@ paths:
       responses:
         "204":
           description: ""
-      security: *a8
-      tags: *a9
+      security: *a10
+      tags: *a11
   /me/drawings:
     get:
       operationId: MyDrawingsController_list
@@ -543,9 +665,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: &a10
+      security: &a12
         - bearer: []
-      tags: &a11
+      tags: &a13
         - drawings
   /drawings/{id}/viewers:
     get:
@@ -573,8 +695,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a10
-      tags: *a11
+      security: *a12
+      tags: *a13
   /drawings/{id}/reviews:
     get:
       operationId: DrawingDetailController_reviews
@@ -601,9 +723,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a12
+      security: *a14
       summary: Reviews of a drawing, newest first
-      tags: *a13
+      tags: *a15
   /drawings/search:
     get:
       operationId: SearchController_searchDrawings
@@ -810,9 +932,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a14
+      security: &a16
         - bearer: []
-      tags: &a15
+      tags: &a17
         - discovery
   /category-requests:
     post:
@@ -831,8 +953,8 @@ paths:
             application/json:
               schema:
                 type: object
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /admin/category-requests:
     get:
       operationId: CategoriesController_listRequests
@@ -864,8 +986,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /admin/category-requests/{id}/approve:
     post:
       operationId: CategoriesController_approve
@@ -878,8 +1000,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /admin/category-requests/{id}/reject:
     post:
       operationId: CategoriesController_reject
@@ -892,8 +1014,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /cities:
     get:
       operationId: CitiesController_list
@@ -931,9 +1053,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a16
+      security: &a18
         - bearer: []
-      tags: &a17
+      tags: &a19
         - discovery
   /architects/{id}:
     get:
@@ -961,8 +1083,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
   /architects/{id}/drawings:
     get:
       operationId: ArchitectsController_drawings
@@ -989,8 +1111,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
   /verification:
     post:
       operationId: VerificationController_submit
@@ -1014,9 +1136,9 @@ paths:
       responses:
         "201":
           description: ""
-      security: &a18
+      security: &a20
         - bearer: []
-      tags: &a19
+      tags: &a21
         - verification
   /verification/me:
     get:
@@ -1025,8 +1147,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a18
-      tags: *a19
+      security: *a20
+      tags: *a21
   /admin/verifications:
     get:
       operationId: AdminVerificationController_list
@@ -1058,9 +1180,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: &a20
+      security: &a22
         - bearer: []
-      tags: &a21
+      tags: &a23
         - admin
   /admin/verifications/{id}:
     get:
@@ -1074,8 +1196,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a20
-      tags: *a21
+      security: *a22
+      tags: *a23
   /admin/verifications/{id}/approve:
     post:
       operationId: AdminVerificationController_approve
@@ -1088,8 +1210,8 @@ paths:
       responses:
         "201":
           description: ""
-      security: *a20
-      tags: *a21
+      security: *a22
+      tags: *a23
   /admin/verifications/{id}/reject:
     post:
       operationId: AdminVerificationController_reject
@@ -1108,8 +1230,8 @@ paths:
       responses:
         "201":
           description: ""
-      security: *a20
-      tags: *a21
+      security: *a22
+      tags: *a23
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -1240,6 +1362,32 @@ components:
           maximum: 5
       required:
         - rating
+    BankAccountDto:
+      type: object
+      properties:
+        holderName:
+          type: string
+          minLength: 2
+          maxLength: 100
+        ifsc:
+          type: string
+          pattern: ^[A-Z]{4}0[A-Z0-9]{6}$
+        accountNumber:
+          type: string
+          pattern: ^\d{9,18}$
+      required:
+        - holderName
+        - ifsc
+        - accountNumber
+    CreateWithdrawalDto:
+      type: object
+      properties:
+        amountPaise:
+          type: number
+          minimum: 1
+          maximum: 2000000000
+      required:
+        - amountPaise
     CreateDrawingDto:
       type: object
       properties:
@@ -1278,7 +1426,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: &a22
+          enum: &a24
             - ft
             - m
         floors:
@@ -1342,7 +1490,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: *a22
+          enum: *a24
         floors:
           type: number
           minimum: 1

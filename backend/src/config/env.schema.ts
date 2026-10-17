@@ -77,6 +77,8 @@ export const envSchema = z.object({
   RAZORPAYX_KEY_SECRET: optionalString,
   RAZORPAYX_ACCOUNT_NUMBER: optionalString,
   RAZORPAYX_WEBHOOK_SECRET: optionalString,
+  // Stub payouts settle after this delay so the app can show the in-progress state (0 = immediately).
+  STUB_PAYOUT_DELAY_MS: int(2000),
 });
 
 export type Env = z.infer<typeof envSchema>;
