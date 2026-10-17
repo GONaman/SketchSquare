@@ -408,6 +408,61 @@ paths:
           description: ""
       security: *a6
       tags: *a7
+  /me:
+    get:
+      operationId: ProfileController_get
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      security: &a8
+        - bearer: []
+      tags: &a9
+        - profile
+    patch:
+      operationId: ProfileController_update
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileDto"
+      responses:
+        "200":
+          description: ""
+      security: *a8
+      tags: *a9
+  /me/avatar/upload-url:
+    post:
+      operationId: ProfileController_avatarUploadUrl
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvatarUploadUrlDto"
+      responses:
+        "200":
+          description: ""
+      security: *a8
+      tags: *a9
+  /me/avatar/confirm:
+    post:
+      operationId: ProfileController_confirmAvatar
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvatarConfirmDto"
+      responses:
+        "200":
+          description: ""
+      security: *a8
+      tags: *a9
   /payments/razorpayx/webhook:
     post:
       operationId: RazorpayXWebhookController_webhook
@@ -445,9 +500,9 @@ paths:
       responses:
         "201":
           description: ""
-      security: &a8
+      security: &a10
         - bearer: []
-      tags: &a9
+      tags: &a11
         - drawings
   /drawings/{id}:
     patch:
@@ -467,8 +522,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a8
-      tags: *a9
+      security: *a10
+      tags: *a11
     delete:
       operationId: DrawingsController_remove
       parameters:
@@ -480,8 +535,8 @@ paths:
       responses:
         "204":
           description: ""
-      security: *a8
-      tags: *a9
+      security: *a10
+      tags: *a11
     get:
       operationId: DrawingDetailController_get
       parameters:
@@ -497,10 +552,10 @@ paths:
             application/json:
               schema:
                 type: object
-      security: &a14
+      security: &a16
         - bearer: []
       summary: Drawing detail with watermarked previews and viewer flags; non-published drawings are owner/admin only
-      tags: &a15
+      tags: &a17
         - discovery
   /drawings/{id}/publish:
     post:
@@ -514,8 +569,8 @@ paths:
       responses:
         "202":
           description: ""
-      security: *a8
-      tags: *a9
+      security: *a10
+      tags: *a11
   /drawings/{drawingId}/sheets/upload-url:
     post:
       operationId: SheetsController_uploadUrl
@@ -534,9 +589,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: &a10
+      security: &a12
         - bearer: []
-      tags: &a11
+      tags: &a13
         - drawings
   /drawings/{drawingId}/sheets:
     post:
@@ -556,8 +611,8 @@ paths:
       responses:
         "201":
           description: ""
-      security: *a10
-      tags: *a11
+      security: *a12
+      tags: *a13
   /drawings/{drawingId}/sheets/{sheetId}:
     patch:
       operationId: SheetsController_update
@@ -581,8 +636,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a10
-      tags: *a11
+      security: *a12
+      tags: *a13
     delete:
       operationId: SheetsController_remove
       parameters:
@@ -599,8 +654,8 @@ paths:
       responses:
         "204":
           description: ""
-      security: *a10
-      tags: *a11
+      security: *a12
+      tags: *a13
   /me/drawings:
     get:
       operationId: MyDrawingsController_list
@@ -665,9 +720,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: &a12
+      security: &a14
         - bearer: []
-      tags: &a13
+      tags: &a15
         - drawings
   /drawings/{id}/viewers:
     get:
@@ -695,8 +750,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a12
-      tags: *a13
+      security: *a14
+      tags: *a15
   /drawings/{id}/reviews:
     get:
       operationId: DrawingDetailController_reviews
@@ -723,9 +778,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
+      security: *a16
       summary: Reviews of a drawing, newest first
-      tags: *a15
+      tags: *a17
   /drawings/search:
     get:
       operationId: SearchController_searchDrawings
@@ -932,9 +987,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a16
+      security: &a18
         - bearer: []
-      tags: &a17
+      tags: &a19
         - discovery
   /category-requests:
     post:
@@ -953,8 +1008,8 @@ paths:
             application/json:
               schema:
                 type: object
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
   /admin/category-requests:
     get:
       operationId: CategoriesController_listRequests
@@ -986,8 +1041,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
   /admin/category-requests/{id}/approve:
     post:
       operationId: CategoriesController_approve
@@ -1000,8 +1055,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
   /admin/category-requests/{id}/reject:
     post:
       operationId: CategoriesController_reject
@@ -1014,8 +1069,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
   /cities:
     get:
       operationId: CitiesController_list
@@ -1053,9 +1108,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a18
+      security: &a20
         - bearer: []
-      tags: &a19
+      tags: &a21
         - discovery
   /architects/{id}:
     get:
@@ -1083,8 +1138,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a18
-      tags: *a19
+      security: *a20
+      tags: *a21
   /architects/{id}/drawings:
     get:
       operationId: ArchitectsController_drawings
@@ -1111,8 +1166,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a18
-      tags: *a19
+      security: *a20
+      tags: *a21
   /verification:
     post:
       operationId: VerificationController_submit
@@ -1136,9 +1191,9 @@ paths:
       responses:
         "201":
           description: ""
-      security: &a20
+      security: &a22
         - bearer: []
-      tags: &a21
+      tags: &a23
         - verification
   /verification/me:
     get:
@@ -1147,8 +1202,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a20
-      tags: *a21
+      security: *a22
+      tags: *a23
   /admin/verifications:
     get:
       operationId: AdminVerificationController_list
@@ -1180,9 +1235,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: &a22
+      security: &a24
         - bearer: []
-      tags: &a23
+      tags: &a25
         - admin
   /admin/verifications/{id}:
     get:
@@ -1196,8 +1251,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a22
-      tags: *a23
+      security: *a24
+      tags: *a25
   /admin/verifications/{id}/approve:
     post:
       operationId: AdminVerificationController_approve
@@ -1210,8 +1265,8 @@ paths:
       responses:
         "201":
           description: ""
-      security: *a22
-      tags: *a23
+      security: *a24
+      tags: *a25
   /admin/verifications/{id}/reject:
     post:
       operationId: AdminVerificationController_reject
@@ -1230,62 +1285,7 @@ paths:
       responses:
         "201":
           description: ""
-      security: *a22
-      tags: *a23
-  /drawings/{id}/favorite:
-    put:
-      operationId: FavoritesController_add
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        "204":
-          description: ""
-      security: &a24
-        - bearer: []
-      summary: Favourite a drawing (idempotent)
-      tags: &a25
-        - favorites
-    delete:
-      operationId: FavoritesController_remove
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        "204":
-          description: ""
       security: *a24
-      summary: Remove a favourite (idempotent)
-      tags: *a25
-  /me/favorites:
-    get:
-      operationId: FavoritesController_list
-      parameters:
-        - name: cursor
-          required: false
-          in: query
-          description: Opaque cursor from a previous page
-          schema:
-            type: string
-        - name: limit
-          required: false
-          in: query
-          schema:
-            minimum: 1
-            maximum: 50
-            default: 20
-            type: number
-      responses:
-        "200":
-          description: ""
-      security: *a24
-      summary: My favourite drawings, most recently added first
       tags: *a25
 info:
   title: SketchSquare API
@@ -1443,6 +1443,34 @@ components:
           maximum: 2000000000
       required:
         - amountPaise
+    UpdateProfileDto:
+      type: object
+      properties:
+        phone:
+          type: string
+          pattern: ^\+?[0-9]{10,14}$
+        city:
+          type: string
+          maxLength: 100
+    AvatarUploadUrlDto:
+      type: object
+      properties:
+        contentType:
+          type: string
+          enum:
+            - image/jpeg
+            - image/png
+            - image/webp
+      required:
+        - contentType
+    AvatarConfirmDto:
+      type: object
+      properties:
+        objectKey:
+          type: string
+          maxLength: 200
+      required:
+        - objectKey
     CreateDrawingDto:
       type: object
       properties:
