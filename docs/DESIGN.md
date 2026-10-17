@@ -159,6 +159,10 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 - **Drawing detail** (expanded only): two columns, gallery + sheets + reviews on the left; title, specs, purchase card
   (`PurchaseBar(inline: true)`), description and architect on the right. Below 1024 it keeps the single column with the
   sticky `PurchaseBar`. Home hides its own brand AppBar when the top nav shows the brand.
+- **Web affordances**: `AppCard` lifts (stronger shadow + border) on hover and shows a 2px primary focus ring on keyboard
+  focus; `AppScrollBehavior` lets a mouse/trackpad drag carousels and the gallery; theme `hoverColor`/`focusColor`
+  are set; `FocusTraversalGroup` uses reading order; icon buttons carry tooltips; the detail description is
+  `SelectableText` on wide windows. Desktop platforms get Flutter's automatic scrollbar.
 - Tests: `pumpApp(size: ...)` sets the surface; with no surface set it defaults to 390×844 so existing tests see the
   compact layout.
 - Don't hard-code widths for "desktop"; use the helpers above so tablets and resized windows behave too.

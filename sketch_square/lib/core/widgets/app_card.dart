@@ -16,7 +16,7 @@ enum AppCardStyle {
 
 /// The standard surface. Rounded, hairline-bordered, softly shadowed, with
 /// ripple + press-scale feedback when [onTap] is set.
-class AppCard extends StatelessWidget {
+class AppCard extends StatefulWidget {
   const AppCard({
     super.key,
     required this.child,
@@ -37,34 +37,64 @@ class AppCard extends StatelessWidget {
   final String? semanticLabel;
 
   @override
+  State<AppCard> createState() => _AppCardState();
+}
+
+class _AppCardState extends State<AppCard> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final r = radius ?? AppRadius.cardRadius;
-    final tonal = style == AppCardStyle.tonal;
+    final r = widget.radius ?? AppRadius.cardRadius;
+    final tonal = widget.style == AppCardStyle.tonal;
+    final interactive = widget.onTap != null;
+    // Pointer and keyboard affordances; both are no-ops on touch.
+    final lifted = interactive && _hovered;
     final decoration = BoxDecoration(
       color:
           tonal ? scheme.surfaceContainerHigh : scheme.surfaceContainerLowest,
       borderRadius: r,
-      border: tonal ? null : Border.all(color: scheme.outlineVariant),
+      border:
+          _focused
+              ? Border.all(color: scheme.primary, width: 2)
+              : tonal
+              ? null
+              : Border.all(
+                color: lifted ? scheme.outline : scheme.outlineVariant,
+              ),
       boxShadow:
-          style == AppCardStyle.elevated
+          lifted
+              ? AppElevation.level2(scheme.brightness)
+              : widget.style == AppCardStyle.elevated
               ? AppElevation.level1(scheme.brightness)
               : null,
     );
-    Widget content = Padding(padding: padding, child: child);
-    if (onTap != null) {
+    Widget content = Padding(padding: widget.padding, child: widget.child);
+    if (interactive) {
       content = Material(
         type: MaterialType.transparency,
-        child: InkWell(onTap: onTap, borderRadius: r, child: content),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: r,
+          onHover: (v) => setState(() => _hovered = v),
+          onFocusChange: (v) => setState(() => _focused = v),
+          child: content,
+        ),
       );
     }
     Widget card = DecoratedBox(
       decoration: decoration,
-      child: clip ? ClipRRect(borderRadius: r, child: content) : content,
+      child: widget.clip ? ClipRRect(borderRadius: r, child: content) : content,
     );
-    if (onTap != null) card = TapScale(child: card);
-    if (semanticLabel != null) {
-      card = Semantics(container: true, label: semanticLabel, child: card);
+    if (interactive) card = TapScale(child: card);
+    if (widget.semanticLabel != null) {
+      card = Semantics(
+        container: true,
+        label: widget.semanticLabel,
+        child: card,
+      );
     }
     return card;
   }

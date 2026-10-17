@@ -99,6 +99,8 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: scheme.surface,
       splashFactory: InkSparkle.splashFactory,
       visualDensity: VisualDensity.standard,
+      focusColor: scheme.primary.withValues(alpha: 0.16),
+      hoverColor: scheme.primary.withValues(alpha: 0.06),
       extensions: [semantic],
     );
     final text = AppTypography.textTheme(base.textTheme, scheme);

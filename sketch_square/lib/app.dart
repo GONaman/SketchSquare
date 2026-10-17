@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/layout/layout.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_provider.dart';
@@ -19,8 +20,13 @@ class SketchSquareApp extends ConsumerWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ref.watch(appThemeModeProvider),
+      scrollBehavior: const AppScrollBehavior(),
       routerConfig: ref.watch(appRouterProvider),
-      builder: (context, child) => OfflineBanner(child: child!),
+      builder:
+          (context, child) => FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: OfflineBanner(child: child!),
+          ),
     );
   }
 }
