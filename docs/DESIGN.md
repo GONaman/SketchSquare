@@ -171,7 +171,7 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Search (sticky field + filter button, active chips + Clear all, result-count header + sort pill, plot-specific empty state with one-tap widen, filters sheet with plot size/tolerance preview, price range, chips, sort) | Done |
 | Shared `DrawingCard`, skeleton grid, Featured/Favorites/Architect grids | Done (inherited) |
 | Drawing detail (immersive collapsing gallery, title/price, spec `StatTile` grid, architect card, rating summary, sticky purchase bar, licence note) | Done |
-| Architect profile header | **To do** |
+| Architect profile (`AppAvatar` header, Rating/Drawings `StatTile`s, skeleton) and Featured tab (city picker, ranked top-architect cards with `#N` badge + rating + drawing count, skeleton row, tonal empty/error) | Done |
 | Auth: sign-in, sign-up (2-step), forgot/reset, verification upload form | **Done** (`AuthHero`, `StepProgress`, `PasswordStrengthMeter`, `AppTextField`/`PrimaryButton`) |
 | Auth: intro, splash, verification status (timeline), Privacy/Terms | **Done** (frosted intro controls, `BlueprintIllustration` + status timeline, tonal legal notice) |
 | Upload flow | **To do** |
