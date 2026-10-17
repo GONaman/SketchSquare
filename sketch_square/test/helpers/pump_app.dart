@@ -7,11 +7,15 @@ import 'package:sketch_square/core/providers.dart';
 import 'package:sketch_square/core/storage/secure_storage.dart';
 import 'package:sketch_square/core/storage/token_store.dart';
 import 'package:sketch_square/core/theme/app_theme.dart';
+import 'package:sketch_square/features/admin/presentation/admin_providers.dart';
 import 'package:sketch_square/features/auth/domain/user.dart';
 import 'package:sketch_square/features/auth/presentation/auth_repository_provider.dart';
 import 'package:sketch_square/features/auth/presentation/intro_seen_provider.dart';
+import 'package:sketch_square/features/verification/presentation/verification_providers.dart';
 
+import 'fake_admin.dart';
 import 'fake_auth_repository.dart';
+import 'fake_verification.dart';
 
 /// Pumps the full app with test-safe overrides (no network font fetches, no
 /// native secure storage, no real backend). Extra [overrides] win over the
@@ -48,6 +52,11 @@ Future<ProviderContainer> pumpApp(
         authRepositoryProvider.overrideWithValue(
           FakeAuthRepository(user: user),
         ),
+        verificationRepositoryProvider.overrideWithValue(
+          FakeVerificationRepository(),
+        ),
+        documentPickerProvider.overrideWithValue(FakeDocumentPicker()),
+        adminRepositoryProvider.overrideWithValue(FakeAdminRepository()),
         ...overrides,
       ],
       child: const SketchSquareApp(),

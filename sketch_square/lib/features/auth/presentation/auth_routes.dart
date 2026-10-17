@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/routes.dart';
-import '../../../core/widgets/placeholder_screen.dart';
+import '../../verification/presentation/verification_status_screen.dart';
 import 'forgot_password_screen.dart';
 import 'intro_screen.dart';
 import 'reset_password_screen.dart';
@@ -29,10 +28,6 @@ final authRoutes = <RouteBase>[
   ),
   GoRoute(
     path: AppRoutes.verificationPending,
-    builder:
-        (_, __) => const PlaceholderScreen(
-          title: 'Verification pending',
-          icon: Icons.hourglass_empty,
-        ),
+    builder: (_, __) => const VerificationStatusScreen(),
   ),
 ];
