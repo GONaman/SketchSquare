@@ -43,6 +43,11 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: backend/package-lock.json
+      - name: Start MinIO and create buckets
+        working-directory: .
+        run: |
+          docker compose -f infra/docker-compose.yml up -d --wait minio
+          docker compose -f infra/docker-compose.yml run --rm minio-init
       - run: npm ci
       - run: npm run lint
       - run: npx prisma migrate deploy
