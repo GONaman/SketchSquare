@@ -210,6 +210,8 @@ model Drawing {
   plotAreaSqft  Float                    @default(0)
   floors        Int                      @default(1)
   facing        Facing?
+  bedrooms      Int?
+  tags          String[]                 @default([])
   pricePaise    Int                      @default(0)
   status        DrawingStatus            @default(DRAFT)
   failureReason String?
@@ -262,6 +264,7 @@ model DrawingSheet {
 
   drawing Drawing @relation(fields: [drawingId], references: [id], onDelete: Cascade)
 
+  @@unique([drawingId, originalKey])
   @@index([drawingId])
   @@index([sha256])
 }
