@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../storage/token_store.dart';
 import 'api_config.dart';
+import 'connectivity_status.dart';
 import 'interceptors.dart';
 import 'refresh_interceptor.dart';
 
@@ -12,6 +13,7 @@ Dio createDio({
   String baseUrl = ApiConfig.baseUrl,
   HttpClientAdapter? httpClientAdapter,
   void Function()? onSessionExpired,
+  void Function(bool online)? onConnectivityChanged,
 }) {
   final dio = Dio(
     BaseOptions(
@@ -30,6 +32,8 @@ Dio createDio({
       onSessionExpired: onSessionExpired,
     ),
     ErrorMappingInterceptor(),
+    if (onConnectivityChanged != null)
+      ConnectivityInterceptor(onConnectivityChanged),
   ]);
   return dio;
 }

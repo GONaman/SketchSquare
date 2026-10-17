@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'network/connectivity_status.dart';
 import 'network/dio_client.dart';
 import 'storage/secure_storage.dart';
 import 'storage/token_store.dart';
@@ -37,4 +38,8 @@ class SessionExpired extends _$SessionExpired {
 Dio dio(Ref ref) => createDio(
   tokenStore: ref.watch(tokenStoreProvider),
   onSessionExpired: () => ref.read(sessionExpiredProvider.notifier).notify(),
+  onConnectivityChanged: (online) {
+    final status = ref.read(connectivityStatusProvider.notifier);
+    online ? status.reportOnline() : status.reportOffline();
+  },
 );

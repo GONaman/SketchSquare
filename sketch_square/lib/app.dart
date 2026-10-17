@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_mode_provider.dart';
+import 'core/widgets/offline_banner.dart';
 
 class SketchSquareApp extends ConsumerWidget {
   const SketchSquareApp({super.key});
@@ -17,6 +18,7 @@ class SketchSquareApp extends ConsumerWidget {
       darkTheme: AppTheme.dark(),
       themeMode: ref.watch(appThemeModeProvider),
       routerConfig: ref.watch(appRouterProvider),
+      builder: (context, child) => OfflineBanner(child: child!),
     );
   }
 }

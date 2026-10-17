@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -157,7 +158,7 @@ class ArchitectAvatar extends StatelessWidget {
             : architect.fullName.trim()[0].toUpperCase();
     return CircleAvatar(
       radius: radius,
-      backgroundImage: url == null ? null : NetworkImage(url),
+      backgroundImage: url == null ? null : CachedNetworkImageProvider(url),
       onBackgroundImageError: url == null ? null : (_, __) {},
       child: url == null ? Text(initial) : null,
     );
