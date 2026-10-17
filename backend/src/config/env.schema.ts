@@ -65,6 +65,8 @@ export const envSchema = z.object({
   FREE_DOWNLOAD_LIMIT: int(20),
   PLATFORM_FEE_BPS: z.coerce.number().int().min(0).max(10000).default(1000),
   MIN_WITHDRAWAL_PAISE: int(50000),
+  // Contribution rule: free drawings an architect must have published per paid drawing they already have (0 = rule off).
+  CONTRIBUTION_FREE_PER_PAID: int(1),
 
   // Razorpay: when the key id/secret are unset the checkout runs in stub mode.
   RAZORPAY_KEY_ID: optionalString,
