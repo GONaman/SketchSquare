@@ -51,7 +51,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 
 ## Phase 7 — Hardening
 - [x] 7.1 Security + authorization matrix test
-- [ ] 7.2 Observability + perf
+- [x] 7.2 Observability + perf
 - [ ] 7.3 Flutter polish
 - [ ] 7.4 Deployment docs + release build + TESTING.md
 

@@ -24,6 +24,7 @@
     "openapi": "nest build && node dist/tools/generate-openapi.js",
     "prisma:generate": "prisma generate",
     "seed": "ts-node prisma/seed.ts",
+    "seed:bulk": "ts-node scripts/seed-bulk.ts",
     "smoke": "ts-node scripts/smoke.ts"
   },
   "prisma": {

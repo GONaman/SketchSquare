@@ -290,13 +290,22 @@ Refund of the sale above (one txn, `entryType = REFUND`, `referenceId = purchase
 
 ## Search indexes and EXPLAIN notes
 Search (`GET /drawings/search`) only reads `Drawing WHERE status='PUBLISHED'`. Indexes serving it: `Drawing_plotLengthFt_plotBreadthFt_idx` (size BitmapOr for both orientations), `searchVector` GIN (full-text), and the partial indexes from migration `20261017100100_search_indexes` (`lower(city)`, `(avgRating DESC, ratingCount DESC, createdAt DESC, id)`, `(purchaseCount DESC, viewCount DESC, createdAt DESC, id)`).
-Measured with `test/perf/search-explain.ts` on 50k synthetic published drawings (`TEST_DATABASE_URL=… npx ts-node test/perf/search-explain.ts 50000`):
+Seed and measure (all rows are tagged `bulk-N@seed.sketchsquare.test` / category slug `bulk-bulk-N`, so they are easy to remove):
+- `npm run seed:bulk [count]` inserts synthetic architects, categories and published drawings (default 50 000, idempotent, refuses `NODE_ENV=production`); `npm run seed:bulk -- --clean` removes them. Point `DATABASE_URL` at a scratch DB.
+- `TEST_DATABASE_URL=… npx ts-node test/perf/search-explain.ts 50000` seeds the same way and prints `EXPLAIN (ANALYZE, BUFFERS)` for each hot query.
+
+Execution times on 50k published drawings / 500 architects (local Postgres 16, warm cache):
 
 | Scenario | Time |
 |---|---|
-| newest (and deep cursor) | ~0.07 ms |
-| size 30x40 ±10 % | ~2 ms (BitmapOr on size index) |
-| size + city | ~0.7 ms |
-| rating / popularity sorts | 0.06–0.15 ms |
-| category + price_asc | ~3.6 ms |
-| full-text `villa` (13 % selectivity) | ~12 ms (seq scan; planner prefers it at that selectivity) |
+| newest (and deep cursor page) | ~0.06 ms |
+| size 30x40 ±10 % | ~1.9 ms (BitmapOr on size index) |
+| size + city | ~0.6 ms |
+| rating / popularity sorts | 0.04–0.4 ms |
+| category + price_asc | ~2.6 ms |
+| full-text `villa` (13 % selectivity) | ~11.5 ms (seq scan; planner prefers it at that selectivity) |
+| `GET /cities` (group by lower(city)) | ~16 ms (seq scan + aggregate; a candidate for a short cache if it gets hot) |
+| `GET /architects/top` | ~0.02 ms (`User_architectRating_idx`) |
+| architect / own drawings, first page | ~0.08 ms (`architectId` index + top-N sort) |
+
+Conclusion: existing indexes suffice for the Phase 7 targets (search p95 well under 50 ms at 50k rows); no new migration was added.
