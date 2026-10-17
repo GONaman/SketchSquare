@@ -154,18 +154,23 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
         Stack(
           alignment: Alignment.bottomRight,
           children: [
-            CircleAvatar(
-              key: const Key('profile-avatar'),
-              radius: 48,
-              backgroundImage:
-                  user.avatarUrl == null
-                      ? null
-                      : CachedNetworkImageProvider(user.avatarUrl!),
-              onBackgroundImageError:
-                  user.avatarUrl == null ? null : (_, __) {},
-              child: Text(
-                _initials(user.fullName),
-                style: theme.textTheme.headlineMedium,
+            Semantics(
+              label: 'Profile photo',
+              image: true,
+              excludeSemantics: true,
+              child: CircleAvatar(
+                key: const Key('profile-avatar'),
+                radius: 48,
+                backgroundImage:
+                    user.avatarUrl == null
+                        ? null
+                        : CachedNetworkImageProvider(user.avatarUrl!),
+                onBackgroundImageError:
+                    user.avatarUrl == null ? null : (_, __) {},
+                child: Text(
+                  _initials(user.fullName),
+                  style: theme.textTheme.headlineMedium,
+                ),
               ),
             ),
             if (_uploading)

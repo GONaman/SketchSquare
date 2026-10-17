@@ -123,13 +123,16 @@ class _ProfileHeader extends StatelessWidget {
                   children: [
                     const Icon(Icons.star_rounded, size: 18),
                     const SizedBox(width: 2),
-                    Text(
-                      rated
-                          ? '${formatRating(architect.architectRating)} '
-                              '(${architect.ratingCount} ratings)'
-                          : 'No ratings yet',
-                      key: const Key('architect-rating'),
-                      style: theme.textTheme.bodyMedium,
+                    Flexible(
+                      child: Text(
+                        rated
+                            ? '${formatRating(architect.architectRating)} '
+                                '(${architect.ratingCount} ratings)'
+                            : 'No ratings yet',
+                        key: const Key('architect-rating'),
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ),
                   ],
                 ),

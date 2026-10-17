@@ -65,18 +65,24 @@ class DrawingCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      if (drawing.isFree)
-                        _Badge(
-                          label: 'FREE',
-                          background: scheme.tertiaryContainer,
-                          foreground: scheme.onTertiaryContainer,
-                        )
-                      else
-                        Text(
-                          formatPaise(drawing.pricePaise),
-                          style: theme.textTheme.titleSmall,
+                      // Shrinks instead of overflowing at large text scales.
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child:
+                              drawing.isFree
+                                  ? _Badge(
+                                    label: 'FREE',
+                                    background: scheme.tertiaryContainer,
+                                    foreground: scheme.onTertiaryContainer,
+                                  )
+                                  : Text(
+                                    formatPaise(drawing.pricePaise),
+                                    style: theme.textTheme.titleSmall,
+                                  ),
                         ),
-                      const Spacer(),
+                      ),
                       if (drawing.ratingCount > 0) ...[
                         const Icon(Icons.star_rounded, size: 16),
                         const SizedBox(width: 2),
@@ -124,12 +130,15 @@ class DrawingPreviewImage extends StatelessWidget {
       ),
     );
     final u = url;
-    if (u == null) return fallback;
-    return CachedNetworkImage(
-      imageUrl: u,
-      fit: fit ?? BoxFit.cover,
-      placeholder: (_, __) => fallback,
-      errorWidget: (_, __, ___) => fallback,
+    // Decorative: the card text already names the drawing.
+    if (u == null) return ExcludeSemantics(child: fallback);
+    return ExcludeSemantics(
+      child: CachedNetworkImage(
+        imageUrl: u,
+        fit: fit ?? BoxFit.cover,
+        placeholder: (_, __) => fallback,
+        errorWidget: (_, __, ___) => fallback,
+      ),
     );
   }
 }

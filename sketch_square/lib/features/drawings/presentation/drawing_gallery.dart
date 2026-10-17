@@ -66,12 +66,22 @@ class _DrawingGalleryState extends ConsumerState<DrawingGallery> {
       height: widget.height,
       child: Stack(
         children: [
-          GestureDetector(
-            onTap: _openFullscreen,
-            child: _GalleryView(
-              urls: widget.urls,
-              controller: _controller,
-              onPageChanged: (i) => setState(() => _index = i),
+          Semantics(
+            button: true,
+            label:
+                widget.urls.length > 1
+                    ? 'Drawing preview, ${widget.urls.length} images. '
+                        'Open full screen'
+                    : 'Drawing preview. Open full screen',
+            child: GestureDetector(
+              onTap: _openFullscreen,
+              child: ExcludeSemantics(
+                child: _GalleryView(
+                  urls: widget.urls,
+                  controller: _controller,
+                  onPageChanged: (i) => setState(() => _index = i),
+                ),
+              ),
             ),
           ),
           if (widget.urls.length > 1)

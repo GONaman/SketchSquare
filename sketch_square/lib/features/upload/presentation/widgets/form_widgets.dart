@@ -110,7 +110,6 @@ class MessageBanner extends StatelessWidget {
           if (onDismiss != null)
             IconButton(
               tooltip: 'Dismiss',
-              visualDensity: VisualDensity.compact,
               icon: Icon(Icons.close, size: 18, color: fg),
               onPressed: onDismiss,
             ),
