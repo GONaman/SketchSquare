@@ -4,6 +4,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { Env } from '../config/env.schema';
 import { ApprovedGuard } from './guards/approved.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -30,7 +32,9 @@ import { TokenService } from './tokens/token.service';
       }),
     }),
   ],
+  controllers: [AuthController],
   providers: [
+    AuthService,
     JwtStrategy,
     TokenService,
     PasswordService,
