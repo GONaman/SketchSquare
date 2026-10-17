@@ -1,6 +1,6 @@
 {
-    "name": "sketch_square",
-    "short_name": "sketch_square",
+    "name": "SketchSquare",
+    "short_name": "SketchSquare",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
