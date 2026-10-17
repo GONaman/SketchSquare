@@ -234,3 +234,16 @@ Example sale of ₹499 (49900 paise), 10% platform fee:
 - `DrawingSheet.sha256` / `pHash` are filled by the processing pipeline (Phase 3) and used by the plagiarism check (Phase 8).
 - `RefreshToken` stores only a SHA-256 hash; all tokens from one login share `familyId` so reuse of a rotated token revokes the family.
 - Test DB: `npm run test:e2e` runs `prisma migrate deploy` against `sketchsquare_test` (global setup) and `resetDb()` truncates between specs.
+
+## Search indexes and EXPLAIN notes
+Search (`GET /drawings/search`) only reads `Drawing WHERE status='PUBLISHED'`. Indexes serving it: `Drawing_plotLengthFt_plotBreadthFt_idx` (size BitmapOr for both orientations), `searchVector` GIN (full-text), and the partial indexes from migration `20261017100100_search_indexes` (`lower(city)`, `(avgRating DESC, ratingCount DESC, createdAt DESC, id)`, `(purchaseCount DESC, viewCount DESC, createdAt DESC, id)`).
+Measured with `test/perf/search-explain.ts` on 50k synthetic published drawings (`TEST_DATABASE_URL=… npx ts-node test/perf/search-explain.ts 50000`):
+
+| Scenario | Time |
+|---|---|
+| newest (and deep cursor) | ~0.07 ms |
+| size 30x40 ±10 % | ~2 ms (BitmapOr on size index) |
+| size + city | ~0.7 ms |
+| rating / popularity sorts | 0.06–0.15 ms |
+| category + price_asc | ~3.6 ms |
+| full-text `villa` (13 % selectivity) | ~12 ms (seq scan; planner prefers it at that selectivity) |

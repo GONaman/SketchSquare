@@ -91,9 +91,12 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
 
 ## Discovery
 `GET /drawings/search` → page of `DrawingSummary` (PUBLISHED drawings of APPROVED architects only). Query params:
-`q`, `categoryId`, `length`, `breadth`, `unit` (`ft`|`m`, default ft), `tolerancePct` (default 10; both dimensions within tolerance, rotated plot also matches; exact first via `sizeMatch`),
-`city` (repeatable), `minDrawingRating`, `minArchitectRating`, `priceType` (`free`|`paid`|`all`), `minPricePaise`, `maxPricePaise`,
-`sort` (`relevance`|`price_asc`|`price_desc`|`drawing_rating`|`architect_rating`|`newest`), `cursor`, `limit`.
+`q` (full-text, English stemming), `categoryId`, `architectId`, `length` + `breadth` (**both or neither**, else 400), `unit` (`ft`|`m`, default ft),
+`tolerancePct` (0–50, default 10; relative to each requested dimension, inclusive; both dimensions must be in tolerance in the *same* orientation, and the rotated plot (length↔breadth) also matches),
+`city` (repeatable, case-insensitive), `minDrawingRating`, `minArchitectRating`, `priceType` (`free`|`paid`|`all`), `minPricePaise`, `maxPricePaise`, `floors` (repeatable), `facing` (repeatable),
+`sort` (`relevance`|`price_asc`|`price_desc`|`drawing_rating`|`architect_rating`|`newest`|`popularity`|`size_match`), `cursor`, `limit`.
+`sizeMatch` = `1 - worstRelativeDeviation / tolerance` for the better orientation (1 = exact, 0 = on the tolerance edge, still a match). `size_match` sort requires a size (400 otherwise).
+`relevance` = `ts_rank` of `q` + `sizeMatch`; with neither it behaves like `newest`. Every sort has an `id` tiebreaker. The cursor is opaque, bound to the sort it was issued for (400 `VALIDATION_ERROR` if reused with another sort), and stable under concurrent inserts.
 
 `GET /drawings/:id` → `DrawingDetail`:
 ```jsonc

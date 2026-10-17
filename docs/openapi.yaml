@@ -360,6 +360,178 @@ paths:
           description: ""
       security: *a7
       tags: *a8
+  /drawings/search:
+    get:
+      operationId: SearchController_searchDrawings
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+        - name: q
+          required: false
+          in: query
+          description: Full-text query over title and description
+          schema:
+            maxLength: 100
+            type: string
+        - name: categoryId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: length
+          required: false
+          in: query
+          description: Plot length in `unit`; must be sent together with `breadth`
+          schema:
+            minimum: 1
+            maximum: 100000
+            example: 30
+            type: number
+        - name: breadth
+          required: false
+          in: query
+          description: Plot breadth in `unit`; must be sent together with `length`
+          schema:
+            minimum: 1
+            maximum: 100000
+            example: 40
+            type: number
+        - name: unit
+          required: false
+          in: query
+          schema:
+            default: ft
+            type: string
+            enum:
+              - ft
+              - m
+        - name: tolerancePct
+          required: false
+          in: query
+          description: Each dimension may differ by this percent; the rotated plot also matches
+          schema:
+            minimum: 0
+            maximum: 50
+            default: 10
+            type: number
+        - name: city
+          required: false
+          in: query
+          description: Repeatable, case-insensitive
+          schema:
+            maxItems: 20
+            maxLength: 80
+            type: array
+            items:
+              type: string
+        - name: minDrawingRating
+          required: false
+          in: query
+          schema:
+            minimum: 0
+            maximum: 5
+            type: number
+        - name: minArchitectRating
+          required: false
+          in: query
+          schema:
+            minimum: 0
+            maximum: 5
+            type: number
+        - name: priceType
+          required: false
+          in: query
+          schema:
+            default: all
+            type: string
+            enum:
+              - free
+              - paid
+              - all
+        - name: minPricePaise
+          required: false
+          in: query
+          schema:
+            minimum: 0
+            type: number
+        - name: maxPricePaise
+          required: false
+          in: query
+          schema:
+            minimum: 0
+            type: number
+        - name: floors
+          required: false
+          in: query
+          description: Repeatable; number of floors
+          schema:
+            maxItems: 10
+            type: array
+            items:
+              type: number
+              maximum: 100
+              minimum: 1
+        - name: facing
+          required: false
+          in: query
+          description: Repeatable
+          schema:
+            maxItems: 8
+            type: array
+            items:
+              type: string
+              enum:
+                - N
+                - NE
+                - E
+                - SE
+                - S
+                - SW
+                - W
+                - NW
+        - name: architectId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: sort
+          required: false
+          in: query
+          description: relevance ranks by text match and size match (newest when neither is given); size_match requires length+breadth
+          schema:
+            default: relevance
+            type: string
+            enum:
+              - relevance
+              - price_asc
+              - price_desc
+              - drawing_rating
+              - architect_rating
+              - newest
+              - popularity
+              - size_match
+      responses:
+        "200":
+          description: ""
+      security:
+        - bearer: []
+      summary: Search published drawings by text, plot size (with tolerance and rotation) and filters
+      tags:
+        - discovery
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
