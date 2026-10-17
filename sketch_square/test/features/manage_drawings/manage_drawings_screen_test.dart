@@ -166,6 +166,28 @@ void main() {
     expect(find.textContaining('Processing failed'), findsOneWidget);
   });
 
+  testWidgets('rejected drawings show the failure reason when known', (
+    tester,
+  ) async {
+    final json = managedJson('dup', status: DrawingStatus.failed)
+      ..['failureReason'] = '"a.pdf" is identical to a published file';
+    await pumpManage(tester, [ManagedDrawing.fromJson(json)]);
+    expect(
+      find.textContaining('identical to a published file'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('under review drawings say admins are reviewing them', (
+    tester,
+  ) async {
+    await pumpManage(tester, [
+      managed('ur', status: DrawingStatus.underReview),
+    ]);
+    expect(find.textContaining('Under review by admins'), findsOneWidget);
+    expect(find.text('Remove'), findsOneWidget);
+  });
+
   testWidgets('processing drawings can only be followed', (tester) async {
     await pumpManage(tester, [
       managed('p', status: DrawingStatus.processing),

@@ -29,10 +29,15 @@ class ManagedDrawing {
   const ManagedDrawing({
     required this.drawing,
     this.stats = const DrawingStats(),
+    this.failureReason,
   });
 
   final DrawingSummary drawing;
   final DrawingStats stats;
+
+  /// Why a FAILED drawing was rejected (e.g. a duplicate file); the list
+  /// endpoint may omit it, in which case the card falls back to a generic text.
+  final String? failureReason;
 
   String get id => drawing.id;
 
@@ -41,10 +46,14 @@ class ManagedDrawing {
     stats: DrawingStats.fromJson(
       (json['stats'] as Map<String, dynamic>?) ?? const {},
     ),
+    failureReason:
+        (json['failureReason'] ??
+                (json['drawing'] as Map<String, dynamic>)['failureReason'])
+            as String?,
   );
 
   ManagedDrawing withDrawing(DrawingSummary d) =>
-      ManagedDrawing(drawing: d, stats: stats);
+      ManagedDrawing(drawing: d, stats: stats, failureReason: failureReason);
 }
 
 /// Seller-side drawing management. Statuses follow the contract:
