@@ -71,6 +71,9 @@ dev_dependencies:
   json_serializable: ^6.9.0
   mocktail: ^1.0.4
   http_mock_adapter: ^0.6.1
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
+  image: ^4.12.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -86,6 +89,8 @@ flutter:
   assets:
     # Placeholder blueprint clip. TODO: replace with the ~30 s product demo video.
     - assets/videos/intro.mp4
+    # Static intro backdrop used when the video cannot be played.
+    - assets/branding/intro_fallback.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -117,3 +122,25 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Regenerate with: dart run tool/generate_brand_assets.dart
+#   && dart run flutter_launcher_icons && dart run flutter_native_splash:create
+flutter_launcher_icons:
+  android: true
+  ios: true
+  web:
+    generate: true
+    background_color: "#1F3A93"
+    theme_color: "#1F3A93"
+  image_path: assets/branding/app_icon.png
+  adaptive_icon_background: "#1F3A93"
+  adaptive_icon_foreground: assets/branding/app_icon_foreground.png
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#1F3A93"
+  image: assets/branding/splash_logo.png
+  android_12:
+    color: "#1F3A93"
+    image: assets/branding/splash_logo.png
+  web: false
