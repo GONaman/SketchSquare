@@ -753,6 +753,200 @@ paths:
       summary: Search published drawings by text, plot size (with tolerance and rotation) and filters
       tags:
         - discovery
+  /categories:
+    get:
+      operationId: CategoriesController_list
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+      security: &a12
+        - bearer: []
+      tags: &a13
+        - discovery
+  /category-requests:
+    post:
+      operationId: CategoriesController_request
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequestDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: *a12
+      tags: *a13
+  /admin/category-requests:
+    get:
+      operationId: CategoriesController_listRequests
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+        - name: status
+          required: false
+          in: query
+          schema:
+            default: PENDING
+            type: string
+            enum:
+              - PENDING
+              - APPROVED
+              - REJECTED
+      responses:
+        "200":
+          description: ""
+      security: *a12
+      tags: *a13
+  /admin/category-requests/{id}/approve:
+    post:
+      operationId: CategoriesController_approve
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      security: *a12
+      tags: *a13
+  /admin/category-requests/{id}/reject:
+    post:
+      operationId: CategoriesController_reject
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      security: *a12
+      tags: *a13
+  /cities:
+    get:
+      operationId: CitiesController_list
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+      security:
+        - bearer: []
+      tags:
+        - discovery
+  /architects/top:
+    get:
+      operationId: ArchitectsController_top
+      parameters:
+        - name: city
+          required: false
+          in: query
+          description: Case-insensitive city of the architect
+          schema:
+            maxLength: 80
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+      security: &a14
+        - bearer: []
+      tags: &a15
+        - discovery
+  /architects/{id}:
+    get:
+      operationId: ArchitectsController_profile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: *a14
+      tags: *a15
+  /architects/{id}/drawings:
+    get:
+      operationId: ArchitectsController_drawings
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: *a14
+      tags: *a15
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -947,7 +1141,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: &a12
+          enum: &a16
             - ft
             - m
         floors:
@@ -1011,7 +1205,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: *a12
+          enum: *a16
         floors:
           type: number
           minimum: 1
@@ -1108,3 +1302,12 @@ components:
             - OTHER
         isPreview:
           type: boolean
+    CreateCategoryRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 60
+      required:
+        - name
