@@ -1,8 +1,8 @@
 {
   "user": {
-    "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
-    "email": "smoke-seller-mvbxf97e@example.com",
-    "fullName": "Smoke seller mvbxf97e",
+    "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+    "email": "smoke-seller-mvby60oi@example.com",
+    "fullName": "Smoke seller mvby60oi",
     "address": "12 Test Street, Pune",
     "phone": "+919800000000",
     "avatarUrl": null,
@@ -12,11 +12,11 @@
     "architectRating": 0,
     "freeDownloadsUsed": 0,
     "freeDownloadLimit": 20,
-    "createdAt": "2026-10-17T04:58:49.630Z"
+    "createdAt": "2026-10-17T05:19:38.286Z"
   },
   "tokens": {
     "accessToken": "REDACTED.JWT.TOKEN",
-    "refreshToken": "6F4A8o5Ku7I8qHSI3E_m_VVZBRNwMub2DIfzB-jS5ubi8Sxz6YFsFDsl7-wwzlh6",
+    "refreshToken": "B-ZGYDFOGtk48FEf6ubUF3TKCtqS_lq2VFa_QEaCR6O6qRJej0yLpG82Eo3226Oj",
     "expiresIn": 900
   }
 }

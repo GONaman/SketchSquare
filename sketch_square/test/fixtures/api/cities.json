@@ -1,5 +1,9 @@
 [
   {
+    "city": "Pune",
+    "count": 16
+  },
+  {
     "city": "Bengaluru",
     "count": 5
   },
@@ -9,10 +13,6 @@
   },
   {
     "city": "Jaipur",
-    "count": 5
-  },
-  {
-    "city": "Pune",
     "count": 5
   }
 ]

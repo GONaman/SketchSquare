@@ -34,6 +34,11 @@ SMOKE_BASE_URL=http://localhost:3100 npm run smoke
 Each run creates fresh users and uniquely tagged drawings, so it can be repeated against the same DB. Use a dedicated DB
 and `QUEUE_PREFIX` if other developers/agents share the infra.
 
+Generated sheets are random noise on purpose: the backend rejects byte-identical files and holds visually similar previews
+`UNDER_REVIEW` (plagiarism check), which would stall the publish wait. The script also covers the contribution rule (a
+further paid drawing without enough free ones → 403 `CONTRIBUTION_REQUIRED`; skipped when `CONTRIBUTION_FREE_PER_PAID=0`)
+and the interest flow.
+
 ### Capturing fixtures for the Flutter tests
 
 ```bash

@@ -480,6 +480,20 @@ void main() {
       },
     );
 
+    test(
+      'publish blocked by the contribution rule keeps code, message and details',
+      () {
+        final e =
+            ApiException.tryParseBody(
+              fx('error_contribution_required'),
+              statusCode: 403,
+            )!;
+        expect(e.code, ApiErrorCodes.contributionRequired);
+        expect(e.message, contains('free drawing'));
+        expect((e.details! as Map)['freeNeeded'], greaterThanOrEqualTo(1));
+      },
+    );
+
     test('conflict and unauthorized envelopes keep their codes', () {
       expect(
         ApiException.tryParseBody(fx('error_conflict'), statusCode: 409)!.code,

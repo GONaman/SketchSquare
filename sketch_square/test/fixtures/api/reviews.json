@@ -1,15 +1,15 @@
 {
   "items": [
     {
-      "id": "a4a7fea8-bbd6-465b-971f-b39e4d881efd",
+      "id": "b89a0fed-910e-48f5-a2c2-17bc767acd49",
       "rating": 5,
       "comment": null,
       "reviewer": {
-        "id": "50da8135-b129-47a6-8779-8169335d07ac",
-        "fullName": "Smoke buyer mvbxf97e"
+        "id": "39fd80a8-b264-4410-a3de-4cf5d1c420c3",
+        "fullName": "Smoke buyer mvby60oi"
       },
-      "createdAt": "2026-10-17T04:58:52.713Z",
-      "updatedAt": "2026-10-17T04:58:52.727Z"
+      "createdAt": "2026-10-17T05:19:41.037Z",
+      "updatedAt": "2026-10-17T05:19:41.047Z"
     }
   ],
   "nextCursor": null

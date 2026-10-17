@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "id": "4d7c6a37-31a9-4ff4-a42a-d50d501cf756",
+      "id": "0e82f630-5ab0-4fcf-98c5-95d637f3570f",
       "title": "Smoke Paid Duplex",
       "category": {
         "id": "558eacde-5267-5bed-9c80-86e3f229b372",
@@ -18,17 +18,327 @@
       "isFree": false,
       "avgRating": 0,
       "ratingCount": 0,
-      "previewUrl": "http://localhost:9000/previews/drawings/4d7c6a37-31a9-4ff4-a42a-d50d501cf756/977fe5bd-9241-4147-827e-becd3fa183d1-ba8f894be3c3.png",
+      "previewUrl": "http://localhost:9000/previews/drawings/0e82f630-5ab0-4fcf-98c5-95d637f3570f/47de3b8f-f7b8-418c-8358-dde3e362a738-02927e7dbb14.png",
       "architect": {
-        "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
-        "fullName": "Smoke seller mvbxf97e",
+        "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+        "fullName": "Smoke seller mvby60oi",
         "city": "Pune",
         "architectRating": 0,
         "ratingCount": 0,
-        "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
+        "avatarUrl": "http://localhost:9000/previews/avatars/e2583d9f-6d5f-4403-94fd-fca11abd7e34/8c13201d-4a27-4abc-a6f1-809c12bae573.png"
       },
       "status": "PUBLISHED",
-      "createdAt": "2026-10-17T04:58:51.310Z",
+      "createdAt": "2026-10-17T05:19:39.892Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "dde308a6-6058-4a24-8406-62c6496545e0",
+      "title": "Smoke Free Bungalow",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 0,
+      "isFree": true,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/dde308a6-6058-4a24-8406-62c6496545e0/65b5e71c-1c83-476a-b821-4ce41a0dba5a-f6154438c409.png",
+      "architect": {
+        "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+        "fullName": "Smoke seller mvby60oi",
+        "city": "Pune",
+        "architectRating": 0,
+        "ratingCount": 0,
+        "avatarUrl": "http://localhost:9000/previews/avatars/e2583d9f-6d5f-4403-94fd-fca11abd7e34/8c13201d-4a27-4abc-a6f1-809c12bae573.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:19:39.324Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "379abc4d-56f6-4b06-a597-ec4a42a17347",
+      "title": "Smoke Paid Villa",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 100000,
+      "isFree": false,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/379abc4d-56f6-4b06-a597-ec4a42a17347/49d0c765-9790-4f98-9cda-18c1f10d002d-f5442af7478c.png",
+      "architect": {
+        "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+        "fullName": "Smoke seller mvby60oi",
+        "city": "Pune",
+        "architectRating": 0,
+        "ratingCount": 0,
+        "avatarUrl": "http://localhost:9000/previews/avatars/e2583d9f-6d5f-4403-94fd-fca11abd7e34/8c13201d-4a27-4abc-a6f1-809c12bae573.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:19:38.713Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "1a6b062d-e5a9-4d38-8878-9ad8ea64d7f3",
+      "title": "Smoke Paid Villa",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 100000,
+      "isFree": false,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/1a6b062d-e5a9-4d38-8878-9ad8ea64d7f3/9020c0e8-d4bb-46c1-bc65-0da4a9f2b988-7929a8fa0e40.png",
+      "architect": {
+        "id": "6378f1f0-8621-4862-803b-4accef855e16",
+        "fullName": "Smoke seller mvby47wi",
+        "city": "Pune",
+        "architectRating": 0,
+        "ratingCount": 0,
+        "avatarUrl": "http://localhost:9000/previews/avatars/6378f1f0-8621-4862-803b-4accef855e16/2f5900ef-2219-4392-ae57-ef43cd6786e0.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:18:14.730Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "a22c9a80-be4d-4705-8098-a3f54e0cac25",
+      "title": "Smoke Free Bungalow",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 0,
+      "isFree": true,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/a22c9a80-be4d-4705-8098-a3f54e0cac25/c0e9173b-59fd-45bb-97eb-cf0f40a644e0-363a9e20647c.png",
+      "architect": {
+        "id": "cba18fc2-fef9-4d72-9986-998050592d99",
+        "fullName": "Smoke seller mvby3i83",
+        "city": "Pune",
+        "architectRating": 5,
+        "ratingCount": 1,
+        "avatarUrl": "http://localhost:9000/previews/avatars/cba18fc2-fef9-4d72-9986-998050592d99/aca349ad-932b-4734-9c28-38331c4e4391.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:17:42.149Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "ad554aef-5843-485e-a927-11f33e01aefc",
+      "title": "Smoke Paid Villa v2",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 110000,
+      "isFree": false,
+      "avgRating": 5,
+      "ratingCount": 1,
+      "previewUrl": "http://localhost:9000/previews/drawings/ad554aef-5843-485e-a927-11f33e01aefc/aff6a76b-d539-4077-b2d6-1ce87b3393a8-9730ad39c248.png",
+      "architect": {
+        "id": "cba18fc2-fef9-4d72-9986-998050592d99",
+        "fullName": "Smoke seller mvby3i83",
+        "city": "Pune",
+        "architectRating": 5,
+        "ratingCount": 1,
+        "avatarUrl": "http://localhost:9000/previews/avatars/cba18fc2-fef9-4d72-9986-998050592d99/aca349ad-932b-4734-9c28-38331c4e4391.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:17:41.491Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "93ac9724-374b-4cd0-be7d-62304f6d2f88",
+      "title": "Smoke Paid Duplex",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 100000,
+      "isFree": false,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/93ac9724-374b-4cd0-be7d-62304f6d2f88/29df8b6a-1330-435c-a98a-746855edc592-fea162eacd06.png",
+      "architect": {
+        "id": "07055d6e-fb29-4a86-b9af-58e17031e36d",
+        "fullName": "Smoke seller mvby1kso",
+        "city": "Pune",
+        "architectRating": 0,
+        "ratingCount": 0,
+        "avatarUrl": "http://localhost:9000/previews/avatars/07055d6e-fb29-4a86-b9af-58e17031e36d/793ed5bf-1779-4a0f-a6a4-8b8c5335c437.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:16:12.637Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "ba84837b-c813-48d2-9dad-b6215bc8d4a6",
+      "title": "Smoke Free Bungalow",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 0,
+      "isFree": true,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/ba84837b-c813-48d2-9dad-b6215bc8d4a6/3bb77781-b5d0-486c-be9d-9b846fc9768b-26f50751c77c.png",
+      "architect": {
+        "id": "07055d6e-fb29-4a86-b9af-58e17031e36d",
+        "fullName": "Smoke seller mvby1kso",
+        "city": "Pune",
+        "architectRating": 0,
+        "ratingCount": 0,
+        "avatarUrl": "http://localhost:9000/previews/avatars/07055d6e-fb29-4a86-b9af-58e17031e36d/793ed5bf-1779-4a0f-a6a4-8b8c5335c437.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:16:12.079Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "a65fe7db-cb2e-4492-8bc8-35ff1e4c6697",
+      "title": "Smoke Paid Villa",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 100000,
+      "isFree": false,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/a65fe7db-cb2e-4492-8bc8-35ff1e4c6697/bbc69d5b-bb89-46dc-97b5-3a189a17f245-37f2dd7439c5.png",
+      "architect": {
+        "id": "07055d6e-fb29-4a86-b9af-58e17031e36d",
+        "fullName": "Smoke seller mvby1kso",
+        "city": "Pune",
+        "architectRating": 0,
+        "ratingCount": 0,
+        "avatarUrl": "http://localhost:9000/previews/avatars/07055d6e-fb29-4a86-b9af-58e17031e36d/793ed5bf-1779-4a0f-a6a4-8b8c5335c437.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T05:16:11.471Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "8fef344e-de68-4df8-aedd-82a0cdd28e0a",
+      "title": "Smoke Free Bungalow",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 0,
+      "isFree": true,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/8fef344e-de68-4df8-aedd-82a0cdd28e0a/27868908-a534-491a-8c43-23d80eb745d8-dc601d8b71f7.png",
+      "architect": {
+        "id": "50e966ce-1649-422b-94f5-c0157f9d89d8",
+        "fullName": "Smoke seller mvbxfl0j",
+        "city": "Pune",
+        "architectRating": 5,
+        "ratingCount": 1,
+        "avatarUrl": "http://localhost:9000/previews/avatars/50e966ce-1649-422b-94f5-c0157f9d89d8/4d05759e-684c-46db-a530-caf9f715a46c.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T04:59:06.123Z",
+      "sizeMatch": 1
+    },
+    {
+      "id": "c5bd2d97-c2a5-4a3e-bf21-6cbe3758afe7",
+      "title": "Smoke Paid Villa v2",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 110000,
+      "isFree": false,
+      "avgRating": 5,
+      "ratingCount": 1,
+      "previewUrl": "http://localhost:9000/previews/drawings/c5bd2d97-c2a5-4a3e-bf21-6cbe3758afe7/aba74086-c5be-4ae7-a6ee-f8d09a119692-7c99f43ac20f.png",
+      "architect": {
+        "id": "50e966ce-1649-422b-94f5-c0157f9d89d8",
+        "fullName": "Smoke seller mvbxfl0j",
+        "city": "Pune",
+        "architectRating": 5,
+        "ratingCount": 1,
+        "avatarUrl": "http://localhost:9000/previews/avatars/50e966ce-1649-422b-94f5-c0157f9d89d8/4d05759e-684c-46db-a530-caf9f715a46c.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T04:59:05.454Z",
       "sizeMatch": 1
     },
     {
@@ -54,8 +364,8 @@
         "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
         "fullName": "Smoke seller mvbxf97e",
         "city": "Pune",
-        "architectRating": 0,
-        "ratingCount": 0,
+        "architectRating": 5,
+        "ratingCount": 1,
         "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
       },
       "status": "PUBLISHED",
@@ -64,7 +374,7 @@
     },
     {
       "id": "43f0ab17-df0d-4449-8350-1b5807630faf",
-      "title": "Smoke Paid Villa",
+      "title": "Smoke Paid Villa v2",
       "category": {
         "id": "558eacde-5267-5bed-9c80-86e3f229b372",
         "name": "Banks",
@@ -76,17 +386,17 @@
       "plotAreaSqft": 1588.41,
       "floors": 2,
       "facing": "NE",
-      "pricePaise": 100000,
+      "pricePaise": 110000,
       "isFree": false,
-      "avgRating": 0,
-      "ratingCount": 0,
+      "avgRating": 5,
+      "ratingCount": 1,
       "previewUrl": "http://localhost:9000/previews/drawings/43f0ab17-df0d-4449-8350-1b5807630faf/80719d8f-b9ff-4f25-8567-b16dd883b0d1-0e760c297758.png",
       "architect": {
         "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
         "fullName": "Smoke seller mvbxf97e",
         "city": "Pune",
-        "architectRating": 0,
-        "ratingCount": 0,
+        "architectRating": 5,
+        "ratingCount": 1,
         "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
       },
       "status": "PUBLISHED",

@@ -1,6 +1,6 @@
 {
-  "uploadUrl": "http://localhost:9000/originals/avatar-uploads/c9c7240b-41c7-4751-8673-ab19506c7297/3c0bf7b6-e669-4031-a6fa-145684523770.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=REDACTED&X-Amz-Date=20261017T045850Z&X-Amz-Expires=900&X-Amz-Signature=REDACTED&X-Amz-SignedHeaders=content-type%3Bhost&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject",
-  "objectKey": "avatar-uploads/c9c7240b-41c7-4751-8673-ab19506c7297/3c0bf7b6-e669-4031-a6fa-145684523770.png",
+  "uploadUrl": "http://localhost:9000/originals/avatar-uploads/e2583d9f-6d5f-4403-94fd-fca11abd7e34/a59a2b63-8683-4821-9f36-40552b10321c.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=REDACTED&X-Amz-Date=20261017T051938Z&X-Amz-Expires=900&X-Amz-Signature=REDACTED&X-Amz-SignedHeaders=content-type%3Bhost&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject",
+  "objectKey": "avatar-uploads/e2583d9f-6d5f-4403-94fd-fca11abd7e34/a59a2b63-8683-4821-9f36-40552b10321c.png",
   "headers": {
     "Content-Type": "image/png"
   }

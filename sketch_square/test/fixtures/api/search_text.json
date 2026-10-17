@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "id": "4d7c6a37-31a9-4ff4-a42a-d50d501cf756",
+      "id": "0e82f630-5ab0-4fcf-98c5-95d637f3570f",
       "title": "Smoke Paid Duplex",
       "category": {
         "id": "558eacde-5267-5bed-9c80-86e3f229b372",
@@ -18,20 +18,20 @@
       "isFree": false,
       "avgRating": 0,
       "ratingCount": 0,
-      "previewUrl": "http://localhost:9000/previews/drawings/4d7c6a37-31a9-4ff4-a42a-d50d501cf756/977fe5bd-9241-4147-827e-becd3fa183d1-ba8f894be3c3.png",
+      "previewUrl": "http://localhost:9000/previews/drawings/0e82f630-5ab0-4fcf-98c5-95d637f3570f/47de3b8f-f7b8-418c-8358-dde3e362a738-02927e7dbb14.png",
       "architect": {
-        "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
-        "fullName": "Smoke seller mvbxf97e",
+        "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+        "fullName": "Smoke seller mvby60oi",
         "city": "Pune",
         "architectRating": 0,
         "ratingCount": 0,
-        "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
+        "avatarUrl": "http://localhost:9000/previews/avatars/e2583d9f-6d5f-4403-94fd-fca11abd7e34/8c13201d-4a27-4abc-a6f1-809c12bae573.png"
       },
       "status": "PUBLISHED",
-      "createdAt": "2026-10-17T04:58:51.310Z"
+      "createdAt": "2026-10-17T05:19:39.892Z"
     },
     {
-      "id": "34f262de-c31a-40e2-afaf-0a93da18ff21",
+      "id": "dde308a6-6058-4a24-8406-62c6496545e0",
       "title": "Smoke Free Bungalow",
       "category": {
         "id": "558eacde-5267-5bed-9c80-86e3f229b372",
@@ -48,18 +48,18 @@
       "isFree": true,
       "avgRating": 0,
       "ratingCount": 0,
-      "previewUrl": "http://localhost:9000/previews/drawings/34f262de-c31a-40e2-afaf-0a93da18ff21/048ae8e4-3756-4c76-9a23-032a81f139a5-a5226ae17790.png",
+      "previewUrl": "http://localhost:9000/previews/drawings/dde308a6-6058-4a24-8406-62c6496545e0/65b5e71c-1c83-476a-b821-4ce41a0dba5a-f6154438c409.png",
       "architect": {
-        "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
-        "fullName": "Smoke seller mvbxf97e",
+        "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+        "fullName": "Smoke seller mvby60oi",
         "city": "Pune",
         "architectRating": 0,
         "ratingCount": 0,
-        "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
+        "avatarUrl": "http://localhost:9000/previews/avatars/e2583d9f-6d5f-4403-94fd-fca11abd7e34/8c13201d-4a27-4abc-a6f1-809c12bae573.png"
       },
       "status": "PUBLISHED",
-      "createdAt": "2026-10-17T04:58:50.739Z"
+      "createdAt": "2026-10-17T05:19:39.324Z"
     }
   ],
-  "nextCursor": "eyJzIjoicmVsZXZhbmNlIiwidiI6WyIwLjE5NTYwNSIsIjIwMjYtMTAtMTcgMDQ6NTg6NTAuNzM5IiwiMzRmMjYyZGUtYzMxYS00MGUyLWFmYWYtMGE5M2RhMThmZjIxIl19"
+  "nextCursor": "eyJzIjoicmVsZXZhbmNlIiwidiI6WyIwLjE5NTYwNSIsIjIwMjYtMTAtMTcgMDU6MTk6MzkuMzI0IiwiZGRlMzA4YTYtNjA1OC00YTI0LTg0MDYtNjJjNjQ5NjU0NWUwIl19"
 }
