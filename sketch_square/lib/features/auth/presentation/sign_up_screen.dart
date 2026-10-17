@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
+import '../../legal/presentation/legal_consent_text.dart';
 import '../../verification/domain/verification_request.dart';
 import '../../verification/presentation/verification_form.dart';
 import '../../verification/presentation/verification_providers.dart';
@@ -214,6 +215,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           ],
           const SizedBox(height: 24),
           FilledButton(onPressed: _next, child: const Text('Next')),
+          const SizedBox(height: 8),
+          const LegalConsentText(),
         ],
       ),
     );
@@ -225,6 +228,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       onSubmit: _createAccountAndUpload,
       extraActions: [
         const SizedBox(height: 8),
+        if (!_accountCreated) const LegalConsentText(),
         if (!_accountCreated)
           TextButton(
             onPressed: () => setState(() => _step = 0),

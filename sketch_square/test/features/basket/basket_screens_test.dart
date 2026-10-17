@@ -105,6 +105,16 @@ void main() {
     expect(gateway.calls, 0);
   });
 
+  testWidgets('checkout licence notice links to the terms', (tester) async {
+    await openBasket(tester);
+    await tester.tap(find.text('Checkout'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('checkout-terms-link')));
+    await tester.pumpAndSettle();
+    expect(inAppBar('Terms of Service'), findsOneWidget);
+  });
+
   testWidgets('a failed payment shows the failure screen with retry', (
     tester,
   ) async {

@@ -106,6 +106,18 @@ class CheckoutScreen extends ConsumerWidget {
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            key: const Key('checkout-terms-link'),
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                              padding: EdgeInsets.zero,
+                            ),
+                            onPressed: () => context.push(AppRoutes.terms),
+                            child: const Text('Read the Terms of Service'),
+                          ),
+                        ),
                       ],
                     ),
                   ),
