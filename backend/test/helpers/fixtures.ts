@@ -58,6 +58,9 @@ export interface DrawingFixture {
   plotBreadthFt?: number;
   floors?: number;
   facing?: Facing;
+  bedrooms?: number;
+  tags?: string[];
+  failureReason?: string;
   pricePaise?: number;
   status?: DrawingStatus;
   avgRating?: number;
@@ -81,6 +84,9 @@ export async function createDrawing(prisma: PrismaClient, f: DrawingFixture) {
       plotBreadthFt: f.plotBreadthFt ?? 40,
       floors: f.floors ?? 1,
       facing: f.facing,
+      bedrooms: f.bedrooms,
+      tags: f.tags,
+      failureReason: f.failureReason,
       pricePaise: f.pricePaise ?? 0,
       status: f.status ?? 'PUBLISHED',
       avgRating: f.avgRating ?? 0,

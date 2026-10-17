@@ -34,7 +34,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 
 ## Phase 4 — Discovery
 - [x] 4.1 Search endpoint (size tolerance + rotation, filters, sort)
-- [ ] 4.2 Detail, categories, cities, architects
+- [x] 4.2 Detail, categories, cities, architects
 - [x] 4.3 Flutter home + search + filters
 - [x] 4.4 Flutter featured + drawing detail
 
