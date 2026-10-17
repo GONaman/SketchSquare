@@ -72,7 +72,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Wordmark()),
+      // The expanded top navigation bar already carries the brand.
+      appBar: context.isExpanded ? null : AppBar(title: const Wordmark()),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(categoriesProvider);
@@ -290,21 +291,27 @@ class _PlotSizeHero extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerLowest,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      child: PlotSizeFields(
-                        controller: controller,
-                        onSubmitted: onSearch,
-                        trailing: PrimaryButton(
-                          key: const Key('plot-search-button'),
-                          label: 'Search',
-                          icon: Icons.search_rounded,
-                          onPressed: onSearch,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 720),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: PlotSizeFields(
+                            controller: controller,
+                            onSubmitted: onSearch,
+                            trailing: PrimaryButton(
+                              key: const Key('plot-search-button'),
+                              label: 'Search',
+                              icon: Icons.search_rounded,
+                              onPressed: onSearch,
+                            ),
+                          ),
                         ),
                       ),
                     ),

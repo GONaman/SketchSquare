@@ -14,6 +14,27 @@ Future<DrawingSearchQuery?> showFiltersSheet(
   BuildContext context,
   DrawingSearchQuery initial,
 ) {
+  if (context.isWide) {
+    // A centred dialog reads better than a stretched bottom sheet on desktop.
+    return showDialog<DrawingSearchQuery>(
+      context: context,
+      useRootNavigator: true,
+      builder:
+          (dialogContext) => Dialog(
+            clipBehavior: Clip.antiAlias,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 560,
+                maxHeight: MediaQuery.sizeOf(dialogContext).height * 0.88,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.lg),
+                child: _FiltersSheet(initial: initial),
+              ),
+            ),
+          ),
+    );
+  }
   return showModalBottomSheet<DrawingSearchQuery>(
     context: context,
     isScrollControlled: true,

@@ -292,6 +292,7 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         modalBackgroundColor: scheme.surfaceContainerLowest,
         showDragHandle: true,
+        constraints: const BoxConstraints(maxWidth: 640),
         dragHandleColor: scheme.outline,
         dragHandleSize: const Size(40, 4),
         shape: const RoundedRectangleBorder(

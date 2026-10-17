@@ -126,52 +126,76 @@ class PlotSizeFields extends StatelessWidget {
           selected: {controller.unit},
           onSelectionChanged: (s) => controller.unit = s.first,
         );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        final lengthField = _DimensionField(
+          fieldKey: const Key('plot-length'),
+          controller: controller.lengthText,
+          label: 'Length',
+          suffix: suffix,
+          error: controller.lengthError,
+          action: TextInputAction.next,
+        );
+        Widget breadthField(TextInputAction action) => _DimensionField(
+          fieldKey: const Key('plot-breadth'),
+          controller: controller.breadthText,
+          label: 'Breadth',
+          suffix: suffix,
+          error: controller.breadthError,
+          action: action,
+          onSubmitted: onSubmitted,
+        );
+        const times = Padding(
+          padding: EdgeInsets.fromLTRB(6, 16, 6, 0),
+          child: Icon(Icons.close, size: 18),
+        );
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Roomy and a trailing action: everything on a single line.
+            if (inline && constraints.maxWidth >= 600) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: lengthField),
+                      times,
+                      Expanded(child: breadthField(TextInputAction.done)),
+                      const SizedBox(width: AppSpacing.md),
+                      SizedBox(height: 56, child: Center(child: unitToggle)),
+                      const SizedBox(width: AppSpacing.md),
+                      SizedBox(width: 160, height: 56, child: trailing),
+                    ],
+                  ),
+                  if (showTolerance) _ToleranceBlock(controller: controller),
+                ],
+              );
+            }
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _DimensionField(
-                    fieldKey: const Key('plot-length'),
-                    controller: controller.lengthText,
-                    label: 'Length',
-                    suffix: suffix,
-                    error: controller.lengthError,
-                    action: TextInputAction.next,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: lengthField),
+                    times,
+                    Expanded(child: breadthField(TextInputAction.done)),
+                  ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(6, 16, 6, 0),
-                  child: Icon(Icons.close, size: 18),
-                ),
-                Expanded(
-                  child: _DimensionField(
-                    fieldKey: const Key('plot-breadth'),
-                    controller: controller.breadthText,
-                    label: 'Breadth',
-                    suffix: suffix,
-                    error: controller.breadthError,
-                    action: TextInputAction.done,
-                    onSubmitted: onSubmitted,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            if (inline)
-              Row(
-                children: [
+                const SizedBox(height: AppSpacing.md),
+                if (inline)
+                  Row(
+                    children: [
+                      unitToggle,
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(child: trailing!),
+                    ],
+                  )
+                else
                   unitToggle,
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(child: trailing!),
-                ],
-              )
-            else
-              unitToggle,
-            if (showTolerance) _ToleranceBlock(controller: controller),
-          ],
+                if (showTolerance) _ToleranceBlock(controller: controller),
+              ],
+            );
+          },
         );
       },
     );

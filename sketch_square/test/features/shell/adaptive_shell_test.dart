@@ -74,7 +74,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('top-nav-brand')));
     await tester.pumpAndSettle();
-    expect(inAppBar('Home'), findsOneWidget);
+    expect(find.byKey(const Key('home-search-entry')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('top-nav-search')));
     await tester.pumpAndSettle();

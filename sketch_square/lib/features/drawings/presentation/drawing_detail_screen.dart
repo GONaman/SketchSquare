@@ -111,8 +111,180 @@ class _DrawingDetailScreenState extends ConsumerState<DrawingDetailScreen> {
     );
   }
 
+  bool _showInterest(DrawingDetail d) =>
+      !d.viewer.isOwner && !d.summary.isFree && !d.viewer.isPurchased;
+
+  Widget _descriptionBlock(DrawingDetail d) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SectionHeader(title: 'About this drawing'),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+        child: Text(
+          d.description,
+          key: const Key('detail-description'),
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ),
+    ],
+  );
+
+  Widget _interestBlock(DrawingDetail d) => Padding(
+    padding: const EdgeInsets.only(top: AppSpacing.xl),
+    child: InterestButton(
+      key: ValueKey('interest-${d.summary.id}'),
+      drawingId: d.summary.id,
+      initial: d.viewer.isInterested,
+    ),
+  );
+
+  Widget _architectBlock(DrawingDetail d) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SectionHeader(title: 'Architect'),
+      _ArchitectCard(
+        architect: d.summary.architect,
+        onTap:
+            () => context.push(widget.paths.architect(d.summary.architect.id)),
+      ),
+    ],
+  );
+
+  Widget _reviewsBlock(DrawingDetail d) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SectionHeader(title: 'Reviews'),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+        child: DrawingReviewsSection(
+          drawingId: d.summary.id,
+          initial: d.reviews,
+          avgRating: d.summary.ratingCount > 0 ? d.summary.avgRating : null,
+          ratingCount: d.summary.ratingCount > 0 ? d.summary.ratingCount : null,
+        ),
+      ),
+    ],
+  );
+
+  PurchaseBar _purchaseBar(DrawingDetail d, {bool inline = false}) =>
+      PurchaseBar(
+        detail: d,
+        inCart: _inCart,
+        busy: _busy,
+        inline: inline,
+        onDownload: () => _toast('Downloads are coming soon.'),
+        onAddToBasket: _addAndStay,
+        onBuyNow: _buyNow,
+        onViewBasket: _openBasket,
+      );
+
+  /// Desktop layout: gallery, sheets and reviews on the left; title, specs,
+  /// the purchase card and the architect on the right.
+  Widget _buildWide(DrawingDetail d, bool favorite) {
+    final scheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          if (!d.viewer.isOwner)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.md),
+              child: IconButton(
+                key: const Key('favorite-button'),
+                tooltip:
+                    favorite ? 'Remove from favorites' : 'Add to favorites',
+                onPressed: () => _toggleFavorite(favorite),
+                icon: Icon(
+                  favorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  color: favorite ? scheme.error : null,
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh:
+            () => ref.refresh(drawingDetailProvider(widget.drawingId).future),
+        child: Scrollbar(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ContentFrame(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.gutter,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(AppRadius.lg),
+                              child: DrawingGallery(
+                                urls: d.previewUrls,
+                                height: 520,
+                                heroTag: drawingHeroTag(context, d.summary.id),
+                              ),
+                            ),
+                          ),
+                          _SheetsSection(detail: d),
+                          _reviewsBlock(d),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: 420,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _TitleBlock(detail: d),
+                          _SpecGrid(summary: d.summary),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.gutter,
+                              AppSpacing.lg,
+                              AppSpacing.gutter,
+                              0,
+                            ),
+                            child: DecoratedBox(
+                              key: const Key('detail-purchase-card'),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: scheme.outlineVariant,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.lg,
+                                ),
+                              ),
+                              child: _purchaseBar(d, inline: true),
+                            ),
+                          ),
+                          if (_showInterest(d)) _interestBlock(d),
+                          if (d.description.isNotEmpty) _descriptionBlock(d),
+                          _architectBlock(d),
+                          if (!d.viewer.isOwner) const _LicenceNote(),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.gutter),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoaded(DrawingDetail d) {
     final favorite = _favorite ?? d.viewer.isFavorite;
+    if (context.isExpanded) return _buildWide(d, favorite);
     final scheme = Theme.of(context).colorScheme;
     final overlay = IconButton.styleFrom(
       backgroundColor: scheme.surface.withValues(alpha: 0.88),
@@ -170,78 +342,12 @@ class _DrawingDetailScreenState extends ConsumerState<DrawingDetailScreen> {
               SliverToBoxAdapter(child: _TitleBlock(detail: d)),
               SliverToBoxAdapter(child: _SpecGrid(summary: d.summary)),
               if (d.description.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SectionHeader(title: 'About this drawing'),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.gutter,
-                        ),
-                        child: Text(
-                          d.description,
-                          key: const Key('detail-description'),
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (!d.viewer.isOwner &&
-                  !d.summary.isFree &&
-                  !d.viewer.isPurchased)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xl),
-                    child: InterestButton(
-                      key: ValueKey('interest-${d.summary.id}'),
-                      drawingId: d.summary.id,
-                      initial: d.viewer.isInterested,
-                    ),
-                  ),
-                ),
+                SliverToBoxAdapter(child: _descriptionBlock(d)),
+              if (_showInterest(d))
+                SliverToBoxAdapter(child: _interestBlock(d)),
               SliverToBoxAdapter(child: _SheetsSection(detail: d)),
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SectionHeader(title: 'Architect'),
-                    _ArchitectCard(
-                      architect: d.summary.architect,
-                      onTap:
-                          () => context.push(
-                            widget.paths.architect(d.summary.architect.id),
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SectionHeader(title: 'Reviews'),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.gutter,
-                      ),
-                      child: DrawingReviewsSection(
-                        drawingId: d.summary.id,
-                        initial: d.reviews,
-                        avgRating:
-                            d.summary.ratingCount > 0
-                                ? d.summary.avgRating
-                                : null,
-                        ratingCount:
-                            d.summary.ratingCount > 0
-                                ? d.summary.ratingCount
-                                : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              SliverToBoxAdapter(child: _architectBlock(d)),
+              SliverToBoxAdapter(child: _reviewsBlock(d)),
               if (!d.viewer.isOwner)
                 const SliverToBoxAdapter(child: _LicenceNote()),
               const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
@@ -249,15 +355,7 @@ class _DrawingDetailScreenState extends ConsumerState<DrawingDetailScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: PurchaseBar(
-        detail: d,
-        inCart: _inCart,
-        busy: _busy,
-        onDownload: () => _toast('Downloads are coming soon.'),
-        onAddToBasket: _addAndStay,
-        onBuyNow: _buyNow,
-        onViewBasket: _openBasket,
-      ),
+      bottomNavigationBar: _purchaseBar(d),
     );
   }
 }

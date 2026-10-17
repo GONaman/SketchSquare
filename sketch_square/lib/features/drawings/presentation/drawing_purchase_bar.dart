@@ -23,6 +23,7 @@ class PurchaseBar extends StatelessWidget {
     required this.detail,
     required this.inCart,
     required this.busy,
+    this.inline = false,
     required this.onDownload,
     required this.onAddToBasket,
     required this.onBuyNow,
@@ -32,6 +33,9 @@ class PurchaseBar extends StatelessWidget {
   final DrawingDetail detail;
   final bool inCart;
   final bool busy;
+
+  /// Renders as a padded block inside a card instead of the sticky bar.
+  final bool inline;
   final VoidCallback onDownload;
   final VoidCallback onAddToBasket;
   final VoidCallback onBuyNow;
@@ -113,6 +117,13 @@ class PurchaseBar extends StatelessWidget {
         ],
       ),
     };
+
+    if (inline) {
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: content,
+      );
+    }
 
     return Material(
       color: scheme.surface,
