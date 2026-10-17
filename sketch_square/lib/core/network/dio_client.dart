@@ -3,11 +3,15 @@ import 'package:dio/dio.dart';
 import '../storage/token_store.dart';
 import 'api_config.dart';
 import 'interceptors.dart';
+import 'refresh_interceptor.dart';
 
+/// Builds the app's [Dio]. [onSessionExpired] fires when a token refresh is
+/// rejected by the server (the stored tokens are already cleared by then).
 Dio createDio({
   required TokenStore tokenStore,
   String baseUrl = ApiConfig.baseUrl,
   HttpClientAdapter? httpClientAdapter,
+  void Function()? onSessionExpired,
 }) {
   final dio = Dio(
     BaseOptions(
@@ -20,6 +24,11 @@ Dio createDio({
   if (httpClientAdapter != null) dio.httpClientAdapter = httpClientAdapter;
   dio.interceptors.addAll([
     AuthHeaderInterceptor(tokenStore),
+    RefreshInterceptor(
+      dio: dio,
+      tokenStore: tokenStore,
+      onSessionExpired: onSessionExpired,
+    ),
     ErrorMappingInterceptor(),
   ]);
   return dio;

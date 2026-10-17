@@ -108,11 +108,63 @@ void main() {
       }
     });
 
+    test('while initializing everything redirects to the splash screen', () {
+      const auth = AuthState.initializing();
+      expect(authRedirect(auth, AppRoutes.home), AppRoutes.splash);
+      expect(authRedirect(auth, AppRoutes.signIn), AppRoutes.splash);
+      expect(authRedirect(auth, AppRoutes.splash), isNull);
+    });
+
+    test(
+      'logged out: public screens are reachable, the rest go to intro/sign-in',
+      () {
+        const auth = AuthState.unauthenticated();
+        for (final r in AppRoutes.publicRoutes) {
+          expect(authRedirect(auth, r, introSeen: false), isNull, reason: r);
+        }
+        expect(authRedirect(auth, AppRoutes.home), AppRoutes.signIn);
+        expect(
+          authRedirect(auth, AppRoutes.home, introSeen: false),
+          AppRoutes.intro,
+        );
+        expect(authRedirect(auth, AppRoutes.admin), AppRoutes.signIn);
+        expect(authRedirect(auth, AppRoutes.splash), AppRoutes.signIn);
+      },
+    );
+
+    test('pending users may stay on sign-up to finish the document step', () {
+      final auth = AuthState.authenticated(
+        user: withStatus(VerificationStatus.pending),
+      );
+      expect(authRedirect(auth, AppRoutes.signUp), isNull);
+      expect(
+        authRedirect(auth, AppRoutes.signIn),
+        AppRoutes.verificationPending,
+      );
+      expect(
+        authRedirect(auth, AppRoutes.admin),
+        AppRoutes.verificationPending,
+      );
+    });
+
+    test('admin area is for approved ADMIN users only', () {
+      final architect = AuthState.authenticated(user: stubUser);
+      final admin = AuthState.authenticated(
+        user: stubUser.copyWith(role: UserRole.admin),
+      );
+      expect(authRedirect(architect, AppRoutes.admin), AppRoutes.home);
+      expect(authRedirect(architect, '/admin/verifications/x'), AppRoutes.home);
+      expect(authRedirect(admin, AppRoutes.admin), isNull);
+      expect(authRedirect(admin, '/admin/verifications/x'), isNull);
+    });
+
     test('approved users skip auth screens and keep other routes', () {
       final auth = AuthState.authenticated(
         user: withStatus(VerificationStatus.approved),
       );
       expect(authRedirect(auth, AppRoutes.signIn), AppRoutes.home);
+      expect(authRedirect(auth, AppRoutes.intro), AppRoutes.home);
+      expect(authRedirect(auth, AppRoutes.splash), AppRoutes.home);
       expect(authRedirect(auth, AppRoutes.verificationPending), AppRoutes.home);
       expect(authRedirect(auth, AppRoutes.basket), isNull);
     });

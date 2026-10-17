@@ -28,7 +28,7 @@ Each section is owned by one agent; append, don't overwrite other sections. Cont
   `dart run build_runner build --delete-conflicting-outputs` (run inside `sketch_square/`).
 - Provider functions take a plain `Ref` (`import 'package:flutter_riverpod/flutter_riverpod.dart'` when the file has no other riverpod import).
 - Core providers (`core/providers.dart`): `secureStorageProvider`, `tokenStoreProvider`, `dioProvider`. Auth session: `authControllerProvider`
-  (`AuthState.unauthenticated | authenticated(user)`; currently a stub — Phase 2 makes it real). Theme: `appThemeModeProvider`.
+  (`AuthState.initializing | unauthenticated | authenticated(user)`, real since Phase 2 — see "Flutter auth" below). Theme: `appThemeModeProvider`.
 - Repositories: define an interface in `domain/`, an implementation in `data/` taking `Dio`, and a `@riverpod` provider that builds it from `dioProvider`.
   Screens depend on the interface provider so tests can override it with a fake.
 - Pagination: request `?cursor=&limit=`, parse with `CursorPage.fromJson(json, Item.fromJson)`.
@@ -37,7 +37,7 @@ Each section is owned by one agent; append, don't overwrite other sections. Cont
 - The error interceptor puts an `ApiException` (`code`, `message`, `details?`, `statusCode`) into `DioException.error`.
   In repositories/controllers use `catch (e) { throw toApiException(e); }` and branch on `ApiErrorCodes.*` (all contract codes are defined).
   Client-only codes: `NETWORK_ERROR`, `TIMEOUT`, `CANCELLED`, `UNKNOWN`.
-- The auth-header interceptor reads `TokenStore`; the refresh-on-401 interceptor is added in Phase 2 next to it in `core/network/dio_client.dart`.
+- The auth-header interceptor reads `TokenStore`; the refresh-on-401 interceptor sits next to it in `core/network/dio_client.dart`.
 
 ### Theme & UI
 - Use `Theme.of(context).colorScheme` / `textTheme` — no hard-coded colours outside `core/theme/app_colors.dart`. Accent is blueprint blue `#1F3A93`
@@ -133,3 +133,24 @@ Integer paise everywhere (Prisma `Int`/`BigInt`, never floats). Timestamps are r
 - Unit tests next to the code; infra-free (mock Prisma/Redis/S3).
 - e2e: build `Test.createTestingModule({ imports: [AppModule] })`, then `configureApp(app)` before `app.init()` so the real pipe/filter apply;
   use Supertest. They hit the real docker Postgres (`sketchsquare_test`), Redis and MinIO, so infra must be up. Clean up the rows you create.
+
+## Flutter auth (`sketch_square/lib/features/auth`, Phase 2.4–2.6)
+
+### Session
+- `authControllerProvider` is a real session: `AuthState.initializing` (validating stored tokens via `GET /me`) → `unauthenticated | authenticated(user)`.
+  Methods (`signIn`, `signUp`, `signOut`, `refreshUser`) throw `ApiException`. Read the user with `ref.watch(authControllerProvider)` and pattern-match `Authenticated(:final user)`.
+- Tokens live in `TokenStore` (secure storage). `AuthRepository` (interface, `DioAuthRepository`) is a pure API client; the controller persists tokens.
+  Override `authRepositoryProvider` with a fake in tests (`test/helpers/fake_auth_repository.dart`).
+- `RefreshInterceptor` (`core/network/refresh_interceptor.dart`) refreshes on 401 (single-flight, retries once, skips `/auth/*`) and, if the server rejects the
+  refresh token, clears tokens and bumps `sessionExpiredProvider` → the controller signs out. Transport/5xx failures during refresh keep the session.
+- `sharedPreferencesProvider` has no default: `main()` and `pumpApp` override it. `introSeenProvider` is the onboarding flag.
+
+### Router guard
+`authRedirect(auth, location, {introSeen})` (pure, unit-tested): initializing → `/splash`; logged out → public auth routes (`AppRoutes.publicRoutes`) else intro (first run) /
+sign-in; PENDING/REJECTED → `/verification-pending` (and `/sign-up`, so the document step can finish); APPROVED → app, `/admin*` only for role ADMIN.
+New logged-out screens must be added to `AppRoutes.publicRoutes`; new non-tab routes of a feature go in its `*_routes.dart` and are spread into the router.
+
+### Testing
+`pumpApp(tester, {signedIn = true, user, introSeen = true})` boots the whole app with a `FakeAuthRepository`; by default you are an approved architect
+on the shell, so existing feature tests are unaffected. Use `signedIn: false` for logged-out flows, `user:` for PENDING/REJECTED/ADMIN sessions.
+`test/helpers/scripted_adapter.dart` is a tiny scriptable Dio adapter for stateful HTTP sequences (e.g. 401 then 200).
