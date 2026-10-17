@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../auth/domain/auth_validators.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/current_user_provider.dart';
@@ -26,6 +27,12 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   late final _city = TextEditingController(
     text: ref.read(currentUserProvider)?.city,
   );
+  late final _name = TextEditingController(
+    text: ref.read(currentUserProvider)?.fullName,
+  );
+  late final _address = TextEditingController(
+    text: ref.read(currentUserProvider)?.address,
+  );
   bool _saving = false;
   String? _error;
   Map<String, String> _fieldErrors = const {};
@@ -34,6 +41,8 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
   void dispose() {
     _phone.dispose();
     _city.dispose();
+    _name.dispose();
+    _address.dispose();
     super.dispose();
   }
 
@@ -87,61 +96,83 @@ class _EditContactScreenState extends ConsumerState<EditContactScreen> {
       body: Form(
         key: _form,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.gutter,
+            AppSpacing.sm,
+            AppSpacing.gutter,
+            AppSpacing.xl,
+          ),
           children: [
-            TextFormField(
-              key: const Key('field-name'),
-              initialValue: user.fullName,
-              enabled: false,
-              decoration: const InputDecoration(labelText: 'Full name'),
+            const FormSectionLabel(
+              'Verified details',
+              icon: Icons.lock_outline,
             ),
-            const SizedBox(height: 12),
-            TextFormField(
+            AppTextField(
+              key: const Key('field-name'),
+              controller: _name,
+              enabled: false,
+              label: 'Full name',
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AppTextField(
               key: const Key('field-address'),
-              initialValue: user.address,
+              controller: _address,
               enabled: false,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Address',
-                helperText:
+              label: 'Address',
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
                     'Name and address match your verification and can only be '
                     'changed by contacting support.',
-                helperMaxLines: 3,
-              ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextFormField(
+            const SizedBox(height: AppSpacing.xl),
+            const FormSectionLabel('Contact', icon: Icons.call_outlined),
+            AppTextField(
               key: const Key('field-phone'),
               controller: _phone,
               enabled: !_saving,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Phone'),
+              label: 'Phone',
+              prefixIcon: Icons.phone_outlined,
               validator:
                   (v) => AuthValidators.phone(v) ?? _fieldErrors['phone'],
             ),
-            const SizedBox(height: 12),
-            TextFormField(
+            const SizedBox(height: AppSpacing.md),
+            AppTextField(
               key: const Key('field-city'),
               controller: _city,
               enabled: !_saving,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'City'),
+              label: 'City',
+              prefixIcon: Icons.location_city_outlined,
               validator: (v) => AuthValidators.city(v) ?? _fieldErrors['city'],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.xl),
             if (_error != null) ...[
               FormErrorBanner(_error!),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
             ],
-            FilledButton(
+            PrimaryButton(
+              label: 'Save',
+              loading: _saving,
               onPressed: _saving ? null : _save,
-              child:
-                  _saving
-                      ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : const Text('Save'),
             ),
           ],
         ),

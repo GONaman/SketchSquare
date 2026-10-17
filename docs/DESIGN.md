@@ -177,7 +177,8 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Upload flow | **To do** |
 | Basket + checkout + order result | Done |
 | Purchases library + download/review sheet | Done |
-| Profile, wallet (bank, payouts), settings, edit profile | **To do** |
+| Profile tab, settings, edit contact details | Done (`SettingsGroup`/`SettingsTile` in `features/profile`) |
+| Wallet (balance, ledger, bank, payouts, withdraw sheet) | **To do** |
 | Manage drawings (`ManagedDrawingCard`) | **To do** |
 | Admin (verifications, refunds, plagiarism, categories) | **To do** |
 

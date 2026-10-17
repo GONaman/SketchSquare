@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,12 +5,14 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/route_utils.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../auth/domain/user.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/current_user_provider.dart';
 import '../../notifications/presentation/notifications_controller.dart';
 import '../../purchases/presentation/purchases_screen.dart';
 import '../data/profile_providers.dart';
+import 'settings_list.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -25,119 +26,115 @@ class ProfileScreen extends ConsumerWidget {
           user == null
               ? const SizedBox.shrink()
               : ListView(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.gutter,
+                  AppSpacing.sm,
+                  AppSpacing.gutter,
+                  AppSpacing.xl,
+                ),
                 children: [
                   ProfileHeader(user: user),
-                  const SizedBox(height: 16),
                   const _StatsRow(),
                   const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    padding: EdgeInsets.only(top: AppSpacing.lg),
                     child: FreeQuotaBanner(),
                   ),
-                  const Divider(),
-                  _NavTile(
-                    key: const Key('tile-my-drawings'),
-                    icon: Icons.architecture,
-                    title: 'My drawings',
-                    subtitle: 'Stats, prices, buyers and reviews',
-                    onTap:
-                        () =>
-                            pushIfRegistered(context, AppRoutes.manageDrawings),
+                  SettingsGroup(
+                    title: 'Your work',
+                    children: [
+                      SettingsTile(
+                        key: const Key('tile-my-drawings'),
+                        icon: Icons.architecture,
+                        title: 'My drawings',
+                        subtitle: 'Stats, prices, buyers and reviews',
+                        onTap:
+                            () => pushIfRegistered(
+                              context,
+                              AppRoutes.manageDrawings,
+                            ),
+                      ),
+                      SettingsTile(
+                        key: const Key('tile-purchases'),
+                        icon: Icons.folder_open_outlined,
+                        title: 'My purchases',
+                        subtitle: 'Download and rate drawings you own',
+                        onTap: () => context.push(AppRoutes.purchases),
+                      ),
+                      SettingsTile(
+                        key: const Key('tile-favorites'),
+                        icon: Icons.favorite_border_rounded,
+                        title: 'Favorites',
+                        subtitle: 'Drawings you saved',
+                        onTap: () => context.push(AppRoutes.favorites),
+                      ),
+                    ],
                   ),
-                  _NavTile(
-                    key: const Key('tile-purchases'),
-                    icon: Icons.folder_open_outlined,
-                    title: 'My purchases',
-                    subtitle: 'Download and rate drawings you own',
-                    onTap: () => context.push(AppRoutes.purchases),
-                  ),
-                  _NavTile(
-                    key: const Key('tile-notifications'),
-                    icon: Icons.notifications_none,
-                    title: 'Notifications',
-                    subtitle: 'Sales, reviews, payouts and approvals',
-                    badgeCount: ref.watch(unreadNotificationCountProvider),
-                    onTap: () => context.push(AppRoutes.notifications),
-                  ),
-                  _NavTile(
-                    key: const Key('tile-favorites'),
-                    icon: Icons.favorite_border,
-                    title: 'Favorites',
-                    subtitle: 'Drawings you saved',
-                    onTap: () => context.push(AppRoutes.favorites),
-                  ),
-                  _NavTile(
-                    key: const Key('tile-wallet'),
-                    icon: Icons.account_balance_wallet_outlined,
-                    title: 'Wallet',
-                    subtitle: 'Balance, payouts and bank account',
-                    onTap: () => context.push(AppRoutes.wallet),
-                  ),
-                  _NavTile(
-                    key: const Key('tile-edit'),
-                    icon: Icons.edit_outlined,
-                    title: 'Edit contact details',
-                    onTap: () => context.push(AppRoutes.profileEdit),
-                  ),
-                  _NavTile(
-                    key: const Key('tile-settings'),
-                    icon: Icons.settings_outlined,
-                    title: 'Settings',
-                    subtitle: 'Theme and sign out',
-                    onTap: () => context.push(AppRoutes.settings),
+                  SettingsGroup(
+                    title: 'Account',
+                    children: [
+                      SettingsTile(
+                        key: const Key('tile-notifications'),
+                        icon: Icons.notifications_none_rounded,
+                        title: 'Notifications',
+                        subtitle: 'Sales, reviews, payouts and approvals',
+                        badgeCount: ref.watch(unreadNotificationCountProvider),
+                        onTap: () => context.push(AppRoutes.notifications),
+                      ),
+                      SettingsTile(
+                        key: const Key('tile-wallet'),
+                        icon: Icons.account_balance_wallet_outlined,
+                        title: 'Wallet',
+                        subtitle: 'Balance, payouts and bank account',
+                        onTap: () => context.push(AppRoutes.wallet),
+                      ),
+                      SettingsTile(
+                        key: const Key('tile-edit'),
+                        icon: Icons.edit_outlined,
+                        title: 'Edit contact details',
+                        onTap: () => context.push(AppRoutes.profileEdit),
+                      ),
+                      SettingsTile(
+                        key: const Key('tile-settings'),
+                        icon: Icons.settings_outlined,
+                        title: 'Settings',
+                        subtitle: 'Theme and legal',
+                        onTap: () => context.push(AppRoutes.settings),
+                      ),
+                    ],
                   ),
                   if (user.role == UserRole.admin)
-                    _NavTile(
-                      key: const Key('tile-admin'),
-                      icon: Icons.admin_panel_settings_outlined,
-                      title: 'Admin',
-                      onTap: () => context.push(AppRoutes.admin),
+                    SettingsGroup(
+                      title: 'Administration',
+                      children: [
+                        SettingsTile(
+                          key: const Key('tile-admin'),
+                          icon: Icons.admin_panel_settings_outlined,
+                          title: 'Admin',
+                          subtitle: 'Verifications, refunds and moderation',
+                          onTap: () => context.push(AppRoutes.admin),
+                        ),
+                      ],
                     ),
-                  _NavTile(
-                    key: const Key('tile-sign-out'),
-                    icon: Icons.logout,
-                    title: 'Sign out',
-                    onTap:
-                        () =>
-                            ref.read(authControllerProvider.notifier).signOut(),
+                  SettingsGroup(
+                    children: [
+                      SettingsTile(
+                        key: const Key('tile-sign-out'),
+                        icon: Icons.logout_rounded,
+                        title: 'Sign out',
+                        destructive: true,
+                        showChevron: false,
+                        onTap:
+                            () =>
+                                ref
+                                    .read(authControllerProvider.notifier)
+                                    .signOut(),
+                      ),
+                    ],
                   ),
                 ],
               ),
     );
   }
-}
-
-class _NavTile extends StatelessWidget {
-  const _NavTile({
-    super.key,
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    this.badgeCount = 0,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final int badgeCount;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-    leading: Icon(icon),
-    title: Text(title),
-    subtitle: subtitle == null ? null : Text(subtitle!),
-    trailing:
-        badgeCount > 0
-            ? Badge(
-              key: const Key('tile-badge'),
-              label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
-              child: const Icon(Icons.chevron_right),
-            )
-            : const Icon(Icons.chevron_right),
-    onTap: onTap,
-  );
 }
 
 class ProfileHeader extends ConsumerStatefulWidget {
@@ -174,60 +171,97 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
   Widget build(BuildContext context) {
     final user = widget.user;
     final theme = Theme.of(context);
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.bottomRight,
+    return InkHeroCard(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
           children: [
-            Semantics(
-              label: 'Profile photo',
-              image: true,
-              excludeSemantics: true,
-              child: CircleAvatar(
-                key: const Key('profile-avatar'),
-                radius: 48,
-                backgroundImage:
-                    user.avatarUrl == null
-                        ? null
-                        : CachedNetworkImageProvider(user.avatarUrl!),
-                onBackgroundImageError:
-                    user.avatarUrl == null ? null : (_, __) {},
-                child: Text(
-                  _initials(user.fullName),
-                  style: theme.textTheme.headlineMedium,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Semantics(
+                  label: 'Profile photo',
+                  image: true,
+                  excludeSemantics: true,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white24, width: 3),
+                    ),
+                    child: AppAvatar(
+                      key: const Key('profile-avatar'),
+                      name: user.fullName,
+                      url: user.avatarUrl,
+                      size: 92,
+                    ),
+                  ),
                 ),
+                if (_uploading)
+                  const Positioned.fill(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                Positioned(
+                  right: -12,
+                  bottom: -12,
+                  child: IconButton.filledTonal(
+                    key: const Key('change-avatar'),
+                    tooltip: 'Change photo',
+                    icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                    onPressed: _uploading ? null : _changeAvatar,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              user.fullName,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: Colors.white,
               ),
             ),
-            if (_uploading)
-              const Positioned.fill(
-                child: Center(child: CircularProgressIndicator()),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              user.email,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white70,
               ),
-            IconButton.filledTonal(
-              key: const Key('change-avatar'),
-              tooltip: 'Change photo',
-              icon: const Icon(Icons.photo_camera_outlined, size: 18),
-              onPressed: _uploading ? null : _changeAvatar,
             ),
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.place_outlined,
+                  size: 16,
+                  color: Colors.white70,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(
+                  child: Text(
+                    user.city,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white70,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (user.verificationStatus == VerificationStatus.approved) ...[
+              const SizedBox(height: AppSpacing.md),
+              const StatusPill(
+                label: 'Verified architect',
+                tone: StatusTone.success,
+                icon: Icons.verified_rounded,
+              ),
+            ],
           ],
         ),
-        const SizedBox(height: 12),
-        Text(user.fullName, style: theme.textTheme.titleLarge),
-        Text(user.email, style: theme.textTheme.bodySmall),
-        Text(user.city, style: theme.textTheme.bodyMedium),
-        const SizedBox(height: 8),
-        if (user.verificationStatus == VerificationStatus.approved)
-          const Chip(
-            avatar: Icon(Icons.verified, size: 18),
-            label: Text('Verified architect'),
-          ),
-      ],
+      ),
     );
   }
-}
-
-String _initials(String name) {
-  final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-  return parts.take(2).map((p) => p[0].toUpperCase()).join();
 }
 
 /// Rating and drawing count. Shows nothing while loading or on error so the
@@ -239,45 +273,41 @@ class _StatsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(profileStatsProvider).valueOrNull;
     if (stats == null) return const SizedBox.shrink();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _Stat(
-          key: const Key('stat-rating'),
-          label: 'Rating',
-          value:
-              stats.ratingCount == 0
-                  ? '—'
-                  : '${stats.rating.toStringAsFixed(1)} ★',
-        ),
-        _Stat(
-          key: const Key('stat-reviews'),
-          label: 'Reviews',
-          value: '${stats.ratingCount}',
-        ),
-        _Stat(
-          key: const Key('stat-drawings'),
-          label: 'Drawings',
-          value: stats.drawingsLabel,
-        ),
-      ],
-    );
-  }
-}
-
-class _Stat extends StatelessWidget {
-  const _Stat({super.key, required this.label, required this.value});
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      children: [
-        Text(value, style: theme.textTheme.titleMedium),
-        Text(label, style: theme.textTheme.bodySmall),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: Row(
+        children: [
+          Expanded(
+            child: StatTile(
+              key: const Key('stat-rating'),
+              icon: Icons.star_rounded,
+              label: 'Rating',
+              value:
+                  stats.ratingCount == 0
+                      ? '—'
+                      : '${stats.rating.toStringAsFixed(1)} ★',
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: StatTile(
+              key: const Key('stat-reviews'),
+              icon: Icons.rate_review_outlined,
+              label: 'Reviews',
+              value: '${stats.ratingCount}',
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: StatTile(
+              key: const Key('stat-drawings'),
+              icon: Icons.architecture,
+              label: 'Drawings',
+              value: stats.drawingsLabel,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
