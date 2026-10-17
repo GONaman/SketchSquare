@@ -6,6 +6,40 @@ part of 'upload_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$draftStoreHash() => r'a9d13cceb66c39c3ddda5ddaa8acdd57f832aa99';
+
+/// See also [draftStore].
+@ProviderFor(draftStore)
+final draftStoreProvider = Provider<DraftStore>.internal(
+  draftStore,
+  name: r'draftStoreProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$draftStoreHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef DraftStoreRef = ProviderRef<DraftStore>;
+String _$uploadDelayHash() => r'9546253432bcc5424bfe0e8fd4ef3cb494292348';
+
+/// Delay used between processing-status polls; tests override it to run instantly.
+///
+/// Copied from [uploadDelay].
+@ProviderFor(uploadDelay)
+final uploadDelayProvider = Provider<Future<void> Function(Duration)>.internal(
+  uploadDelay,
+  name: r'uploadDelayProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$uploadDelayHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef UploadDelayRef = ProviderRef<Future<void> Function(Duration)>;
 String _$uploadRepositoryHash() => r'68b67202a96d59c7abd69238655bce10eb7da796';
 
 /// Screens depend on the interface providers so tests can override them.

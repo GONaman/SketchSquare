@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DrawingRecord {
 
- String get id; String get title; String get description; CategoryRef? get category; String get city; double get plotLengthFt; double get plotBreadthFt; double get plotAreaSqft; int get floors; int? get bedrooms; String? get facing; List<String> get tags; int get pricePaise; bool get isFree; DrawingStatus get status; String? get failureReason; List<DrawingSheet> get sheets; String? get previewUrl; int get viewCount; int get purchaseCount;
+ String get id; String get title; String get description; CategoryRef? get category; String get city; double get plotLengthFt; double get plotBreadthFt; double get plotAreaSqft; int get floors; int? get bedrooms; String? get facing; List<String> get tags; int get pricePaise; bool get isFree; DrawingStatus get status; String? get failureReason; List<Sheet> get sheets; String? get previewUrl; int get viewCount; int get purchaseCount;
 /// Create a copy of DrawingRecord
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $DrawingRecordCopyWith<$Res>  {
   factory $DrawingRecordCopyWith(DrawingRecord value, $Res Function(DrawingRecord) _then) = _$DrawingRecordCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String description, CategoryRef? category, String city, double plotLengthFt, double plotBreadthFt, double plotAreaSqft, int floors, int? bedrooms, String? facing, List<String> tags, int pricePaise, bool isFree, DrawingStatus status, String? failureReason, List<DrawingSheet> sheets, String? previewUrl, int viewCount, int purchaseCount
+ String id, String title, String description, CategoryRef? category, String city, double plotLengthFt, double plotBreadthFt, double plotAreaSqft, int floors, int? bedrooms, String? facing, List<String> tags, int pricePaise, bool isFree, DrawingStatus status, String? failureReason, List<Sheet> sheets, String? previewUrl, int viewCount, int purchaseCount
 });
 
 
@@ -84,7 +84,7 @@ as int,isFree: null == isFree ? _self.isFree : isFree // ignore: cast_nullable_t
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DrawingStatus,failureReason: freezed == failureReason ? _self.failureReason : failureReason // ignore: cast_nullable_to_non_nullable
 as String?,sheets: null == sheets ? _self.sheets : sheets // ignore: cast_nullable_to_non_nullable
-as List<DrawingSheet>,previewUrl: freezed == previewUrl ? _self.previewUrl : previewUrl // ignore: cast_nullable_to_non_nullable
+as List<Sheet>,previewUrl: freezed == previewUrl ? _self.previewUrl : previewUrl // ignore: cast_nullable_to_non_nullable
 as String?,viewCount: null == viewCount ? _self.viewCount : viewCount // ignore: cast_nullable_to_non_nullable
 as int,purchaseCount: null == purchaseCount ? _self.purchaseCount : purchaseCount // ignore: cast_nullable_to_non_nullable
 as int,
@@ -184,7 +184,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String description,  CategoryRef? category,  String city,  double plotLengthFt,  double plotBreadthFt,  double plotAreaSqft,  int floors,  int? bedrooms,  String? facing,  List<String> tags,  int pricePaise,  bool isFree,  DrawingStatus status,  String? failureReason,  List<DrawingSheet> sheets,  String? previewUrl,  int viewCount,  int purchaseCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String description,  CategoryRef? category,  String city,  double plotLengthFt,  double plotBreadthFt,  double plotAreaSqft,  int floors,  int? bedrooms,  String? facing,  List<String> tags,  int pricePaise,  bool isFree,  DrawingStatus status,  String? failureReason,  List<Sheet> sheets,  String? previewUrl,  int viewCount,  int purchaseCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DrawingRecord() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.category,_that.city,_that.plotLengthFt,_that.plotBreadthFt,_that.plotAreaSqft,_that.floors,_that.bedrooms,_that.facing,_that.tags,_that.pricePaise,_that.isFree,_that.status,_that.failureReason,_that.sheets,_that.previewUrl,_that.viewCount,_that.purchaseCount);case _:
@@ -205,7 +205,7 @@ return $default(_that.id,_that.title,_that.description,_that.category,_that.city
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String description,  CategoryRef? category,  String city,  double plotLengthFt,  double plotBreadthFt,  double plotAreaSqft,  int floors,  int? bedrooms,  String? facing,  List<String> tags,  int pricePaise,  bool isFree,  DrawingStatus status,  String? failureReason,  List<DrawingSheet> sheets,  String? previewUrl,  int viewCount,  int purchaseCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String description,  CategoryRef? category,  String city,  double plotLengthFt,  double plotBreadthFt,  double plotAreaSqft,  int floors,  int? bedrooms,  String? facing,  List<String> tags,  int pricePaise,  bool isFree,  DrawingStatus status,  String? failureReason,  List<Sheet> sheets,  String? previewUrl,  int viewCount,  int purchaseCount)  $default,) {final _that = this;
 switch (_that) {
 case _DrawingRecord():
 return $default(_that.id,_that.title,_that.description,_that.category,_that.city,_that.plotLengthFt,_that.plotBreadthFt,_that.plotAreaSqft,_that.floors,_that.bedrooms,_that.facing,_that.tags,_that.pricePaise,_that.isFree,_that.status,_that.failureReason,_that.sheets,_that.previewUrl,_that.viewCount,_that.purchaseCount);case _:
@@ -225,7 +225,7 @@ return $default(_that.id,_that.title,_that.description,_that.category,_that.city
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String description,  CategoryRef? category,  String city,  double plotLengthFt,  double plotBreadthFt,  double plotAreaSqft,  int floors,  int? bedrooms,  String? facing,  List<String> tags,  int pricePaise,  bool isFree,  DrawingStatus status,  String? failureReason,  List<DrawingSheet> sheets,  String? previewUrl,  int viewCount,  int purchaseCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String description,  CategoryRef? category,  String city,  double plotLengthFt,  double plotBreadthFt,  double plotAreaSqft,  int floors,  int? bedrooms,  String? facing,  List<String> tags,  int pricePaise,  bool isFree,  DrawingStatus status,  String? failureReason,  List<Sheet> sheets,  String? previewUrl,  int viewCount,  int purchaseCount)?  $default,) {final _that = this;
 switch (_that) {
 case _DrawingRecord() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.category,_that.city,_that.plotLengthFt,_that.plotBreadthFt,_that.plotAreaSqft,_that.floors,_that.bedrooms,_that.facing,_that.tags,_that.pricePaise,_that.isFree,_that.status,_that.failureReason,_that.sheets,_that.previewUrl,_that.viewCount,_that.purchaseCount);case _:
@@ -240,7 +240,7 @@ return $default(_that.id,_that.title,_that.description,_that.category,_that.city
 @JsonSerializable()
 
 class _DrawingRecord extends DrawingRecord {
-  const _DrawingRecord({required this.id, required this.title, this.description = '', this.category, this.city = '', this.plotLengthFt = 0, this.plotBreadthFt = 0, this.plotAreaSqft = 0, this.floors = 1, this.bedrooms, this.facing, final  List<String> tags = const <String>[], this.pricePaise = 0, this.isFree = false, required this.status, this.failureReason, final  List<DrawingSheet> sheets = const <DrawingSheet>[], this.previewUrl, this.viewCount = 0, this.purchaseCount = 0}): _tags = tags,_sheets = sheets,super._();
+  const _DrawingRecord({required this.id, required this.title, this.description = '', this.category, this.city = '', this.plotLengthFt = 0, this.plotBreadthFt = 0, this.plotAreaSqft = 0, this.floors = 1, this.bedrooms, this.facing, final  List<String> tags = const <String>[], this.pricePaise = 0, this.isFree = false, required this.status, this.failureReason, final  List<Sheet> sheets = const <Sheet>[], this.previewUrl, this.viewCount = 0, this.purchaseCount = 0}): _tags = tags,_sheets = sheets,super._();
   factory _DrawingRecord.fromJson(Map<String, dynamic> json) => _$DrawingRecordFromJson(json);
 
 @override final  String id;
@@ -265,8 +265,8 @@ class _DrawingRecord extends DrawingRecord {
 @override@JsonKey() final  bool isFree;
 @override final  DrawingStatus status;
 @override final  String? failureReason;
- final  List<DrawingSheet> _sheets;
-@override@JsonKey() List<DrawingSheet> get sheets {
+ final  List<Sheet> _sheets;
+@override@JsonKey() List<Sheet> get sheets {
   if (_sheets is EqualUnmodifiableListView) return _sheets;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_sheets);
@@ -309,7 +309,7 @@ abstract mixin class _$DrawingRecordCopyWith<$Res> implements $DrawingRecordCopy
   factory _$DrawingRecordCopyWith(_DrawingRecord value, $Res Function(_DrawingRecord) _then) = __$DrawingRecordCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String description, CategoryRef? category, String city, double plotLengthFt, double plotBreadthFt, double plotAreaSqft, int floors, int? bedrooms, String? facing, List<String> tags, int pricePaise, bool isFree, DrawingStatus status, String? failureReason, List<DrawingSheet> sheets, String? previewUrl, int viewCount, int purchaseCount
+ String id, String title, String description, CategoryRef? category, String city, double plotLengthFt, double plotBreadthFt, double plotAreaSqft, int floors, int? bedrooms, String? facing, List<String> tags, int pricePaise, bool isFree, DrawingStatus status, String? failureReason, List<Sheet> sheets, String? previewUrl, int viewCount, int purchaseCount
 });
 
 
@@ -345,7 +345,7 @@ as int,isFree: null == isFree ? _self.isFree : isFree // ignore: cast_nullable_t
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as DrawingStatus,failureReason: freezed == failureReason ? _self.failureReason : failureReason // ignore: cast_nullable_to_non_nullable
 as String?,sheets: null == sheets ? _self._sheets : sheets // ignore: cast_nullable_to_non_nullable
-as List<DrawingSheet>,previewUrl: freezed == previewUrl ? _self.previewUrl : previewUrl // ignore: cast_nullable_to_non_nullable
+as List<Sheet>,previewUrl: freezed == previewUrl ? _self.previewUrl : previewUrl // ignore: cast_nullable_to_non_nullable
 as String?,viewCount: null == viewCount ? _self.viewCount : viewCount // ignore: cast_nullable_to_non_nullable
 as int,purchaseCount: null == purchaseCount ? _self.purchaseCount : purchaseCount // ignore: cast_nullable_to_non_nullable
 as int,
