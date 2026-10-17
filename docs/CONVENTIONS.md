@@ -151,6 +151,15 @@ Integer paise everywhere (Prisma `Int`/`BigInt`, never floats). Timestamps are r
 sign-in; PENDING/REJECTED → `/verification-pending` (and `/sign-up`, so the document step can finish); APPROVED → app, `/admin*` only for role ADMIN.
 New logged-out screens must be added to `AppRoutes.publicRoutes`; new non-tab routes of a feature go in its `*_routes.dart` and are spread into the router.
 
+### Screens
+- Logged-out screens use `AuthFormScaffold` + `PasswordField` (`presentation/widgets/`), validators from `AuthValidators` (domain, pure), and show failures with `FormErrorBanner`;
+  `serverFieldErrors(apiException)` maps a contract `VALIDATION_ERROR` (`details.fields`) to `TextFormField.forceErrorText`.
+- Navigate between logged-out screens with `go` when the next screen can change the auth state (sign-up), `push` otherwise (A7).
+- `VerificationForm` (features/verification) is the shared COA number + document form; pickers/repositories are injected via `documentPickerProvider` /
+  `verificationRepositoryProvider` so tests use `FakeDocumentPicker` / `FakeVerificationRepository` (`test/helpers/fake_verification.dart`).
+- The intro video is built through `introVideoBuilderProvider` (tests override it; `video_player` has no test platform). The asset is a placeholder (A11).
+- Widget tests of logged-out flows: `pumpLoggedOut(tester, {auth, verification, picker, introSeen})` in `test/helpers/auth_test_utils.dart` (tall viewport, fakes wired).
+
 ### Testing
 `pumpApp(tester, {signedIn = true, user, introSeen = true})` boots the whole app with a `FakeAuthRepository`; by default you are an approved architect
 on the shell, so existing feature tests are unaffected. Use `signedIn: false` for logged-out flows, `user:` for PENDING/REJECTED/ADMIN sessions.
