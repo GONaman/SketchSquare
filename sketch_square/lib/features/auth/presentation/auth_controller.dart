@@ -7,6 +7,7 @@ import '../domain/auth_repository.dart';
 import '../domain/auth_session.dart';
 import '../domain/auth_state.dart';
 import '../domain/user.dart';
+import '../../notifications/presentation/push_registrar.dart';
 import 'auth_repository_provider.dart';
 import 'intro_seen_provider.dart';
 
@@ -87,6 +88,13 @@ class AuthController extends _$AuthController {
   /// Best effort server-side revoke; the local session always ends.
   Future<void> signOut() async {
     final tokens = await _tokens.read();
+    try {
+      // The device-token DELETE needs the access token, so do it first.
+      await ref
+          .read(pushRegistrarProvider)
+          .unregister()
+          .timeout(const Duration(seconds: 3));
+    } catch (_) {}
     await _tokens.clear();
     state = const AuthState.unauthenticated();
     if (tokens != null) {

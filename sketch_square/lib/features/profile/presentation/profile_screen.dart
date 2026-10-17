@@ -9,6 +9,7 @@ import '../../../core/router/routes.dart';
 import '../../auth/domain/user.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/current_user_provider.dart';
+import '../../notifications/presentation/notifications_controller.dart';
 import '../../purchases/presentation/purchases_screen.dart';
 import '../data/profile_providers.dart';
 
@@ -49,6 +50,14 @@ class ProfileScreen extends ConsumerWidget {
                     title: 'My purchases',
                     subtitle: 'Download and rate drawings you own',
                     onTap: () => context.push(AppRoutes.purchases),
+                  ),
+                  _NavTile(
+                    key: const Key('tile-notifications'),
+                    icon: Icons.notifications_none,
+                    title: 'Notifications',
+                    subtitle: 'Sales, reviews, payouts and approvals',
+                    badgeCount: ref.watch(unreadNotificationCountProvider),
+                    onTap: () => context.push(AppRoutes.notifications),
                   ),
                   _NavTile(
                     key: const Key('tile-favorites'),
@@ -104,12 +113,14 @@ class _NavTile extends StatelessWidget {
     required this.icon,
     required this.title,
     this.subtitle,
+    this.badgeCount = 0,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
+  final int badgeCount;
   final VoidCallback onTap;
 
   @override
@@ -117,7 +128,14 @@ class _NavTile extends StatelessWidget {
     leading: Icon(icon),
     title: Text(title),
     subtitle: subtitle == null ? null : Text(subtitle!),
-    trailing: const Icon(Icons.chevron_right),
+    trailing:
+        badgeCount > 0
+            ? Badge(
+              key: const Key('tile-badge'),
+              label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
+              child: const Icon(Icons.chevron_right),
+            )
+            : const Icon(Icons.chevron_right),
     onTap: onTap,
   );
 }

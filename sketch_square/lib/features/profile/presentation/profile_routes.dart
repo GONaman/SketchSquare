@@ -4,6 +4,7 @@ import '../../../core/router/placeholder_detail_route.dart';
 import '../../../core/router/routes.dart';
 import '../../drawings/presentation/discovery_routes.dart';
 import '../../favorites/presentation/favorites_screen.dart';
+import '../../notifications/presentation/notifications_screen.dart';
 import '../../purchases/presentation/purchases_screen.dart';
 import '../../wallet/presentation/bank_account_screen.dart';
 import '../../wallet/presentation/payouts_screen.dart';
@@ -22,6 +23,10 @@ final profileRoutes = <RouteBase>[
       GoRoute(path: 'favorites', builder: (_, __) => const FavoritesScreen()),
       // Drawings opened from Favorites keep the Profile tab's own stack.
       ...discoverySubRoutes(favoritesPaths, includeSearch: false),
+      GoRoute(
+        path: 'notifications',
+        builder: (_, __) => const NotificationsScreen(),
+      ),
       GoRoute(path: 'edit', builder: (_, __) => const EditContactScreen()),
       GoRoute(path: 'settings', builder: (_, __) => const SettingsScreen()),
       GoRoute(
