@@ -7,3 +7,4 @@ One line of reasoning per decision. Items marked **needs owner confirmation** ar
 | D1 | Work happens via small feature branches merged by squash PR; `main` is never pushed to directly. | Owner requirement. |
 | D2 | Old Firebase-based prototype (local, uncommitted) is not carried over; the spec mandates our own NestJS backend. | Spec Part 1 stack is fixed. |
 | D3 | Generated Dart code (`*.g.dart`, `*.freezed.dart`) is committed. | Keeps `flutter analyze`/`test` reproducible without a codegen step in CI. |
+| D4 | MinIO runs from `bitnamilegacy/minio` in docker-compose. | `minio/minio` and `minio/mc` Docker Hub images were not pullable on the dev network; Bitnami's image bundles the `mc` client too. |
