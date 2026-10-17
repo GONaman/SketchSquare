@@ -1,8 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sketch_square/core/network/api_exception.dart';
 import 'package:sketch_square/core/network/cursor_page.dart';
+import 'package:sketch_square/features/architects/data/architects_providers.dart';
 import 'package:sketch_square/features/architects/domain/architect_profile.dart';
 import 'package:sketch_square/features/architects/domain/architect_summary.dart';
 import 'package:sketch_square/features/architects/domain/architects_repository.dart';
+import 'package:sketch_square/features/drawings/data/drawings_providers.dart';
 import 'package:sketch_square/features/drawings/domain/city_count.dart';
 import 'package:sketch_square/features/drawings/domain/drawing_actions_repository.dart';
 import 'package:sketch_square/features/drawings/domain/drawing_detail.dart';
@@ -242,3 +245,20 @@ class FakeDrawingActions implements DrawingActionsRepository {
     favorites[drawingId] = favorite;
   }
 }
+
+/// Provider overrides replacing every discovery repository with a fake.
+List<Override> discoveryFakes({
+  FakeDrawingsRepository? drawings,
+  FakeArchitectsRepository? architects,
+  FakeDrawingActions? actions,
+}) => [
+  drawingsRepositoryProvider.overrideWithValue(
+    drawings ?? FakeDrawingsRepository(),
+  ),
+  architectsRepositoryProvider.overrideWithValue(
+    architects ?? FakeArchitectsRepository(),
+  ),
+  drawingActionsRepositoryProvider.overrideWithValue(
+    actions ?? FakeDrawingActions(),
+  ),
+];

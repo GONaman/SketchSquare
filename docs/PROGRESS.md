@@ -35,7 +35,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 ## Phase 4 — Discovery
 - [ ] 4.1 Search endpoint (size tolerance + rotation, filters, sort)
 - [ ] 4.2 Detail, categories, cities, architects
-- [ ] 4.3 Flutter home + search + filters
+- [x] 4.3 Flutter home + search + filters
 - [ ] 4.4 Flutter featured + drawing detail
 
 ## Phase 5 — Purchasing
@@ -66,3 +66,4 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - Flutter intro video (`sketch_square/assets/videos/intro.mp4`) is a placeholder; TODO replace with the real ~30 s demo. `video_player` playback itself is only checked on a device/emulator (tests stub it).
 - Flutter document picker (`file_picker`) on iOS/macOS/Android: verify picking PDF/JPG/PNG on a real device (platform permissions/entitlements untested).
 - Password-reset email link does not open the app (no deep-link setup); users paste the code from the email (A10).
+- Discovery (4.3): eyeball the drawing grid on real devices and at large text scales; check keyboard/focus behaviour of the search field and plot-size fields; verify cursor paging and `sizeMatch` against the real backend once 4.1 is merged; cached-image behaviour of `DrawingPreviewImage` is untested.

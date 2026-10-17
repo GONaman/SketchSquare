@@ -180,3 +180,11 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - Tab screens in an `IndexedStatefulShell` stay mounted; refresh on re-activation with `TickerMode.of(context)` + `WidgetsBindingObserver` resume (see `basket_screen.dart`).
 - Checkout state is a sealed class (`CheckoutIdle/Processing/Success/Failure/Pending`); screens only react to it, all payment logic is in `CheckoutController`.
 - Shared fixtures: `fakeDrawing()` / `fakeSheet()` in `test/helpers/commerce_fixtures.dart`.
+
+## Flutter discovery (home / search / detail)
+- Routes: `DiscoveryPaths(base)` builds `search`/`drawing`/`architect` locations under a tab; `discoverySubRoutes(paths)` registers the sub-routes, so Home and Featured share screens.
+- Search state is the URL: `DrawingSearchQuery` <-> query string (`drawing_search_query_uri.dart`). Screens derive the query from the route; change it with `context.go(paths.search(query))` and open results with `push`.
+- `DrawingSearchController` (family keyed by query) holds `PagedState<DrawingSummary>` (`core/pagination`); render with `pagedDrawingSlivers(...)` (skeleton, error retry, empty, grid, prefetch + footer). Text input is debounced 400 ms.
+- Plot size: `PlotSizeController` + `PlotSizeFields`; validation lives in `domain/plot_size.dart` (`validatePlotSize`). Money/size formatting only through `presentation/formatters.dart` (`formatPaise` etc.).
+- Tests: fakes and JSON builders in `test/features/drawings/fixtures.dart` (`discoveryFakes()`, `FakeDrawingsRepository` records `searchCalls`). The shell keeps Home mounted behind Search, so filter `searchCalls` by query when asserting. Never `pumpAndSettle` while a page request is in flight (spinner animates forever).
+
