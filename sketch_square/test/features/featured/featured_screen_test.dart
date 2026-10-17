@@ -20,7 +20,7 @@ void main() {
     FakeDrawingsRepository? drawings,
     FakeArchitectsRepository? architects,
   }) async {
-    tester.view.physicalSize = const Size(900, 2400);
+    tester.view.physicalSize = const Size(500, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await pumpApp(

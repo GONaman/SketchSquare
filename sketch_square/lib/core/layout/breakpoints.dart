@@ -25,6 +25,9 @@ abstract final class Breakpoints {
   /// Max content width for browse screens (feeds, detail, lists).
   static const double browseMaxWidth = 1200;
 
+  /// Max content width for single-column row lists and summaries.
+  static const double listMaxWidth = 760;
+
   /// Max content width for forms, auth, checkout, wallet and settings.
   static const double formMaxWidth = 560;
 

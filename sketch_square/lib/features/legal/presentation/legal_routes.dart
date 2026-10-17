@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../../core/layout/layout.dart';
 import '../../../core/router/routes.dart';
 import 'legal_screen.dart';
 
@@ -8,10 +9,18 @@ import 'legal_screen.dart';
 final legalRoutes = <RouteBase>[
   GoRoute(
     path: AppRoutes.terms,
-    builder: (_, __) => const LegalDocumentScreen.terms(),
+    builder:
+        (_, __) => const ContentFrame(
+          width: ContentWidth.list,
+          child: LegalDocumentScreen.terms(),
+        ),
   ),
   GoRoute(
     path: AppRoutes.privacy,
-    builder: (_, __) => const LegalDocumentScreen.privacy(),
+    builder:
+        (_, __) => const ContentFrame(
+          width: ContentWidth.list,
+          child: LegalDocumentScreen.privacy(),
+        ),
   ),
 ];

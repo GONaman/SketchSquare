@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../../core/layout/layout.dart';
 import '../../../core/router/routes.dart';
 import 'manage_drawings_screen.dart';
 
@@ -8,6 +9,10 @@ import 'manage_drawings_screen.dart';
 final manageDrawingsRoutes = <RouteBase>[
   GoRoute(
     path: AppRoutes.manageDrawings,
-    builder: (_, __) => const ManageDrawingsScreen(),
+    builder:
+        (_, __) => const ContentFrame(
+          width: ContentWidth.list,
+          child: ManageDrawingsScreen(),
+        ),
   ),
 ];

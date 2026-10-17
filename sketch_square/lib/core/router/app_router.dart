@@ -41,7 +41,9 @@ GoRouter appRouter(Ref ref) {
       ...adminRoutes,
       ...manageDrawingsRoutes,
       StatefulShellRoute.indexedStack(
-        builder: (_, __, shell) => AppShell(navigationShell: shell),
+        builder:
+            (_, state, shell) =>
+                AppShell(navigationShell: shell, location: state.uri.path),
         // Branch order == bottom-nav order. Each feature owns its routes.
         branches: [
           StatefulShellBranch(routes: homeRoutes),

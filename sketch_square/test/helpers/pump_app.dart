@@ -29,14 +29,28 @@ import 'fake_verification.dart';
 /// `signedIn: false` for the logged-out flow, or [user] to pick the session
 /// user (e.g. a PENDING architect or an ADMIN). [introSeen] seeds the
 /// onboarding flag.
+///
+/// Unless the test already picked a surface size (or passes [size]), the app
+/// is pumped at a phone size (390x844) so the compact layout (bottom
+/// `NavigationBar`) is what tests see; the flutter_test default of 800x600 would
+/// otherwise select the tablet layout.
 Future<ProviderContainer> pumpApp(
   WidgetTester tester, {
   List<Override> overrides = const [],
   bool signedIn = true,
   User? user,
   bool introSeen = true,
+  Size? size,
 }) async {
   AppTheme.useGoogleFonts = false;
+  final untouched =
+      tester.view.physicalSize == const Size(2400, 1800) &&
+      tester.view.devicePixelRatio == 3;
+  if (size != null || untouched) {
+    tester.view.physicalSize = size ?? const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+  }
   SharedPreferences.setMockInitialValues({
     if (introSeen) IntroSeen.prefsKey: true,
   });
