@@ -42,7 +42,28 @@ final tokenStoreProvider = Provider<TokenStore>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TokenStoreRef = ProviderRef<TokenStore>;
-String _$dioHash() => r'1ed2bea256c7a6b721e5e9037b1a86dc6362f39d';
+String _$sharedPreferencesHash() => r'40004dbe6d842c0c162dedd918eff6d6e16dfae0';
+
+/// Must be overridden in `main()` (after `SharedPreferences.getInstance()`) and
+/// in tests (see `pumpApp`), so reads of simple flags stay synchronous.
+///
+/// Copied from [sharedPreferences].
+@ProviderFor(sharedPreferences)
+final sharedPreferencesProvider = Provider<SharedPreferences>.internal(
+  sharedPreferences,
+  name: r'sharedPreferencesProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$sharedPreferencesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SharedPreferencesRef = ProviderRef<SharedPreferences>;
+String _$dioHash() => r'3cc34e5a1ca8fe81004ae1b243ce26398ba21aca';
 
 /// See also [dio].
 @ProviderFor(dio)
@@ -58,5 +79,24 @@ final dioProvider = Provider<Dio>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef DioRef = ProviderRef<Dio>;
+String _$sessionExpiredHash() => r'74a62641ecae93c2e5648a0cfde9dbf6c95356e7';
+
+/// Bumped when the HTTP layer gives up on the session (refresh token
+/// rejected); the auth controller listens and signs the user out.
+///
+/// Copied from [SessionExpired].
+@ProviderFor(SessionExpired)
+final sessionExpiredProvider = NotifierProvider<SessionExpired, int>.internal(
+  SessionExpired.new,
+  name: r'sessionExpiredProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$sessionExpiredHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$SessionExpired = Notifier<int>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

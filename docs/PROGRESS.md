@@ -21,7 +21,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 2.1 Backend auth (signup/login/refresh/logout/reset)
 - [ ] 2.2 Backend verification + admin + email jobs + global guard
 - [ ] 2.3 Backend e2e tests
-- [ ] 2.4 Flutter auth core (interceptor, router guard)
+- [x] 2.4 Flutter auth core (interceptor, router guard)
 - [ ] 2.5 Flutter intro/sign in/sign up/forgot
 - [ ] 2.6 Flutter pending screen + admin area
 

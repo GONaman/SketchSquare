@@ -5,7 +5,7 @@ import 'api_exception.dart';
 
 /// Adds `Authorization: Bearer <access token>` when a token is stored.
 ///
-/// Phase 2 adds the refresh-on-401 interceptor next to this one.
+/// The refresh-on-401 logic lives in `refresh_interceptor.dart`.
 class AuthHeaderInterceptor extends Interceptor {
   AuthHeaderInterceptor(this._tokenStore);
 

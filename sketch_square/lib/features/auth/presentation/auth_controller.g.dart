@@ -6,10 +6,11 @@ part of 'auth_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authControllerHash() => r'a3349218ed457e886d745448e545bbe6987cebba';
+String _$authControllerHash() => r'b52dfba416eba478566453fbdc1d8a8312f3c34c';
 
-/// Session state. STUB: always "logged in & approved" so the shell shows.
-/// Phase 2 replaces `build` with the real token/session bootstrap.
+/// The app session. Starts as [AuthState.initializing], validates any stored
+/// tokens with `GET /me`, then settles on authenticated/unauthenticated.
+/// Methods throw [ApiException] so screens can show inline errors.
 ///
 /// Copied from [AuthController].
 @ProviderFor(AuthController)
