@@ -119,7 +119,4 @@ export const AUTHZ_MATRIX: Record<string, MatrixEntry> = {
   'GET /admin/purchases': { access: 'admin' },
   'GET /admin/purchases/:id': { access: 'admin' },
   'POST /admin/purchases/:id/refund': { access: 'admin' },
-  'GET /admin/plagiarism-flags': { access: 'admin' },
-  'POST /admin/plagiarism-flags/:id/approve': { access: 'admin' },
-  'POST /admin/plagiarism-flags/:id/reject': { access: 'admin' },
 };
