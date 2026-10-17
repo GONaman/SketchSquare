@@ -12,10 +12,10 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 0.6 GitHub Actions CI
 
 ## Phase 1 — Database schema
-- [ ] 1.1 Prisma schema + migration (enums, indexes, partial unique, FTS)
+- [x] 1.1 Prisma schema + migration (enums, indexes, partial unique, FTS)
 - [ ] 1.2 Seed script
-- [ ] 1.3 Ledger zero-sum guard + test
-- [ ] 1.4 docs/data-model.md
+- [x] 1.3 Ledger zero-sum guard + test
+- [x] 1.4 docs/data-model.md
 
 ## Phase 2 — Auth, onboarding, verification
 - [ ] 2.1 Backend auth (signup/login/refresh/logout/reset)

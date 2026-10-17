@@ -123,6 +123,12 @@ Use `common/pagination.ts`: extend/use `PageQueryDto` (`cursor`, `limit` 20/max 
 ### Money, ledger, time
 Integer paise everywhere (Prisma `Int`/`BigInt`, never floats). Timestamps are returned as ISO strings (Date → JSON). Lengths in feet.
 
+### Database
+- Schema: `backend/prisma/schema.prisma`; change it with `npx prisma migrate dev --name <name> < /dev/null` (use `--create-only` and hand-edit when raw SQL is needed). See `docs/data-model.md` for DB-level rules (partial unique, triggers, FTS, ledger).
+- Identifiers in raw SQL are quoted (`"Drawing"."pricePaise"`). Never write `Drawing.plotAreaSqft` or `searchVector`.
+- Ledger: only through `LedgerService.postTransaction(entries, tx?)` (import `LedgerModule`; it is a feature module like any other). Pass the caller's `tx` from `prisma.$transaction(async (tx) => …)` to commit atomically with purchase/withdrawal updates.
+- e2e DB: `globalSetup` migrates `sketchsquare_test` (override with `TEST_DATABASE_URL`); call `resetDb(prisma)` from `test/helpers/db.ts` in `beforeEach` (TRUNCATE ... CASCADE; ledger rows cannot be DELETEd).
+
 ### Tests
 - Unit tests next to the code; infra-free (mock Prisma/Redis/S3).
 - e2e: build `Test.createTestingModule({ imports: [AppModule] })`, then `configureApp(app)` before `app.init()` so the real pipe/filter apply;
