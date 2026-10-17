@@ -54,7 +54,7 @@ class ProfileScreen extends ConsumerWidget {
                     icon: Icons.account_balance_wallet_outlined,
                     title: 'Wallet',
                     subtitle: 'Balance, payouts and bank account',
-                    onTap: () => pushIfRegistered(context, AppRoutes.wallet),
+                    onTap: () => context.push(AppRoutes.wallet),
                   ),
                   _NavTile(
                     key: const Key('tile-edit'),

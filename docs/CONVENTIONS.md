@@ -191,6 +191,8 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - Profile (`features/profile`): `ProfileRepository` / `AvatarPicker` interfaces, fakes in `test/features/profile/fakes.dart`. Subroutes live in `profile_routes.dart`; path constants in `AppRoutes` (`profileEdit`, `settings`, `wallet`, `manageDrawings`).
 - Link to routes owned by other agents with `pushIfRegistered(context, AppRoutes.x)` (`core/router/route_utils.dart`): it shows a "Coming soon" snackbar if the path is not registered yet.
 - In widget tests list `...discoveryFakes()` FIRST in `overrides`, otherwise it replaces your `architectsRepositoryProvider` override.
+- Wallet (`features/wallet`): `WalletRepository` + `DioWalletRepository`, fakes in `test/features/wallet/fakes.dart`. `WalletController` (summary + `saveBankAccount` / `withdraw`), `LedgerController` / `WithdrawalsController` (`PagedState`). All validation lives in `WalletValidators` (pure, unit-tested); server codes map through `WalletValidators.messageFor`.
+- Infinite lists inside a plain `ListView(children: …)`: append `LoadMoreSentinel` (`core/widgets/load_more_sentinel.dart`) keyed by the item count; it calls `loadMore` once it is built.
 
 ## Flutter discovery (home / search / detail)
 - Routes: `DiscoveryPaths(base)` builds `search`/`drawing`/`architect` locations under a tab; `discoverySubRoutes(paths)` registers the sub-routes, so Home and Featured share screens.

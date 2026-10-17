@@ -26,6 +26,8 @@ abstract final class AppRoutes {
   static const profileEdit = '/profile/edit';
   static const settings = '/profile/settings';
   static const wallet = '/profile/wallet';
+  static const walletBank = '/profile/wallet/bank-account';
+  static const walletPayouts = '/profile/wallet/payouts';
 
   /// Sub-route segment registered under every tab, for per-tab stack tests.
   static const detailSegment = 'details';
