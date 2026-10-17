@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sketch_square/core/router/app_router.dart';
+import 'package:sketch_square/core/router/routes.dart';
 import 'package:sketch_square/features/basket/data/basket_providers.dart';
 import 'package:sketch_square/features/basket/data/pending_checkout_store.dart';
 import 'package:sketch_square/features/basket/domain/checkout_models.dart';
@@ -128,5 +130,32 @@ void main() {
 
     expect(find.text('Payment failed'), findsOneWidget);
     expect(find.text('Try again'), findsOneWidget);
+  });
+
+  testWidgets('checkout shows an error with retry when the basket fails', (
+    tester,
+  ) async {
+    cart.error = networkError;
+    final container = await pumpApp(
+      tester,
+      overrides: [
+        cartRepositoryProvider.overrideWithValue(cart),
+        checkoutRepositoryProvider.overrideWithValue(checkout),
+        paymentGatewayProvider.overrideWithValue(gateway),
+        pendingCheckoutStoreProvider.overrideWithValue(
+          InMemoryPendingCheckoutStore(),
+        ),
+      ],
+    );
+    container.read(appRouterProvider).go(AppRoutes.basketCheckout);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Your basket is empty.'), findsNothing);
+    expect(find.text('Retry'), findsOneWidget);
+
+    cart.error = null;
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('checkout-total')), findsOneWidget);
   });
 }

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../upload/domain/money.dart';
 import '../../../core/format/plot_size.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/error_retry.dart';
 import 'cart_controller.dart';
 import 'checkout_controller.dart';
 
@@ -40,14 +42,22 @@ class CheckoutScreen extends ConsumerWidget {
     });
 
     final theme = Theme.of(context);
-    final cart = ref.watch(cartControllerProvider).valueOrNull;
+    final cartAsync = ref.watch(cartControllerProvider);
+    final cart = cartAsync.valueOrNull;
     final state = ref.watch(checkoutControllerProvider);
     final processing = state is CheckoutProcessing;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),
       body:
-          cart == null || cart.isEmpty
+          cart == null
+              ? (cartAsync.hasError
+                  ? ErrorRetry(
+                    message: toApiException(cartAsync.error!).message,
+                    onRetry: () => ref.invalidate(cartControllerProvider),
+                  )
+                  : const Center(child: CircularProgressIndicator()))
+              : cart.isEmpty
               ? const Center(child: Text('Your basket is empty.'))
               : Column(
                 children: [
