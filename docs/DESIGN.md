@@ -174,7 +174,7 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Architect profile header | **To do** |
 | Auth: sign-in, sign-up (2-step), forgot/reset, verification upload form | **Done** (`AuthHero`, `StepProgress`, `PasswordStrengthMeter`, `AppTextField`/`PrimaryButton`) |
 | Auth: intro, splash, verification status (timeline), Privacy/Terms | **Done** (frosted intro controls, `BlueprintIllustration` + status timeline, tonal legal notice) |
-| Upload flow | **To do** |
+| Upload flow (stepper, sectioned steps, thumbnail sheet tiles with progress rings, live `DrawingCard` preview, celebratory publish state) | Done |
 | Basket + checkout + order result | Done |
 | Purchases library + download/review sheet | Done |
 | Profile tab, settings, edit contact details | Done (`SettingsGroup`/`SettingsTile` in `features/profile`) |

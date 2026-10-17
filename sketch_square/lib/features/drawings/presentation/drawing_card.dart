@@ -25,6 +25,7 @@ class DrawingCard extends StatelessWidget {
     required this.drawing,
     required this.onTap,
     this.favoriteAction,
+    this.preview,
   });
 
   final DrawingSummary drawing;
@@ -32,6 +33,9 @@ class DrawingCard extends StatelessWidget {
 
   /// Optional heart shown over the preview (top-left), e.g. in Favorites.
   final Widget? favoriteAction;
+
+  /// Replaces the network preview image, e.g. a local file while uploading.
+  final Widget? preview;
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +52,11 @@ class DrawingCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Hero(
-                  tag: drawingHeroTag(context, drawing.id),
-                  child: DrawingPreviewImage(url: drawing.previewUrl),
-                ),
+                preview ??
+                    Hero(
+                      tag: drawingHeroTag(context, drawing.id),
+                      child: DrawingPreviewImage(url: drawing.previewUrl),
+                    ),
                 const Positioned.fill(
                   child: IgnorePointer(
                     child: DecoratedBox(
