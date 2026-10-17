@@ -9,9 +9,8 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/network/cursor_page.dart';
 import '../../../core/pagination/paged_state.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/widgets/blueprint_empty_state.dart';
-import '../../../core/widgets/error_retry.dart';
-import '../../drawings/presentation/formatters.dart';
+import '../../../core/widgets/load_more_sentinel.dart';
+import '../../../core/widgets/widgets.dart';
 import '../domain/admin_purchase.dart';
 import 'refunds_providers.dart';
 
@@ -117,28 +116,15 @@ class _AdminRefundsScreenState extends ConsumerState<AdminRefundsScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: TextField(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.gutter,
+              AppSpacing.md,
+              AppSpacing.gutter,
+              AppSpacing.sm,
+            ),
+            child: _SearchField(
               key: const Key('refunds-search'),
               controller: _search,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: 'Buyer, seller, drawing, order or payment id',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon:
-                    _search.text.isEmpty
-                        ? null
-                        : IconButton(
-                          key: const Key('refunds-search-clear'),
-                          icon: const Icon(Icons.clear),
-                          tooltip: 'Clear',
-                          onPressed: () {
-                            _search.clear();
-                            _onQueryChanged('');
-                            setState(() {});
-                          },
-                        ),
-              ),
               onChanged: (v) {
                 setState(() {});
                 _onQueryChanged(v);
@@ -151,25 +137,38 @@ class _AdminRefundsScreenState extends ConsumerState<AdminRefundsScreen> {
                   _reload();
                 }
               },
+              onClear: () {
+                _search.clear();
+                _onQueryChanged('');
+                setState(() {});
+              },
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Wrap(
-              spacing: 8,
-              children: [
-                for (final (label, value) in <(String, PurchaseStatus?)>[
-                  ('All', null),
-                  ('Paid', PurchaseStatus.paid),
-                  ('Refunded', PurchaseStatus.refunded),
-                ])
-                  ChoiceChip(
-                    key: Key('refunds-filter-${value?.wire ?? 'ALL'}'),
-                    label: Text(label),
-                    selected: _status == value,
-                    onSelected: (_) => _setStatus(value),
-                  ),
-              ],
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.gutter,
+              0,
+              AppSpacing.gutter,
+              AppSpacing.sm,
+            ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                children: [
+                  for (final (label, value) in <(String, PurchaseStatus?)>[
+                    ('All', null),
+                    ('Paid', PurchaseStatus.paid),
+                    ('Refunded', PurchaseStatus.refunded),
+                  ])
+                    ChoiceChip(
+                      key: Key('refunds-filter-${value?.wire ?? 'ALL'}'),
+                      label: Text(label),
+                      selected: _status == value,
+                      onSelected: (_) => _setStatus(value),
+                    ),
+                ],
+              ),
             ),
           ),
           Expanded(child: _content()),
@@ -181,14 +180,14 @@ class _AdminRefundsScreenState extends ConsumerState<AdminRefundsScreen> {
   Widget _content() {
     final paged = _paged;
     if (_loading && paged == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const ListRowSkeleton(count: 4);
     }
     if (_error != null) {
-      return ErrorRetry(message: _error!.message, onRetry: _reload);
+      return ErrorState(message: _error!.message, onRetry: _reload);
     }
     if (paged == null) return const SizedBox.shrink();
     if (paged.items.isEmpty) {
-      return const BlueprintEmptyState(
+      return const EmptyState(
         icon: Icons.receipt_long_outlined,
         title: 'No purchases found',
         message: 'Try a different search or filter.',
@@ -198,19 +197,63 @@ class _AdminRefundsScreenState extends ConsumerState<AdminRefundsScreen> {
       onRefresh: _reload,
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.gutter,
+          AppSpacing.xs,
+          AppSpacing.gutter,
+          AppSpacing.gutter,
+        ),
         itemCount: paged.items.length + (paged.hasMore ? 1 : 0),
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
         itemBuilder: (context, i) {
           if (i == paged.items.length) {
-            return _LoadMore(
-              paged.isLoadingMore,
-              paged.loadMoreError?.message,
-              _loadMore,
+            return LoadMoreSentinel(
+              key: ValueKey('refunds-more-${paged.items.length}'),
+              loading: paged.isLoadingMore,
+              errorMessage: paged.loadMoreError?.message,
+              onLoadMore: _loadMore,
+              onRetry: _loadMore,
             );
           }
           return _PurchaseTile(paged.items[i]);
         },
       ),
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({
+    super.key,
+    required this.controller,
+    required this.onChanged,
+    required this.onSubmitted,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppTextField(
+      controller: controller,
+      hint: 'Buyer, seller, drawing or order id',
+      prefixIcon: Icons.search,
+      textInputAction: TextInputAction.search,
+      suffix:
+          controller.text.isEmpty
+              ? null
+              : IconButton(
+                key: const Key('refunds-search-clear'),
+                icon: const Icon(Icons.clear),
+                tooltip: 'Clear',
+                onPressed: onClear,
+              ),
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
     );
   }
 }
@@ -222,81 +265,65 @@ class _PurchaseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    return AppCard(
       key: Key('purchase-${item.id}'),
-      title: Text(item.drawingTitle),
-      subtitle: Text(
-        [
-          item.buyer.fullName,
-          formatPaise(item.pricePaise),
-          DateFormat.yMMMd().format(item.createdAt.toLocal()),
-        ].join(' • '),
-      ),
-      trailing: PurchaseStatusChip(item.status),
       onTap: () => context.push(adminRefundPath(item.id)),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.drawingTitle,
+                  style: theme.textTheme.titleSmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${item.buyer.fullName} • '
+                  '${DateFormat.yMMMd().format(item.createdAt.toLocal())}',
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                formatPaise(item.pricePaise),
+                style: theme.textTheme.titleSmall?.tabular,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              PurchaseStatusPill(item.status),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
 
-class PurchaseStatusChip extends StatelessWidget {
-  const PurchaseStatusChip(this.status, {super.key});
+class PurchaseStatusPill extends StatelessWidget {
+  const PurchaseStatusPill(this.status, {super.key});
 
   final PurchaseStatus status;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final color = switch (status) {
-      PurchaseStatus.paid => scheme.primary,
-      PurchaseStatus.refunded => scheme.tertiary,
-      PurchaseStatus.failed => scheme.error,
-      PurchaseStatus.created => scheme.outline,
+    final (label, tone) = switch (status) {
+      PurchaseStatus.paid => ('Paid', StatusTone.success),
+      PurchaseStatus.refunded => ('Refunded', StatusTone.warning),
+      PurchaseStatus.failed => ('Failed', StatusTone.danger),
+      PurchaseStatus.created => ('Awaiting payment', StatusTone.neutral),
     };
-    return Text(
-      status.wire,
-      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        color: color,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-/// Fetches the next page when it scrolls into view (or on tap after a failure).
-class _LoadMore extends StatefulWidget {
-  const _LoadMore(this.loading, this.error, this.onLoad);
-
-  final bool loading;
-  final String? error;
-  final VoidCallback onLoad;
-
-  @override
-  State<_LoadMore> createState() => _LoadMoreState();
-}
-
-class _LoadMoreState extends State<_LoadMore> {
-  @override
-  void initState() {
-    super.initState();
-    if (!widget.loading && widget.error == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) widget.onLoad();
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.error != null) {
-      return ListTile(
-        leading: const Icon(Icons.refresh),
-        title: Text('${widget.error} Tap to retry.'),
-        onTap: widget.onLoad,
-      );
-    }
-    return const Padding(
-      padding: EdgeInsets.all(16),
-      child: Center(child: CircularProgressIndicator()),
-    );
+    return StatusPill(label: label, tone: tone, dense: true);
   }
 }

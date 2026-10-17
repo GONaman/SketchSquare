@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sketch_square/core/network/api_exception.dart';
 import 'package:sketch_square/core/router/app_router.dart';
 import 'package:sketch_square/core/router/routes.dart';
+import 'package:sketch_square/core/widgets/widgets.dart';
 import 'package:sketch_square/features/admin/domain/admin_purchase.dart';
 import 'package:sketch_square/features/admin/presentation/admin_refund_detail_screen.dart';
 import 'package:sketch_square/features/admin/presentation/refunds_providers.dart';
@@ -69,7 +70,7 @@ void main() {
       expect(find.text('Modern Villa'), findsOneWidget);
       expect(find.text('Cottage'), findsOneWidget);
       expect(find.text('Loft'), findsOneWidget);
-      expect(find.text('REFUNDED'), findsOneWidget);
+      expect(find.widgetWithText(StatusPill, 'Refunded'), findsOneWidget);
     });
 
     testWidgets('debounced search and status filter hit the repository', (
@@ -148,7 +149,7 @@ void main() {
       expect(find.text('Refund of ₹500 issued.'), findsOneWidget);
       expect(find.byKey(const Key('refund-button')), findsNothing);
       expect(find.byKey(const Key('refund-reason')), findsOneWidget);
-      expect(find.text('REFUNDED'), findsOneWidget);
+      expect(find.widgetWithText(StatusPill, 'Refunded'), findsOneWidget);
     });
 
     testWidgets('a reason is required and cancel does nothing', (tester) async {
@@ -237,6 +238,30 @@ void main() {
   testWidgets('non-admins cannot open the refunds screen', (tester) async {
     await _open(tester, repo, user: stubUser);
     expect(inAppBar('Refunds'), findsNothing);
+  });
+
+  testWidgets('list and detail fit a small phone at 1.3x text', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    addTearDown(() {
+      tester.view.reset();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+    final container = await pumpApp(
+      tester,
+      user: _admin,
+      overrides: [adminRefundsRepositoryProvider.overrideWithValue(repo)],
+    );
+    final router = container.read(appRouterProvider);
+    router.go('${AppRoutes.admin}/refunds');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    for (final id in ['p1', 'p3']) {
+      router.go(adminRefundPathFor(id));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
   });
 
   test('validateRefundReason trims and bounds the reason', () {

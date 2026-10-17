@@ -1,15 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/format/plot_size.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/pagination/paged_state.dart';
-import '../../../core/widgets/blueprint_empty_state.dart';
-import '../../../core/widgets/error_retry.dart';
 import '../../../core/widgets/load_more_sentinel.dart';
-import '../../drawings/presentation/formatters.dart' show formatPaise;
+import '../../../core/widgets/widgets.dart';
 import '../domain/plagiarism_flag.dart';
 import 'plagiarism_providers.dart';
 
@@ -178,11 +177,16 @@ class _AdminPlagiarismScreenState extends ConsumerState<AdminPlagiarismScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.gutter,
+              AppSpacing.md,
+              AppSpacing.gutter,
+              AppSpacing.sm,
+            ),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Wrap(
-                spacing: 8,
+                spacing: AppSpacing.sm,
                 children: [
                   for (final s in PlagiarismFlagStatus.values)
                     ChoiceChip(
@@ -206,10 +210,10 @@ class _AdminPlagiarismScreenState extends ConsumerState<AdminPlagiarismScreen> {
   Widget _content() {
     final paged = _paged;
     if (_loading && paged == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const ListRowSkeleton(count: 3);
     }
     if (_error != null && paged == null) {
-      return ErrorRetry(message: _error!.message, onRetry: _reload);
+      return ErrorState(message: _error!.message, onRetry: _reload);
     }
     if (paged == null) return const SizedBox.shrink();
     if (paged.items.isEmpty) {
@@ -221,7 +225,7 @@ class _AdminPlagiarismScreenState extends ConsumerState<AdminPlagiarismScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: SizedBox(
                   height: c.maxHeight,
-                  child: BlueprintEmptyState(
+                  child: EmptyState(
                     icon: Icons.fact_check_outlined,
                     title:
                         _status == PlagiarismFlagStatus.pending
@@ -239,9 +243,15 @@ class _AdminPlagiarismScreenState extends ConsumerState<AdminPlagiarismScreen> {
     }
     return RefreshIndicator(
       onRefresh: _reload,
-      child: ListView.builder(
+      child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.gutter,
+          AppSpacing.xs,
+          AppSpacing.gutter,
+          AppSpacing.gutter,
+        ),
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
         itemCount: paged.items.length + (paged.hasMore ? 1 : 0),
         itemBuilder: (context, i) {
           if (i == paged.items.length) {
@@ -285,91 +295,98 @@ class PlagiarismFlagCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final pending = flag.status == PlagiarismFlagStatus.pending;
-    return Card(
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final (tone, statusLabel) = switch (flag.status) {
+      PlagiarismFlagStatus.approved => (StatusTone.success, 'Approved'),
+      PlagiarismFlagStatus.rejected => (StatusTone.danger, 'Rejected'),
+      _ => (
+        flag.similarityPercent >= 90 ? StatusTone.danger : StatusTone.warning,
+        'Pending',
+      ),
+    };
+    return AppCard(
       key: Key('flag-${flag.id}'),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${flag.similarityPercent}% similar previews '
-              '(hash distance ${flag.hammingDistance})',
-              key: const Key('flag-similarity'),
-              style: theme.textTheme.titleSmall,
-            ),
-            Text(
-              'Flagged ${DateFormat.yMMMd().format(flag.createdAt.toLocal())}',
-              style: theme.textTheme.bodySmall,
-            ),
-            const SizedBox(height: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  '${flag.similarityPercent}% similar previews '
+                  '(hash distance ${flag.hammingDistance})',
+                  key: const Key('flag-similarity'),
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              StatusPill(label: statusLabel, tone: tone, dense: true),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Flagged ${DateFormat.yMMMd().format(flag.createdAt.toLocal())}',
+            style: theme.textTheme.bodySmall?.copyWith(color: muted),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _DrawingColumn(
+                  key: const Key('flag-uploaded'),
+                  label: 'Uploaded (held)',
+                  drawing: flag.drawing,
+                  previewUrl: flag.flaggedPreviewUrl,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _DrawingColumn(
+                  key: const Key('flag-existing'),
+                  label: 'Existing',
+                  drawing: flag.matchedDrawing,
+                  previewUrl: flag.matchedPreviewUrl,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          if (pending)
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: _DrawingColumn(
-                    key: const Key('flag-uploaded'),
-                    label: 'Uploaded (held)',
-                    drawing: flag.drawing,
-                    previewUrl: flag.flaggedPreviewUrl,
+                  child: SecondaryButton(
+                    key: Key('reject-${flag.id}'),
+                    label: 'Reject',
+                    onPressed: busy ? null : onReject,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: _DrawingColumn(
-                    key: const Key('flag-existing'),
-                    label: 'Existing',
-                    drawing: flag.matchedDrawing,
-                    previewUrl: flag.matchedPreviewUrl,
+                  child: PrimaryButton(
+                    key: Key('approve-${flag.id}'),
+                    label: 'Approve',
+                    loading: busy,
+                    onPressed: onApprove,
                   ),
                 ),
               ],
+            )
+          else
+            Text(
+              [
+                flag.status == PlagiarismFlagStatus.approved
+                    ? 'Approved'
+                    : 'Rejected',
+                if (flag.reviewNote != null && flag.reviewNote!.isNotEmpty)
+                  flag.reviewNote!,
+              ].join(': '),
+              key: const Key('flag-decision'),
+              style: theme.textTheme.bodyMedium,
             ),
-            const SizedBox(height: 12),
-            if (pending)
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      key: Key('reject-${flag.id}'),
-                      onPressed: busy ? null : onReject,
-                      child: const Text('Reject'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      key: Key('approve-${flag.id}'),
-                      onPressed: busy ? null : onApprove,
-                      child:
-                          busy
-                              ? const SizedBox(
-                                height: 18,
-                                width: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Text('Approve'),
-                    ),
-                  ),
-                ],
-              )
-            else
-              Text(
-                [
-                  flag.status == PlagiarismFlagStatus.approved
-                      ? 'Approved'
-                      : 'Rejected',
-                  if (flag.reviewNote != null && flag.reviewNote!.isNotEmpty)
-                    flag.reviewNote!,
-                ].join(': '),
-                key: const Key('flag-decision'),
-                style: theme.textTheme.bodyMedium,
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -405,14 +422,14 @@ class _DrawingColumn extends StatelessWidget {
           label,
           style: theme.textTheme.labelMedium?.copyWith(color: scheme.primary),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         Semantics(
           label: '$label preview of ${drawing.title}',
           button: url != null,
           child: GestureDetector(
             onTap: url == null ? null : () => _showFullScreen(context, url),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
               child: AspectRatio(
                 aspectRatio: 4 / 3,
                 child:
@@ -428,7 +445,7 @@ class _DrawingColumn extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           drawing.title,
           maxLines: 2,
@@ -520,15 +537,17 @@ class _RejectDialogState extends State<_RejectDialog> {
               '"${widget.title}" is removed and the uploader receives your '
               'reason by email.',
             ),
-            const SizedBox(height: 12),
-            TextFormField(
+            const SizedBox(height: AppSpacing.md),
+            AppTextField(
               key: const Key('reject-reason-field'),
               controller: _reason,
               minLines: 2,
               maxLines: 4,
-              maxLength: maxRejectReasonLength,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Reason'),
+              label: 'Reason',
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(maxRejectReasonLength),
+              ],
               validator: validateRejectReason,
             ),
           ],

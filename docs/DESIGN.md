@@ -191,6 +191,6 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Profile tab, settings, edit contact details | Done (`SettingsGroup`/`SettingsTile` in `features/profile`) |
 | Wallet (balance, ledger, bank, payouts, withdraw sheet) | Done (`InkHeroCard` balance, ledger grouped by day) |
 | Manage drawings (`ManagedDrawingCard`: status pills, stats strip, summary tiles, skeleton + empty states, restyled edit sheet) | Done |
-| Admin (verifications, refunds, plagiarism, categories) | **To do** |
+| Admin (dashboard with review-queue hero + stat tiles, verifications list/detail with sticky Approve/Reject, refunds list/detail, plagiarism side-by-side flag cards) | Done (reuses `SettingsGroup`, `StatusPill`, `SummaryRow`, `LoadMoreSentinel`) |
 
 When you finish a group, update this table in the same PR.

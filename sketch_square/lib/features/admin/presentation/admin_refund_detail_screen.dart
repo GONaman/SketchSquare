@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/api_exception.dart';
-import '../../../core/widgets/error_retry.dart';
-import '../../drawings/presentation/formatters.dart';
+import '../../../core/widgets/widgets.dart';
+import '../../auth/presentation/widgets/form_widgets.dart';
 import '../domain/admin_purchase.dart';
-import 'admin_refunds_screen.dart' show PurchaseStatusChip;
+import 'admin_refunds_screen.dart' show PurchaseStatusPill;
 import 'refunds_providers.dart';
 
 const minRefundReasonLength = 3;
@@ -90,32 +91,59 @@ class _AdminRefundDetailScreenState
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(adminPurchaseProvider(widget.id));
+    final p = async.valueOrNull;
     return Scaffold(
       appBar: AppBar(title: const Text('Purchase')),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ListRowSkeleton(count: 4),
         error:
-            (e, _) => ErrorRetry(
+            (e, _) => ErrorState(
               message: toApiException(e).message,
               onRetry: () => ref.invalidate(adminPurchaseProvider(widget.id)),
             ),
         data: _body,
       ),
+      bottomNavigationBar:
+          p != null && p.canRefund
+              ? SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.gutter,
+                    AppSpacing.sm,
+                    AppSpacing.gutter,
+                    AppSpacing.md,
+                  ),
+                  child: PrimaryButton(
+                    key: const Key('refund-button'),
+                    icon: Icons.undo,
+                    label: 'Refund ${formatPaise(p.pricePaise)}',
+                    loading: _busy,
+                    onPressed: () => _refund(p),
+                  ),
+                ),
+              )
+              : null,
     );
   }
 
   Widget _body(AdminPurchase p) {
-    final text = Theme.of(context).textTheme;
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final text = theme.textTheme;
+    final muted = theme.colorScheme.onSurfaceVariant;
     final date = DateFormat.yMMMd().add_jm();
-    Widget row(String label, String? value, {Key? key}) =>
+    Widget field(String label, String? value, {Key? key}) =>
         value == null || value.isEmpty
             ? const SizedBox.shrink()
-            : ListTile(
-              key: key,
-              dense: true,
-              title: Text(label, style: text.labelMedium),
-              subtitle: SelectableText(value, style: text.bodyLarge),
+            : Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs + 1),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: text.labelMedium?.copyWith(color: muted)),
+                  const SizedBox(height: 2),
+                  SelectableText(value, key: key, style: text.bodyLarge),
+                ],
+              ),
             );
     String person(AdminPerson x) =>
         x.email == null ? x.fullName : '${x.fullName} (${x.email})';
@@ -123,70 +151,112 @@ class _AdminRefundDetailScreenState
     final balance = p.sellerBalancePaise;
     final afterBalance = balance == null ? null : balance - p.sellerNetPaise;
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(AppSpacing.gutter),
       children: [
-        ListTile(
-          title: Text(p.drawingTitle, style: text.titleMedium),
-          trailing: PurchaseStatusChip(p.status),
-        ),
-        row('Purchase id', p.id),
-        row('Buyer', person(p.buyer)),
-        row('Seller', person(p.seller)),
-        row('Price', formatPaise(p.pricePaise)),
-        row('Platform fee', formatPaise(p.platformFeePaise)),
-        row('Seller earnings', formatPaise(p.sellerNetPaise)),
-        row('Created', date.format(p.createdAt.toLocal())),
-        if (p.paidAt != null) row('Paid', date.format(p.paidAt!.toLocal())),
-        row('Razorpay order', p.razorpayOrderId),
-        row('Razorpay payment', p.razorpayPaymentId),
-        if (balance != null)
-          row(
-            "Seller's wallet balance",
-            formatPaise(balance),
-            key: const Key('seller-balance'),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: Text(p.drawingTitle, style: text.titleLarge)),
+                  const SizedBox(width: AppSpacing.md),
+                  PurchaseStatusPill(p.status),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              field('Purchase id', p.id),
+              field('Buyer', person(p.buyer)),
+              field('Seller', person(p.seller)),
+            ],
           ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppCard(
+          style: AppCardStyle.outlined,
+          child: Column(
+            children: [
+              SummaryRow(label: 'Price', value: formatPaise(p.pricePaise)),
+              SummaryRow(
+                label: 'Platform fee',
+                value: formatPaise(p.platformFeePaise),
+              ),
+              const Divider(height: AppSpacing.xl),
+              SummaryRow(
+                label: 'Seller earnings',
+                value: formatPaise(p.sellerNetPaise),
+                emphasis: true,
+              ),
+              if (balance != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                SummaryRow(
+                  label: "Seller's wallet balance",
+                  value: formatPaise(balance),
+                  valueKey: const Key('seller-balance'),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppCard(
+          style: AppCardStyle.outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              field('Created', date.format(p.createdAt.toLocal())),
+              if (p.paidAt != null)
+                field('Paid', date.format(p.paidAt!.toLocal())),
+              field('Razorpay order', p.razorpayOrderId),
+              field('Razorpay payment', p.razorpayPaymentId),
+            ],
+          ),
+        ),
         if (refund != null) ...[
-          const Divider(),
-          row('Refunded', date.format(refund.refundedAt.toLocal())),
-          row('Refunded by', refund.refundedBy.fullName),
-          row('Reason', refund.reason, key: const Key('refund-reason')),
-          row('Gateway refund', switch (refund.providerStatus) {
-            RefundProviderStatus.succeeded =>
-              'Succeeded${refund.providerRefundId == null ? '' : ' (${refund.providerRefundId})'}',
-            RefundProviderStatus.pending => 'In progress',
-            RefundProviderStatus.failed =>
-              'Failed${refund.providerError == null ? '' : ': ${refund.providerError}'}',
-          }, key: const Key('refund-provider-status')),
-          if (refund.providerStatus != RefundProviderStatus.succeeded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: OutlinedButton(
-                key: const Key('refund-retry'),
-                onPressed:
-                    _busy ? null : () => _submit(p, refund.reason, retry: true),
-                child: const Text('Retry gateway refund'),
-              ),
+          const SizedBox(height: AppSpacing.md),
+          AppCard(
+            style: AppCardStyle.outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Refund', style: text.titleMedium),
+                const SizedBox(height: AppSpacing.sm),
+                field('Refunded on', date.format(refund.refundedAt.toLocal())),
+                field('Refunded by', refund.refundedBy.fullName),
+                field('Reason', refund.reason, key: const Key('refund-reason')),
+                field('Gateway refund', switch (refund.providerStatus) {
+                  RefundProviderStatus.succeeded =>
+                    'Succeeded${refund.providerRefundId == null ? '' : ' (${refund.providerRefundId})'}',
+                  RefundProviderStatus.pending => 'In progress',
+                  RefundProviderStatus.failed =>
+                    'Failed${refund.providerError == null ? '' : ': ${refund.providerError}'}',
+                }, key: const Key('refund-provider-status')),
+                if (refund.providerStatus !=
+                    RefundProviderStatus.succeeded) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  SecondaryButton(
+                    key: const Key('refund-retry'),
+                    label: 'Retry gateway refund',
+                    icon: Icons.refresh,
+                    onPressed:
+                        _busy
+                            ? null
+                            : () => _submit(p, refund.reason, retry: true),
+                  ),
+                ],
+              ],
             ),
+          ),
         ],
-        if (p.canRefund) ...[
-          if (afterBalance != null && afterBalance < 0)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Text(
-                'The seller has already spent part of this sale. Their balance '
-                'will become ${formatPaise(afterBalance)} and withdrawals stay '
-                'blocked until it is positive again.',
-                key: const Key('negative-balance-warning'),
-                style: TextStyle(color: scheme.error),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: FilledButton.icon(
-              key: const Key('refund-button'),
-              onPressed: _busy ? null : () => _refund(p),
-              icon: const Icon(Icons.undo),
-              label: Text('Refund ${formatPaise(p.pricePaise)}'),
+        if (p.canRefund && afterBalance != null && afterBalance < 0) ...[
+          const SizedBox(height: AppSpacing.md),
+          KeyedSubtree(
+            key: const Key('negative-balance-warning'),
+            child: FormErrorBanner(
+              'The seller has already spent part of this sale. Their balance '
+              'will become ${formatPaise(afterBalance)} and withdrawals stay '
+              'blocked until it is positive again.',
             ),
           ),
         ],
@@ -232,14 +302,16 @@ class _RefundDialogState extends State<_RefundDialog> {
               'This cannot be undone.',
             ),
             const SizedBox(height: 12),
-            TextFormField(
+            AppTextField(
               key: const Key('refund-reason-field'),
               controller: _reason,
               minLines: 2,
               maxLines: 4,
-              maxLength: maxRefundReasonLength,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Reason'),
+              label: 'Reason',
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(maxRefundReasonLength),
+              ],
               validator: validateRefundReason,
             ),
           ],
