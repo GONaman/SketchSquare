@@ -5,8 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/pagination/paged_state.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/widgets/blueprint_empty_state.dart';
-import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../drawings/domain/drawing_summary.dart';
 import '../../interest/presentation/interested_sheet.dart';
 import '../data/manage_drawings_providers.dart';
@@ -39,12 +38,9 @@ class ManageDrawingsScreen extends ConsumerWidget {
           ),
           Expanded(
             child: list.when(
-              loading:
-                  () => const Center(
-                    child: CircularProgressIndicator(key: ValueKey('loading')),
-                  ),
+              loading: () => const _LoadingList(),
               error:
-                  (e, _) => ErrorRetry(
+                  (e, _) => ErrorState(
                     message: toApiException(e).message,
                     onRetry:
                         () => ref.invalidate(
@@ -76,14 +72,17 @@ class _FilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 52,
+    height: 56,
     child: ListView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       children: [
         for (final f in ManageFilter.values)
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: ChoiceChip(
               key: ValueKey('filter-${f.name}'),
               label: Text(f.label),
@@ -176,49 +175,187 @@ class _DrawingList extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               child: SizedBox(
                 height: c.maxHeight,
-                child: BlueprintEmptyState(
-                  icon: Icons.inventory_2_outlined,
-                  title:
-                      filter == ManageFilter.all
-                          ? 'No drawings yet'
-                          : 'Nothing in ${filter.label.toLowerCase()}',
-                  message:
-                      filter == ManageFilter.all
-                          ? 'Upload your first drawing to start selling.'
-                          : null,
-                  action:
-                      filter == ManageFilter.all
-                          ? FilledButton(
-                            key: const ValueKey('empty-upload'),
-                            onPressed: () => context.go(AppRoutes.upload),
-                            child: const Text('Upload a drawing'),
-                          )
-                          : null,
-                ),
+                child: _EmptyView(filter: filter),
               ),
             ),
       );
     }
+    final showSummary = filter == ManageFilter.all && !state.canLoadMore;
+    final lead = showSummary ? 1 : 0;
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 24),
-      itemCount: state.items.length + 1,
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      itemCount: state.items.length + lead + 1,
       itemBuilder: (context, i) {
-        if (i == state.items.length) {
+        if (i == 0 && showSummary) {
+          return _SummaryStrip(items: state.items);
+        }
+        final index = i - lead;
+        if (index == state.items.length) {
           return _Footer(state: state, controller: controller);
         }
-        if (state.canLoadMore && i >= state.items.length - 3) {
+        if (state.canLoadMore && index >= state.items.length - 3) {
           WidgetsBinding.instance.addPostFrameCallback(
             (_) => controller.loadMore(),
           );
         }
-        final item = state.items[i];
+        final item = state.items[index];
         return ManagedDrawingCard(
           key: ValueKey('manage-card-${item.id}'),
           item: item,
           onAction: (a) => _handle(context, ref, item, a),
         );
       },
+    );
+  }
+}
+
+class _EmptyView extends StatelessWidget {
+  const _EmptyView({required this.filter});
+
+  final ManageFilter filter;
+
+  @override
+  Widget build(BuildContext context) {
+    final all = filter == ManageFilter.all;
+    return EmptyState(
+      icon: switch (filter) {
+        ManageFilter.all => Icons.inventory_2_outlined,
+        ManageFilter.drafts => Icons.edit_note_rounded,
+        ManageFilter.processing => Icons.autorenew_rounded,
+        ManageFilter.published => Icons.storefront_outlined,
+        ManageFilter.underReview => Icons.hourglass_top_rounded,
+        ManageFilter.rejected => Icons.report_gmailerrorred_outlined,
+      },
+      title:
+          all ? 'No drawings yet' : 'Nothing in ${filter.label.toLowerCase()}',
+      message:
+          all
+              ? 'Upload your first drawing to start selling. Buyers find it by '
+                  'plot size.'
+              : 'Drawings with this status will show up here.',
+      action:
+          all
+              ? PrimaryButton(
+                key: const ValueKey('empty-upload'),
+                label: 'Upload a drawing',
+                icon: Icons.add_rounded,
+                expand: false,
+                onPressed: () => context.go(AppRoutes.upload),
+              )
+              : null,
+    );
+  }
+}
+
+/// Totals across every drawing, shown once the whole list is loaded.
+class _SummaryStrip extends StatelessWidget {
+  const _SummaryStrip({required this.items});
+
+  final List<ManagedDrawing> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final live = items.where(
+      (m) => m.drawing.status == DrawingStatus.published,
+    );
+    final views = items.fold<int>(0, (n, m) => n + m.stats.viewCount);
+    final sales = items.fold<int>(0, (n, m) => n + m.stats.purchaseCount);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.xs,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: IntrinsicHeight(
+        key: const ValueKey('manage-summary'),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: StatTile(
+                value: '${live.length}',
+                label: 'Live',
+                icon: Icons.storefront_outlined,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: StatTile(
+                value: '$views',
+                label: 'Views',
+                icon: Icons.visibility_outlined,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: StatTile(
+                value: '$sales',
+                label: 'Sales',
+                icon: Icons.shopping_bag_outlined,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingList extends StatelessWidget {
+  const _LoadingList();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SingleChildScrollView(
+      key: ValueKey('loading'),
+      physics: NeverScrollableScrollPhysics(),
+      child: Shimmer(
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            children: [
+              _SkeletonCard(),
+              SizedBox(height: AppSpacing.md),
+              _SkeletonCard(),
+              SizedBox(height: AppSpacing.md),
+              _SkeletonCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppCard(
+      style: AppCardStyle.outlined,
+      padding: EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ShimmerBox(width: 76, height: 76, radius: AppRadius.sm),
+          SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShimmerBox(width: 72, height: 18, radius: AppRadius.pill),
+                SizedBox(height: AppSpacing.sm),
+                ShimmerBox(height: 16),
+                SizedBox(height: AppSpacing.xs),
+                ShimmerBox(width: 120, height: 12),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

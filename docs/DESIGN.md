@@ -186,7 +186,7 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Purchases library + download/review sheet | Done |
 | Profile tab, settings, edit contact details | Done (`SettingsGroup`/`SettingsTile` in `features/profile`) |
 | Wallet (balance, ledger, bank, payouts, withdraw sheet) | Done (`InkHeroCard` balance, ledger grouped by day) |
-| Manage drawings (`ManagedDrawingCard`) | **To do** |
+| Manage drawings (`ManagedDrawingCard`: status pills, stats strip, summary tiles, skeleton + empty states, restyled edit sheet) | Done |
 | Admin (verifications, refunds, plagiarism, categories) | **To do** |
 
 When you finish a group, update this table in the same PR.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/network/api_exception.dart';
-import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/widgets.dart' hide formatPaise;
 import '../../upload/domain/drawing_form_validators.dart';
 import '../../upload/domain/money.dart';
 import '../../upload/domain/drawing_record.dart';
@@ -94,29 +94,34 @@ class _EditPublishedSheetState extends State<EditPublishedSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final record = _record;
     final errors = _showErrors ? _errors : const <String, String>{};
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        16 + MediaQuery.viewInsetsOf(context).bottom,
+        AppSpacing.gutter,
+        AppSpacing.xs,
+        AppSpacing.gutter,
+        AppSpacing.lg + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Edit drawing', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
+            Text('Edit drawing', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 2),
+            Text(
+              'Title, description and price can be changed after publishing.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             if (_loadError != null)
               ErrorRetry(message: _loadError!, onRetry: _load)
             else if (record == null)
-              const Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: CircularProgressIndicator()),
-              )
+              const _SheetSkeleton()
             else ...[
               FormTextField(
                 key: const ValueKey('edit-title'),
@@ -126,7 +131,7 @@ class _EditPublishedSheetState extends State<EditPublishedSheet> {
                 maxLength: DrawingFormValidators.titleMax,
                 onChanged: (v) => setState(() => _title = v),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               FormTextField(
                 key: const ValueKey('edit-description'),
                 label: 'Description',
@@ -137,14 +142,18 @@ class _EditPublishedSheetState extends State<EditPublishedSheet> {
                 keyboardType: TextInputType.multiline,
                 onChanged: (v) => setState(() => _description = v),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               if (record.isFree)
-                const Text('This drawing is free; its price cannot be changed.')
+                const _InfoNote(
+                  icon: Icons.lock_outline_rounded,
+                  text: 'This drawing is free; its price cannot be changed.',
+                )
               else ...[
                 FormTextField(
                   key: const ValueKey('edit-price'),
                   label: 'Price',
                   prefixText: '₹ ',
+                  tabularFigures: true,
                   initialText: paiseToInput(record.pricePaise),
                   errorText: errors['price'],
                   keyboardType: const TextInputType.numberWithOptions(
@@ -158,45 +167,95 @@ class _EditPublishedSheetState extends State<EditPublishedSheet> {
                 ),
                 if (_pricePaise >= 100)
                   Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'You receive ${formatPaise(sellerNetPaise(_pricePaise))} '
-                      'after the platform fee.',
-                      style: Theme.of(context).textTheme.bodySmall,
+                    padding: const EdgeInsets.only(top: AppSpacing.md),
+                    child: _InfoNote(
+                      icon: Icons.account_balance_wallet_outlined,
+                      text:
+                          'You receive ${formatPaise(sellerNetPaise(_pricePaise))} '
+                          'after the platform fee.',
                     ),
                   ),
               ],
               if (_saveError != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 MessageBanner(message: _saveError!),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.xl),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed:
-                        _saving ? null : () => Navigator.of(context).pop(false),
-                    child: const Text('Cancel'),
+                  Expanded(
+                    child: SecondaryButton(
+                      label: 'Cancel',
+                      onPressed:
+                          _saving
+                              ? null
+                              : () => Navigator.of(context).pop(false),
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    key: const ValueKey('edit-save'),
-                    onPressed: _saving ? null : _save,
-                    child:
-                        _saving
-                            ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Text('Save'),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    flex: 2,
+                    child: PrimaryButton(
+                      key: const ValueKey('edit-save'),
+                      label: 'Save',
+                      loading: _saving,
+                      onPressed: _saving ? null : _save,
+                    ),
                   ),
                 ],
               ),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _InfoNote extends StatelessWidget {
+  const _InfoNote({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetSkeleton extends StatelessWidget {
+  const _SheetSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Shimmer(
+      child: Column(
+        children: [
+          ShimmerBox(height: 56),
+          SizedBox(height: AppSpacing.md),
+          ShimmerBox(height: 112),
+          SizedBox(height: AppSpacing.md),
+          ShimmerBox(height: 56),
+        ],
       ),
     );
   }
