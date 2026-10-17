@@ -11,7 +11,9 @@ export type CheckState = 'up' | 'down';
 
 export interface HealthReport {
   status: 'ok' | 'error';
-  checks: { db: CheckState; redis: CheckState; s3: CheckState };
+  checks?: { db: CheckState; redis: CheckState; s3: CheckState };
+  /** Present (with status `error`) once a shutdown signal was received; dependency checks are skipped. */
+  shuttingDown?: true;
 }
 
 const CHECK_TIMEOUT_MS = 2000;

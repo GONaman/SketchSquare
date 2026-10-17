@@ -9,3 +9,4 @@ process.env.RATE_LIMIT_ENABLED ??= 'false';
 process.env.QUEUE_PREFIX ??= `bull-test-${new URL(TEST_DATABASE_URL).pathname.slice(1)}`;
 // Counters in shared Redis would leak between test runs (a 60 s window); the Redis store has its own spec.
 process.env.RATE_LIMIT_STORAGE ??= 'memory';
+process.env.LOG_LEVEL ??= 'silent';

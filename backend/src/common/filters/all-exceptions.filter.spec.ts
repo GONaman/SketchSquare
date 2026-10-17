@@ -9,21 +9,44 @@ import { Prisma } from '@prisma/client';
 import { ApiException } from '../errors/api-exception';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
-function run(exception: unknown): { status: number; body: unknown } {
+function run(
+  exception: unknown,
+  headers: Record<string, string> = {},
+  setHeader: jest.Mock = jest.fn(),
+): { status: number; body: unknown } {
   const json = jest.fn<void, [unknown]>();
   const status = jest.fn<{ json: typeof json }, [number]>().mockReturnValue({
     json,
   });
   const host = {
-    switchToHttp: () => ({ getResponse: () => ({ status }) }),
+    switchToHttp: () => ({
+      getResponse: () => ({ status, setHeader, getHeader: () => undefined }),
+      getRequest: () => ({ headers }),
+    }),
   } as unknown as ArgumentsHost;
   new AllExceptionsFilter().catch(exception, host);
-  return { status: status.mock.calls[0][0], body: json.mock.calls[0][0] };
+  return {
+    status: status.mock.calls[0][0],
+    body: json.mock.calls[0][0],
+  };
 }
 
 describe('AllExceptionsFilter', () => {
   beforeAll(() => {
     jest.spyOn(Logger.prototype, 'error').mockImplementation();
+  });
+
+  it('sets X-Request-Id on error responses (echoing a safe client id, else generating one)', () => {
+    const echoed = jest.fn();
+    run(new NotFoundException(), { 'x-request-id': 'abc-123' }, echoed);
+    expect(echoed).toHaveBeenCalledWith('X-Request-Id', 'abc-123');
+    const generated = jest.fn();
+    run(
+      new NotFoundException(),
+      { 'x-request-id': 'bad id with spaces' },
+      generated,
+    );
+    expect((generated.mock.calls[0] as string[])[1]).toMatch(/^[0-9a-f-]{36}$/);
   });
 
   it('keeps ApiException code and details', () => {

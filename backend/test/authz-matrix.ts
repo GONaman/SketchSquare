@@ -28,6 +28,8 @@ export const AUTHZ_MATRIX: Record<string, MatrixEntry> = {
   'POST /auth/forgot-password': { access: 'public' },
   'POST /auth/reset-password': { access: 'public' },
   'GET /health': { access: 'public' },
+  // Operational: guarded by METRICS_TOKEN or private-network-only (see metrics.controller.ts), not by a user JWT.
+  'GET /metrics': { access: 'public' },
   // Webhooks authenticate via HMAC signature, not JWT.
   'POST /payments/razorpay/webhook': { access: 'public' },
   'POST /payments/razorpayx/webhook': { access: 'public' },
