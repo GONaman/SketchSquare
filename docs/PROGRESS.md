@@ -65,7 +65,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 
 ## Phase 9 — UI redesign (see docs/DESIGN.md)
 - [x] 9.1 Design system: tokens, themes (light/dark), widget kit, page transitions, bottom bar, new DrawingCard, Home + Search redesign
-- [ ] 9.2 Redesign remaining screen groups on the kit (detail, architect, auth, upload, basket/purchases, profile/wallet/settings, manage drawings, admin) — tracked in the DESIGN.md adoption table
+- [x] 9.2 Redesign remaining screen groups on the kit (detail, architect, auth, upload, basket/purchases, profile/wallet/settings, manage drawings, admin) — tracked in the DESIGN.md adoption table
 
 ## Needs manual check
 - Push (8.5): Flutter ships `PushService` with a no-op implementation, so no device token is ever registered. To enable push: add `firebase_core` + `firebase_messaging`, the Firebase config (`google-services.json` / `GoogleService-Info.plist`), implement `PushService` over `FirebaseMessaging.instance`, and override `pushServiceProvider` (see `features/notifications/domain/push_service.dart`). Push payload deep links are not handled; tapping a notification in the in-app list navigates.
