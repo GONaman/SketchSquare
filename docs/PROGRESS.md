@@ -47,7 +47,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 6.1 Manage drawings + stats endpoints
 - [ ] 6.2 Wallet + bank account + withdrawals + payouts
 - [ ] 6.3 Profile endpoints
-- [ ] 6.4 Flutter profile, manage drawings, wallet
+- [ ] 6.4 Flutter profile, manage drawings, wallet — manage drawings done (seller list, filters, stats, edit published, remove; route `AppRoutes.manageDrawings` = `/manage-drawings`, link from profile); profile and wallet pending
 
 ## Phase 7 — Hardening
 - [ ] 7.1 Security + authorization matrix test

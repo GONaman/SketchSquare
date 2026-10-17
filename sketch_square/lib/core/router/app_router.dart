@@ -10,6 +10,7 @@ import '../../features/auth/presentation/intro_seen_provider.dart';
 import '../../features/basket/presentation/basket_routes.dart';
 import '../../features/featured/presentation/featured_routes.dart';
 import '../../features/home/presentation/home_routes.dart';
+import '../../features/manage_drawings/presentation/manage_drawings_routes.dart';
 import '../../features/profile/presentation/profile_routes.dart';
 import '../../features/shell/presentation/app_shell.dart';
 import '../../features/upload/presentation/upload_routes.dart';
@@ -36,6 +37,7 @@ GoRouter appRouter(Ref ref) {
     routes: [
       ...authRoutes,
       ...adminRoutes,
+      ...manageDrawingsRoutes,
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => AppShell(navigationShell: shell),
         // Branch order == bottom-nav order. Each feature owns its routes.

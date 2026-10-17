@@ -209,3 +209,10 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - Client limits (title/description lengths, plot range, fee estimate) are UI guard rails; the backend is authoritative and its `ApiException` messages are surfaced.
 - Testing: `test/features/upload/fakes.dart` has `FakeUploadRepository`, `FakeSheetUploader` (`hold` completer to freeze progress), `FakeSheetPicker`, `InMemoryDraftStore`;
   override `uploadDelayProvider` with `(_) async {}` so polling is instant. Widget tests pump `UploadScreen` in a tall (800×3000) viewport to avoid scrolling.
+
+## Flutter manage drawings (`sketch_square/lib/features/manage_drawings`, Phase 6.4)
+
+- Route `AppRoutes.manageDrawings` (`/manage-drawings`) is registered via `manageDrawingsRoutes`; link to it with `context.push(AppRoutes.manageDrawings)` (e.g. from the profile tab).
+- `ManageDrawingsRepository` (`GET /me/drawings`, `GET/PATCH/DELETE /drawings/:id`) + Dio impl; `managedDrawingsControllerProvider(filter)` pages with a cursor, filters out `REMOVED`, and updates its list locally after edit/remove.
+- `actionsFor(status)` in `managed_drawing_card.dart` is the single place deciding which actions a status offers; stats show only for published/under-review drawings.
+- Testing: `test/features/manage_drawings/fakes.dart` has `FakeManageDrawingsRepository` (`failNext`, `listFilters`, `updates`, `count`); widget tests use a small GoRouter harness to assert `/upload?draft=<id>` navigation. Avoid `pumpAndSettle` with processing cards (indeterminate progress bar).
