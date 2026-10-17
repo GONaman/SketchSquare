@@ -52,7 +52,7 @@ One line of reasoning per decision. Items marked **needs owner confirmation** ar
 | S1 | The filters sheet has no floors/bedrooms filter. | `GET /drawings` in the API contract has none; the sheet offers category, city, drawing/architect rating, free/paid, price range and sort. |
 | S2 | Home's feed is "Latest drawings" (`sort=newest`); the Featured tab (4.4) uses `sort=drawing_rating`. | The contract has no trending endpoint. |
 | S3 | Search state lives in the URL (`/home/search?length=..&breadth=..&unit=..`) with the same param names as the API; defaults are omitted and tolerance is only sent with a plot size. | Deep-linkable, survives rebuilds, and the query object doubles as the Riverpod family key. |
-| S4 | Plot-size input is validated client-side to 5–1000 ft equivalent per side (converted from m/in), tolerance 0–50%. | Avoids pointless requests; the backend remains authoritative. |
+| S4 | Plot-size input is validated client-side to 5–1000 ft equivalent per side (ft or m, converted to ft), tolerance 0–50%. | Avoids pointless requests; the backend remains authoritative. |
 | S5 | `DrawingActionsRepository` (add to cart, favorite) is defined inside the drawings feature with only the calls detail needs. | Keeps discovery independent of the commerce feature; swap the provider override when wiring. |
 | S6 | Infinite scroll prefetches when one of the last 4 grid items is built; the spinner only shows while a page is loading and a failed page shows an inline retry (no auto-retry loop). | Items are built lazily, so no scroll listener is needed; a failing endpoint is never hammered. |
 | S7 | Shared `Sheet`/`Review` models come from the commerce PR (#12); discovery reuses them rather than defining its own. | One model per API shape. |
