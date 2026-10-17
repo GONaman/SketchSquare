@@ -41,6 +41,32 @@ describe('validateEnv', () => {
     );
   });
 
+  it('rejects a wildcard CORS allowlist in production only', () => {
+    const prod = {
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgresql://u:p@db/x',
+      REDIS_URL: 'redis://r',
+      S3_ENDPOINT: 'https://s3.example.com',
+      S3_ACCESS_KEY_ID: 'k',
+      S3_SECRET_ACCESS_KEY: 's',
+      S3_PREVIEWS_PUBLIC_URL: 'https://cdn.example.com',
+      JWT_ACCESS_SECRET: 'a',
+      JWT_REFRESH_SECRET: 'b',
+    };
+    expect(() => validateEnv(prod)).toThrow(/CORS_ORIGINS/);
+    expect(() => validateEnv({ ...prod, CORS_ORIGINS: '*' })).toThrow(
+      /CORS_ORIGINS/,
+    );
+    expect(() =>
+      validateEnv({ ...prod, CORS_ORIGINS: 'https://a.example, *' }),
+    ).toThrow(/CORS_ORIGINS/);
+    expect(
+      validateEnv({ ...prod, CORS_ORIGINS: 'https://app.example.com' })
+        .CORS_ORIGINS,
+    ).toBe('https://app.example.com');
+    expect(validateEnv({ CORS_ORIGINS: '*' }).CORS_ORIGINS).toBe('*');
+  });
+
   it('accepts .env.example as-is', () => {
     const example = parse(
       readFileSync(join(__dirname, '../../.env.example'), 'utf8'),

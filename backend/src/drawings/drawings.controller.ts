@@ -10,6 +10,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { AuthUser } from '../common/decorators/current-user.decorator';
 import { CreateDrawingDto } from './dto/create-drawing.dto';
@@ -42,6 +43,7 @@ export class DrawingsController {
 
   @Post(':id/publish')
   @HttpCode(HttpStatus.ACCEPTED)
+  @Throttle({ write: { limit: 10, ttl: 60_000 } })
   publish(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,

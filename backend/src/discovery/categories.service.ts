@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, RequestStatus } from '@prisma/client';
+import { AuditService } from '../audit/audit.service';
 import { ApiException } from '../common/errors/api-exception';
 import { Page, decodeCursor, toPage } from '../common/pagination';
 import { PrismaService } from '../prisma/prisma.service';
@@ -30,7 +31,10 @@ export const slugify = (name: string): string =>
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   list(): Promise<CategoryView[]> {
     return this.prisma.category.findMany({
@@ -113,7 +117,10 @@ export class CategoriesService {
   }
 
   /** Approving creates (or re-activates) the Category; the PENDING→APPROVED claim makes it race-safe. */
-  async approve(id: string): Promise<{ ok: true; category: CategoryView }> {
+  async approve(
+    adminId: string,
+    id: string,
+  ): Promise<{ ok: true; category: CategoryView }> {
     return this.prisma.$transaction(async (tx) => {
       const claimed = await tx.categoryRequest.updateMany({
         where: { id, status: 'PENDING' },
@@ -125,6 +132,17 @@ export class CategoriesService {
         select: { requestedName: true },
       });
       const select = { id: true, name: true, slug: true } as const;
+      const approved = (categoryId: string) =>
+        this.audit.record(
+          {
+            actorId: adminId,
+            action: 'category-request.approve',
+            entityType: 'CategoryRequest',
+            entityId: id,
+            metadata: { categoryId, name: req.requestedName },
+          },
+          tx,
+        );
       const existing = await tx.category.findFirst({
         where: { name: { equals: req.requestedName, mode: 'insensitive' } },
         select: { ...select, isActive: true },
@@ -136,6 +154,7 @@ export class CategoriesService {
             data: { isActive: true },
           });
         }
+        await approved(existing.id);
         return {
           ok: true as const,
           category: {
@@ -154,16 +173,28 @@ export class CategoriesService {
         data: { name: req.requestedName, slug },
         select,
       });
+      await approved(category.id);
       return { ok: true as const, category };
     });
   }
 
-  async reject(id: string): Promise<{ ok: true }> {
-    const claimed = await this.prisma.categoryRequest.updateMany({
-      where: { id, status: 'PENDING' },
-      data: { status: 'REJECTED', reviewedAt: new Date() },
+  async reject(adminId: string, id: string): Promise<{ ok: true }> {
+    await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.categoryRequest.updateMany({
+        where: { id, status: 'PENDING' },
+        data: { status: 'REJECTED', reviewedAt: new Date() },
+      });
+      if (claimed.count === 0) await this.failUnclaimed(tx, id);
+      await this.audit.record(
+        {
+          actorId: adminId,
+          action: 'category-request.reject',
+          entityType: 'CategoryRequest',
+          entityId: id,
+        },
+        tx,
+      );
     });
-    if (claimed.count === 0) await this.failUnclaimed(this.prisma, id);
     return { ok: true };
   }
 

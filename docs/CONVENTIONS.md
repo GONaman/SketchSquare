@@ -223,3 +223,10 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - `ManageDrawingsRepository` (`GET /me/drawings`, `GET/PATCH/DELETE /drawings/:id`) + Dio impl; `managedDrawingsControllerProvider(filter)` pages with a cursor, filters out `REMOVED`, and updates its list locally after edit/remove.
 - `actionsFor(status)` in `managed_drawing_card.dart` is the single place deciding which actions a status offers; stats show only for published/under-review drawings.
 - Testing: `test/features/manage_drawings/fakes.dart` has `FakeManageDrawingsRepository` (`failNext`, `listFilters`, `updates`, `count`); widget tests use a small GoRouter harness to assert `/upload?draft=<id>` navigation. Avoid `pumpAndSettle` with processing cards (indeterminate progress bar).
+
+## Backend hardening (Phase 7)
+
+- **Rate limits:** every POST/PUT/PATCH/DELETE already counts against the `write` throttler (`RATE_LIMIT_WRITE_PER_MIN`, per IP and route, Redis-backed). Tighten sensitive routes with `@Throttle({ write: { limit, ttl } })`; never use `@SkipThrottle` on a write route.
+- **Admin actions:** every `@Roles('ADMIN')` mutation must call `AuditService.record({ actorId, action: '<domain>.<verb>', entityType, entityId, metadata }, tx)` inside the decision's transaction (`AuditModule` is global).
+- **Errors from middleware** (oversized/malformed body) are mapped by `AllExceptionsFilter`; keep client-error mapping there rather than in controllers.
+- **Env:** new variables go into `env.schema.ts` and `.env.example`; production-only requirements belong in the schema (hard fail) or the startup guard (escape hatch available).

@@ -88,6 +88,28 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
 
+    // Express middleware (body-parser) throws http-errors, e.g. 413 for an oversized body or 400 for malformed JSON.
+    const clientError = exception as { status?: unknown; expose?: unknown };
+    if (
+      typeof clientError?.status === 'number' &&
+      clientError.status >= 400 &&
+      clientError.status < 500 &&
+      clientError.expose === true
+    ) {
+      const status = clientError.status;
+      const message =
+        status === 413
+          ? 'Request body is too large'
+          : status === 400
+            ? 'Malformed request body'
+            : 'Invalid request';
+      return this.simple(
+        status,
+        CODE_BY_STATUS[status] ?? 'VALIDATION_ERROR',
+        message,
+      );
+    }
+
     return this.simple(
       HttpStatus.INTERNAL_SERVER_ERROR,
       'INTERNAL',

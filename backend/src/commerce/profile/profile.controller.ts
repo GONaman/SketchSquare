@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AllowUnverified } from '../../common/decorators/access.decorators';
 import {
   type AuthUser,
@@ -44,6 +45,7 @@ export class ProfileController {
 
   @Post('avatar/confirm')
   @HttpCode(200)
+  @Throttle({ write: { limit: 10, ttl: 60_000 } })
   confirmAvatar(
     @CurrentUser() user: AuthUser,
     @Body() dto: AvatarConfirmDto,

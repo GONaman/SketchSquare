@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { IsNotEmpty, IsString } from 'class-validator';
 import {
   type AuthUser,
@@ -22,6 +23,7 @@ export class CheckoutController {
 
   @Post()
   @HttpCode(200)
+  @Throttle({ write: { limit: 20, ttl: 60_000 } })
   create(@CurrentUser() user: AuthUser): Promise<CheckoutResult> {
     return this.checkout.checkout(user.id);
   }
