@@ -152,6 +152,13 @@ The phone layout is the baseline and must not change. Wider windows get native-f
   browse 1200 (default), list 760 (`/basket`, `/profile`, `/manage-drawings`, `/admin*`), form 560 (upload, checkout,
   wallet, edit profile, settings, legal). Routes pushed outside the shell (admin, legal, manage drawings) wrap themselves
   in `ContentFrame`. New routes get browse width unless added to the mapping.
+- **Plot-size hero**: `PlotSizeFields(trailing: ...)` puts length × breadth, the ft/m toggle and the action on one line
+  when it is ≥ 600 wide; Home caps the card at 720 on wide windows. Elsewhere it keeps the stacked phone layout.
+- **Filters**: `showFiltersSheet` opens a centred 560 dialog on wide windows (bottom sheet on phones). Every modal
+  bottom sheet is capped at 640 wide by `bottomSheetTheme`; `AlertDialog` is already ≤ 560.
+- **Drawing detail** (expanded only): two columns, gallery + sheets + reviews on the left; title, specs, purchase card
+  (`PurchaseBar(inline: true)`), description and architect on the right. Below 1024 it keeps the single column with the
+  sticky `PurchaseBar`. Home hides its own brand AppBar when the top nav shows the brand.
 - Tests: `pumpApp(size: ...)` sets the surface; with no surface set it defaults to 390×844 so existing tests see the
   compact layout.
 - Don't hard-code widths for "desktop"; use the helpers above so tablets and resized windows behave too.
