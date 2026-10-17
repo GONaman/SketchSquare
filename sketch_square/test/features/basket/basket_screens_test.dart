@@ -112,6 +112,8 @@ void main() {
     await tester.tap(find.text('Checkout'));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.byKey(const Key('checkout-terms-link')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('checkout-terms-link')));
     await tester.pumpAndSettle();
     expect(inAppBar('Terms of Service'), findsOneWidget);

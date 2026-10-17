@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../upload/domain/money.dart';
-import '../../../core/format/plot_size.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/widgets/blueprint_empty_state.dart';
-import '../../../core/widgets/drawing_thumbnail.dart';
-import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../drawings/domain/drawing_summary.dart';
 import '../domain/cart.dart';
 import 'cart_controller.dart';
@@ -84,36 +80,55 @@ class _BasketScreenState extends ConsumerState<BasketScreen>
           if (checkout is CheckoutPending) const _PendingBanner(),
           Expanded(
             child: cart.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const ListRowSkeleton(count: 3),
               error:
-                  (e, _) => ErrorRetry(
+                  (e, _) => ErrorState(
                     message: toApiException(e).message,
                     onRetry: () => ref.invalidate(cartControllerProvider),
                   ),
               data:
                   (data) =>
                       data.isEmpty
-                          ? const BlueprintEmptyState(
+                          ? EmptyState(
                             icon: Icons.shopping_basket_outlined,
                             title: 'Your basket is empty',
-                            message: 'Drawings you add will appear here.',
+                            message:
+                                'Drawings you add will appear here, ready for '
+                                'one-tap checkout.',
+                            action: PrimaryButton(
+                              label: 'Browse drawings',
+                              icon: Icons.search_rounded,
+                              expand: false,
+                              onPressed: () => context.go(AppRoutes.home),
+                            ),
                           )
                           : RefreshIndicator(
                             onRefresh:
                                 ref
                                     .read(cartControllerProvider.notifier)
                                     .refresh,
-                            child: ListView.separated(
+                            child: ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.all(16),
-                              itemCount: data.items.length,
-                              separatorBuilder:
-                                  (_, __) => const SizedBox(height: 12),
-                              itemBuilder:
-                                  (_, i) => CartItemTile(
-                                    item: data.items[i],
-                                    onRemove: () => _remove(data.items[i]),
+                              padding: const EdgeInsets.fromLTRB(
+                                AppSpacing.gutter,
+                                AppSpacing.sm,
+                                AppSpacing.gutter,
+                                AppSpacing.xl,
+                              ),
+                              children: [
+                                for (final item in data.items)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: AppSpacing.md,
+                                    ),
+                                    child: CartItemTile(
+                                      item: item,
+                                      onRemove: () => _remove(item),
+                                    ),
                                   ),
+                                const SizedBox(height: AppSpacing.sm),
+                                _PriceSummary(cart: data),
+                              ],
                             ),
                           ),
             ),
@@ -138,41 +153,109 @@ class CartItemTile extends StatelessWidget {
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DrawingThumbnail(url: item.previewUrl, size: 72),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DrawingThumbnail(url: item.previewUrl, size: 88),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: theme.textTheme.titleSmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                PlotSizeBadge(
+                  lengthFt: item.plotLengthFt,
+                  breadthFt: item.plotBreadthFt,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  '${item.city} · by ${item.architect.fullName}',
+                  style: muted,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                PriceText(
+                  paise: item.pricePaise,
+                  style: theme.textTheme.titleMedium,
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Remove ${item.title}',
+            visualDensity: VisualDensity.compact,
+            icon: Icon(
+              Icons.close_rounded,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            onPressed: onRemove,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceSummary extends StatelessWidget {
+  const _PriceSummary({required this.cart});
+  final Cart cart;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final noun = cart.itemCount == 1 ? 'drawing' : 'drawings';
+    return AppCard(
+      style: AppCardStyle.outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Price details', style: theme.textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.sm),
+          SummaryRow(
+            label: 'Subtotal (${cart.itemCount} $noun)',
+            value: formatPaise(cart.totalPaise),
+          ),
+          SummaryRow(
+            label: 'Delivery',
+            value: 'Instant download',
+            valueColor: AppSemanticColors.of(context).success,
+          ),
+          const Divider(height: AppSpacing.lg),
+          SummaryRow(
+            label: 'Total',
+            value: formatPaise(cart.totalPaise),
+            emphasis: true,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
             children: [
-              Text(
-                item.title,
-                style: theme.textTheme.titleSmall,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              Icon(
+                Icons.verified_user_outlined,
+                size: 16,
+                color: AppSemanticColors.of(context).success,
               ),
-              const SizedBox(height: 2),
-              Text(
-                '${formatPlotSize(item.plotLengthFt, item.plotBreadthFt)} · ${item.city}',
-                style: muted,
-              ),
-              Text('by ${item.architect.fullName}', style: muted),
-              const SizedBox(height: 4),
-              Text(
-                formatPaise(item.pricePaise),
-                style: theme.textTheme.titleSmall,
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Secure payment · instant download · licence included',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-        IconButton(
-          tooltip: 'Remove ${item.title}',
-          icon: const Icon(Icons.delete_outline),
-          onPressed: onRemove,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -184,34 +267,48 @@ class _CheckoutBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
-      elevation: 8,
+    final scheme = theme.colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLowest,
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+        boxShadow: AppElevation.level2(scheme.brightness),
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.gutter,
+            AppSpacing.md,
+            AppSpacing.gutter,
+            AppSpacing.md,
+          ),
           child: Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${cart.itemCount} ${cart.itemCount == 1 ? 'drawing' : 'drawings'}',
-                      style: theme.textTheme.bodySmall,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${cart.itemCount} ${cart.itemCount == 1 ? 'drawing' : 'drawings'}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
-                    Text(
-                      formatPaise(cart.totalPaise),
-                      key: const Key('basket-total'),
-                      style: theme.textTheme.titleLarge,
-                    ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    formatPaise(cart.totalPaise),
+                    key: const Key('basket-total'),
+                    style: theme.textTheme.titleLarge?.tabular,
+                  ),
+                ],
               ),
-              FilledButton(
-                onPressed: () => context.push(AppRoutes.basketCheckout),
-                child: const Text('Checkout'),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: PrimaryButton(
+                  label: 'Checkout',
+                  accent: true,
+                  onPressed: () => context.push(AppRoutes.basketCheckout),
+                ),
               ),
             ],
           ),
@@ -226,17 +323,45 @@ class _PendingBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialBanner(
-      leading: const Icon(Icons.hourglass_top),
-      content: const Text('Confirming your last payment…'),
-      actions: [
-        TextButton(
-          onPressed:
-              () =>
-                  ref.read(checkoutControllerProvider.notifier).resumePending(),
-          child: const Text('Check status'),
-        ),
-      ],
+    final theme = Theme.of(context);
+    final sem = AppSemanticColors.of(context);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.gutter,
+        AppSpacing.sm,
+        AppSpacing.gutter,
+        AppSpacing.sm,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: sem.warningContainer,
+        borderRadius: AppRadius.cardRadius,
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.hourglass_top_rounded, color: sem.warning),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              'Confirming your last payment…',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed:
+                () =>
+                    ref
+                        .read(checkoutControllerProvider.notifier)
+                        .resumePending(),
+            child: const Text('Check status'),
+          ),
+        ],
+      ),
     );
   }
 }

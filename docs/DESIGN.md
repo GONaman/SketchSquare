@@ -95,6 +95,8 @@ Dimensions, plot sizes, prices and counters use tabular figures: `style.tabular`
 | `SectionHeader` | Title + optional `subtitle` and `actionLabel/onAction` ("See all"). Default padding already has the gutter. |
 | `PrimaryButton` / `SecondaryButton` | `label`, `onPressed`, `icon`, `loading` (spinner, taps ignored), `expand` (default full width), `accent` (copper, Primary only). |
 | `AppTextField` | Form field with consistent label/hint/helper/error, `prefixIcon`, `suffix(Text)`, `obscureText`, `validator`, `tabularFigures`. |
+| `InkHeroCard` | Ink gradient + blueprint grid surface for hero blocks (wallet balance, order result). Put white text inside. |
+| `SummaryRow` | Label / tabular value row for price summaries and receipts; `emphasis` makes it a total. |
 | `StatTile` | Big tabular number + label + optional icon/`onTap` (wallet, profile, admin dashboards). |
 | `StatusPill` | Small label chip. `tone: neutral \| info \| success \| warning \| danger \| accent`, optional `icon`, `dense`. |
 | `AppAvatar` | Initials avatar with network image fallback (`name`, `url`, `size`). |
@@ -164,7 +166,8 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Auth: sign-in, sign-up (2-step), forgot/reset, verification upload form | **Done** (`AuthHero`, `StepProgress`, `PasswordStrengthMeter`, `AppTextField`/`PrimaryButton`) |
 | Auth: intro, splash, verification status, Privacy/Terms | **To do** |
 | Upload flow | **To do** |
-| Basket + checkout, purchases | **To do** |
+| Basket + checkout + order result | Done |
+| Purchases library + download/review sheet | **To do** |
 | Profile, wallet (bank, payouts), settings, edit profile | **To do** |
 | Manage drawings (`ManagedDrawingCard`) | **To do** |
 | Admin (verifications, refunds, plagiarism, categories) | **To do** |
