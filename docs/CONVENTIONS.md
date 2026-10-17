@@ -155,3 +155,10 @@ New logged-out screens must be added to `AppRoutes.publicRoutes`; new non-tab ro
 `pumpApp(tester, {signedIn = true, user, introSeen = true})` boots the whole app with a `FakeAuthRepository`; by default you are an approved architect
 on the shell, so existing feature tests are unaffected. Use `signedIn: false` for logged-out flows, `user:` for PENDING/REJECTED/ADMIN sessions.
 `test/helpers/scripted_adapter.dart` is a tiny scriptable Dio adapter for stateful HTTP sequences (e.g. 401 then 200).
+
+### Commerce (basket / checkout)
+- Repositories (`CartRepository`, `CheckoutRepository`) and platform seams (`PaymentGateway`, `PendingCheckoutStore`) are interfaces in `features/basket/domain`; Dio/Razorpay/prefs implementations live in `data/`, wired by keepAlive providers in `basket_providers.dart`. Tests override them with the fakes in `test/features/basket/fakes.dart` (`FakeCartRepository`, `FakeCheckoutRepository`, `FakePaymentGateway`).
+- Controllers that cache per-user data must `ref.watch(currentUserIdProvider)` (`features/auth/presentation/current_user_provider.dart`) so they rebuild on sign-in/out.
+- Tab screens in an `IndexedStatefulShell` stay mounted; refresh on re-activation with `TickerMode.of(context)` + `WidgetsBindingObserver` resume (see `basket_screen.dart`).
+- Checkout state is a sealed class (`CheckoutIdle/Processing/Success/Failure/Pending`); screens only react to it, all payment logic is in `CheckoutController`.
+- Shared fixtures: `fakeDrawing()` / `fakeSheet()` in `test/helpers/commerce_fixtures.dart`.
