@@ -10,6 +10,7 @@ import '../../features/auth/presentation/intro_seen_provider.dart';
 import '../../features/basket/presentation/basket_routes.dart';
 import '../../features/featured/presentation/featured_routes.dart';
 import '../../features/home/presentation/home_routes.dart';
+import '../../features/legal/presentation/legal_routes.dart';
 import '../../features/manage_drawings/presentation/manage_drawings_routes.dart';
 import '../../features/profile/presentation/profile_routes.dart';
 import '../../features/shell/presentation/app_shell.dart';
@@ -36,6 +37,7 @@ GoRouter appRouter(Ref ref) {
         ),
     routes: [
       ...authRoutes,
+      ...legalRoutes,
       ...adminRoutes,
       ...manageDrawingsRoutes,
       StatefulShellRoute.indexedStack(

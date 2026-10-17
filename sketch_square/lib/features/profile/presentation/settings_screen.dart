@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/routes.dart';
 import '../../../core/theme/theme_mode_provider.dart';
 import '../../auth/presentation/auth_controller.dart';
 
@@ -68,6 +70,21 @@ class SettingsScreen extends ConsumerWidget {
                 (s) => ref.read(appThemeModeProvider.notifier).set(s.first),
           ),
           const SizedBox(height: 24),
+          const Divider(),
+          ListTile(
+            key: const Key('settings-terms'),
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Terms of Service'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.terms),
+          ),
+          ListTile(
+            key: const Key('settings-privacy'),
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy Policy'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.privacy),
+          ),
           const Divider(),
           ListTile(
             key: const Key('sign-out'),

@@ -9,6 +9,8 @@ abstract final class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const resetPassword = '/reset-password';
   static const verificationPending = '/verification-pending';
+  static const terms = '/legal/terms';
+  static const privacy = '/legal/privacy';
   static const admin = '/admin';
   static const home = '/home';
   static const featured = '/featured';
@@ -32,6 +34,9 @@ abstract final class AppRoutes {
   /// Sub-route segment registered under every tab, for per-tab stack tests.
   static const detailSegment = 'details';
 
+  /// Reachable in every signed-in/out state (sign-up links, settings).
+  static const legalRoutes = {terms, privacy};
+
   /// Screens a logged-out user may see.
   static const publicRoutes = {
     intro,
@@ -46,6 +51,9 @@ abstract final class AppRoutes {
 /// [introSeen] decides whether logged-out users land on the intro video or
 /// straight on sign-in.
 String? authRedirect(AuthState auth, String location, {bool introSeen = true}) {
+  if (auth is! Initializing && AppRoutes.legalRoutes.contains(location)) {
+    return null;
+  }
   switch (auth) {
     case Initializing():
       return location == AppRoutes.splash ? null : AppRoutes.splash;
