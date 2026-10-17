@@ -48,6 +48,9 @@ jobs:
         run: |
           docker compose -f infra/docker-compose.yml up -d --wait minio
           docker compose -f infra/docker-compose.yml run --rm minio-init
+      - name: Start Mailpit (email e2e assertions)
+        working-directory: .
+        run: docker compose -f infra/docker-compose.yml up -d --wait mailpit
       - run: npm ci
       - run: npm run lint
       - run: npx prisma migrate deploy
