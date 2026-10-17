@@ -482,6 +482,26 @@ paths:
           description: ""
       security: *a8
       tags: *a9
+    get:
+      operationId: DrawingDetailController_get
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: &a14
+        - bearer: []
+      summary: Drawing detail with watermarked previews and viewer flags; non-published drawings are owner/admin only
+      tags: &a15
+        - discovery
   /drawings/{id}/publish:
     post:
       operationId: DrawingsController_publish
@@ -679,7 +699,7 @@ paths:
       tags: *a13
   /drawings/{id}/reviews:
     get:
-      operationId: SellerController_reviews
+      operationId: DrawingDetailController_reviews
       parameters:
         - name: id
           required: true
@@ -703,8 +723,9 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a12
-      tags: *a13
+      security: *a14
+      summary: Reviews of a drawing, newest first
+      tags: *a15
   /drawings/search:
     get:
       operationId: SearchController_searchDrawings
@@ -890,9 +911,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a14
+      security: &a16
         - bearer: []
-      tags: &a15
+      tags: &a17
         - discovery
   /category-requests:
     post:
@@ -911,8 +932,8 @@ paths:
             application/json:
               schema:
                 type: object
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /admin/category-requests:
     get:
       operationId: CategoriesController_listRequests
@@ -944,8 +965,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /admin/category-requests/{id}/approve:
     post:
       operationId: CategoriesController_approve
@@ -958,8 +979,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /admin/category-requests/{id}/reject:
     post:
       operationId: CategoriesController_reject
@@ -972,8 +993,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a14
-      tags: *a15
+      security: *a16
+      tags: *a17
   /cities:
     get:
       operationId: CitiesController_list
@@ -1011,9 +1032,9 @@ paths:
                 type: array
                 items:
                   type: object
-      security: &a16
+      security: &a18
         - bearer: []
-      tags: &a17
+      tags: &a19
         - discovery
   /architects/{id}:
     get:
@@ -1041,8 +1062,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
   /architects/{id}/drawings:
     get:
       operationId: ArchitectsController_drawings
@@ -1069,8 +1090,127 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a16
-      tags: *a17
+      security: *a18
+      tags: *a19
+  /verification:
+    post:
+      operationId: VerificationController_submit
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - coaRegistrationNumber
+                - document
+              properties:
+                coaRegistrationNumber:
+                  type: string
+                document:
+                  type: string
+                  format: binary
+                  description: PDF/JPG/PNG, max 10MB
+      responses:
+        "201":
+          description: ""
+      security: &a20
+        - bearer: []
+      tags: &a21
+        - verification
+  /verification/me:
+    get:
+      operationId: VerificationController_mine
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      security: *a20
+      tags: *a21
+  /admin/verifications:
+    get:
+      operationId: AdminVerificationController_list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+        - name: status
+          required: false
+          in: query
+          schema:
+            default: PENDING
+            type: string
+            enum:
+              - PENDING
+              - APPROVED
+              - REJECTED
+      responses:
+        "200":
+          description: ""
+      security: &a22
+        - bearer: []
+      tags: &a23
+        - admin
+  /admin/verifications/{id}:
+    get:
+      operationId: AdminVerificationController_detail
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      security: *a22
+      tags: *a23
+  /admin/verifications/{id}/approve:
+    post:
+      operationId: AdminVerificationController_approve
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+      security: *a22
+      tags: *a23
+  /admin/verifications/{id}/reject:
+    post:
+      operationId: AdminVerificationController_reject
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectVerificationDto"
+      responses:
+        "201":
+          description: ""
+      security: *a22
+      tags: *a23
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -1265,7 +1405,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: &a18
+          enum: &a24
             - ft
             - m
         floors:
@@ -1329,7 +1469,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: *a18
+          enum: *a24
         floors:
           type: number
           minimum: 1
@@ -1435,3 +1575,11 @@ components:
           maxLength: 60
       required:
         - name
+    RejectVerificationDto:
+      type: object
+      properties:
+        note:
+          type: string
+          maxLength: 1000
+      required:
+        - note
