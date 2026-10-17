@@ -5,6 +5,8 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'drawing_card.dart' show DrawingPreviewImage;
+
 part 'drawing_gallery.g.dart';
 
 typedef GalleryImageResolver = ImageProvider Function(String url);
@@ -17,10 +19,19 @@ GalleryImageResolver galleryImageResolver(Ref ref) =>
 /// Pinch-to-zoom, swipeable gallery of watermarked previews with a page
 /// indicator. Tap opens the same gallery full screen.
 class DrawingGallery extends ConsumerStatefulWidget {
-  const DrawingGallery({super.key, required this.urls, this.height = 300});
+  const DrawingGallery({
+    super.key,
+    required this.urls,
+    this.height = 300,
+    this.heroTag,
+  });
 
   final List<String> urls;
   final double height;
+
+  /// When set, the first image flies in from the matching card (see
+  /// `drawingHeroTag`).
+  final Object? heroTag;
 
   @override
   ConsumerState<DrawingGallery> createState() => _DrawingGalleryState();
@@ -43,6 +54,20 @@ class _DrawingGalleryState extends ConsumerState<DrawingGallery> {
         builder:
             (_) => _FullscreenGallery(urls: widget.urls, initialIndex: _index),
       ),
+    );
+  }
+
+  // The flight shows a plain thumbnail so the PageView/controller is never
+  // mounted twice.
+  Widget _withHero(Widget child) {
+    final tag = widget.heroTag;
+    if (tag == null) return child;
+    return Hero(
+      tag: tag,
+      flightShuttleBuilder:
+          (_, __, ___, ____, _____) =>
+              DrawingPreviewImage(url: widget.urls.first, fit: BoxFit.cover),
+      child: child,
     );
   }
 
@@ -76,10 +101,12 @@ class _DrawingGalleryState extends ConsumerState<DrawingGallery> {
             child: GestureDetector(
               onTap: _openFullscreen,
               child: ExcludeSemantics(
-                child: _GalleryView(
-                  urls: widget.urls,
-                  controller: _controller,
-                  onPageChanged: (i) => setState(() => _index = i),
+                child: _withHero(
+                  _GalleryView(
+                    urls: widget.urls,
+                    controller: _controller,
+                    onPageChanged: (i) => setState(() => _index = i),
+                  ),
                 ),
               ),
             ),

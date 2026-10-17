@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Inline error with a retry button, for async screens.
+import 'empty_error_state.dart';
+
+/// Inline error with a retry button, for async screens. Kept for existing call
+/// sites; see [ErrorState].
 class ErrorRetry extends StatelessWidget {
   const ErrorRetry({super.key, required this.message, required this.onRetry});
 
@@ -8,25 +11,6 @@ class ErrorRetry extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 40,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      ErrorState(message: message, onRetry: onRetry);
 }

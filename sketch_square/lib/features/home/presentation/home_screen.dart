@@ -9,7 +9,14 @@ import '../../drawings/presentation/drawing_search_controller.dart';
 import '../../drawings/presentation/paged_drawing_slivers.dart';
 import '../../drawings/presentation/plot_size_fields.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/app_buttons.dart';
 import '../../../core/widgets/blueprint_empty_state.dart';
+import '../../../core/widgets/blueprint_grid.dart';
+import '../../../core/widgets/brand_mark.dart';
+import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/tap_scale.dart';
 import 'request_category_sheet.dart';
 
 const homePaths = DiscoveryPaths(AppRoutes.home);
@@ -59,12 +66,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final feed = drawingSearchControllerProvider(homeFeedQuery);
     final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(title: const Wordmark()),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(categoriesProvider);
@@ -76,23 +82,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.gutter,
+                  AppSpacing.xs,
+                  AppSpacing.gutter,
+                  AppSpacing.lg,
+                ),
                 child: _SearchEntry(
                   onTap: () => context.push(homePaths.search(), extra: true),
                 ),
               ),
             ),
             SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.gutter,
+                ),
+                child: _PlotSizeHero(
+                  controller: _plot,
+                  onSearch: _searchByPlotSize,
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(
+              child: SectionHeader(
+                title: 'Browse by category',
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.gutter,
+                  AppSpacing.xl,
+                  AppSpacing.gutter,
+                  AppSpacing.sm,
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
               child: SizedBox(
-                height: 48,
+                height: 52,
                 child: ListView(
                   key: const Key('category-chips'),
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.gutter,
+                    vertical: 2,
+                  ),
                   children: [
                     for (final c in categories.valueOrNull ?? const [])
                       Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.only(right: AppSpacing.sm),
                         child: ActionChip(
                           label: Text(c.name),
                           onPressed:
@@ -113,60 +149,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Card(
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.straighten,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Search by plot size',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleMedium,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        PlotSizeFields(
-                          controller: _plot,
-                          onSubmitted: _searchByPlotSize,
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            key: const Key('plot-search-button'),
-                            onPressed: _searchByPlotSize,
-                            child: const Text('Find drawings'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Text(
-                  'Latest drawings',
-                  style: theme.textTheme.titleMedium,
-                ),
+            const SliverToBoxAdapter(
+              child: SectionHeader(
+                title: 'Latest drawings',
+                subtitle: 'Freshly published by verified architects',
               ),
             ),
             ...pagedDrawingSlivers(
@@ -188,6 +174,145 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+/// Hero card for the key feature: type a plot size, find matching drawings.
+class _PlotSizeHero extends StatelessWidget {
+  const _PlotSizeHero({required this.controller, required this.onSearch});
+
+  final PlotSizeController controller;
+  final VoidCallback onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final sem = AppSemanticColors.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(sem.ink, AppColors.blueprintBlue, 0.55)!,
+            sem.ink,
+          ],
+        ),
+        boxShadow: AppElevation.level2(scheme.brightness),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: CustomPaint(
+                painter: BlueprintGridPainter(
+                  color: Colors.white,
+                  spacing: 22,
+                  majorEvery: 4,
+                ),
+              ),
+            ),
+            Positioned(
+              top: 18,
+              right: 18,
+              child: ExcludeSemantics(
+                child: CustomPaint(
+                  size: const Size(64, 48),
+                  painter: _HeroGlyphPainter(AppColors.copperLight),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'SEARCH BY PLOT SIZE',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppColors.copperLight,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 56),
+                    child: Text(
+                      'What’s your plot size?',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Get ready-to-build drawings that fit your site.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.78),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerLowest,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Column(
+                        children: [
+                          PlotSizeFields(
+                            controller: controller,
+                            onSubmitted: onSearch,
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          PrimaryButton(
+                            key: const Key('plot-search-button'),
+                            label: 'Find drawings',
+                            icon: Icons.search_rounded,
+                            onPressed: onSearch,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroGlyphPainter extends CustomPainter {
+  const _HeroGlyphPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6
+          ..strokeCap = StrokeCap.round;
+    final r = Rect.fromLTWH(10, 12, size.width - 12, size.height - 12);
+    canvas.drawRect(r, p);
+    canvas.drawLine(Offset(r.left, 4), Offset(r.right, 4), p);
+    canvas.drawLine(Offset(r.left, 0), Offset(r.left, 8), p);
+    canvas.drawLine(Offset(r.right, 0), Offset(r.right, 8), p);
+    canvas.drawLine(Offset(2, r.top), Offset(2, r.bottom), p);
+    canvas.drawLine(Offset(-2, r.top), Offset(6, r.top), p);
+    canvas.drawLine(Offset(-2, r.bottom), Offset(6, r.bottom), p);
+  }
+
+  @override
+  bool shouldRepaint(_HeroGlyphPainter old) => old.color != color;
+}
+
 class _SearchEntry extends StatelessWidget {
   const _SearchEntry({required this.onTap});
 
@@ -199,30 +324,39 @@ class _SearchEntry extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Search drawings',
-      child: InkWell(
-        key: const Key('home-search-entry'),
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: scheme.surface,
-            border: Border.all(color: scheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
+      excludeSemantics: true,
+      child: TapScale(
+        child: Material(
+          color: scheme.surfaceContainerLowest,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.controlRadius,
+            side: BorderSide(color: scheme.outline),
           ),
-          child: Row(
-            children: [
-              Icon(Icons.search, color: scheme.onSurfaceVariant),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Search drawings by title or keyword',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: scheme.onSurfaceVariant),
-                ),
+          child: InkWell(
+            key: const Key('home-search-entry'),
+            borderRadius: AppRadius.controlRadius,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: 15,
               ),
-            ],
+              child: Row(
+                children: [
+                  Icon(Icons.search_rounded, color: scheme.primary),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      'Search drawings by title or keyword',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: scheme.onSurfaceVariant),
+                    ),
+                  ),
+                  Icon(Icons.tune_rounded, color: scheme.onSurfaceVariant),
+                ],
+              ),
+            ),
           ),
         ),
       ),

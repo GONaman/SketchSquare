@@ -3,18 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/pagination/paged_state.dart';
+import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/shimmer.dart';
 import '../domain/drawing_summary.dart';
 import 'drawing_card.dart';
 
-const _gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
-  maxCrossAxisExtent: 240,
-  mainAxisExtent: 272,
-  mainAxisSpacing: 12,
-  crossAxisSpacing: 12,
-);
+/// Card height grows with the text scale so the info block never overflows.
+SliverGridDelegate _gridDelegate(BuildContext context) {
+  final scale = MediaQuery.textScalerOf(context).scale(1);
+  return SliverGridDelegateWithMaxCrossAxisExtent(
+    maxCrossAxisExtent: 260,
+    mainAxisExtent: 300 + (scale - 1).clamp(0, 1) * 160,
+    mainAxisSpacing: 14,
+    crossAxisSpacing: 14,
+  );
+}
+
 const _prefetchDistance = 4;
-const _gridPadding = EdgeInsets.symmetric(horizontal: 16);
+const _gridPadding = EdgeInsets.symmetric(horizontal: AppSpacing.gutter);
 
 /// Slivers for an infinite-scrolling drawing grid driven by an
 /// `AsyncValue<PagedState<DrawingSummary>>`: skeletons while loading, an error
@@ -46,29 +53,12 @@ List<Widget> pagedDrawingSlivers({
         return [SliverFillRemaining(hasScrollBody: false, child: empty)];
       }
       return [
-        SliverPadding(
-          padding: _gridPadding,
-          sliver: SliverGrid.builder(
-            gridDelegate: _gridDelegate,
-            itemCount: state.items.length,
-            itemBuilder: (context, i) {
-              final d = state.items[i];
-              if (state.hasMore &&
-                  state.loadMoreError == null &&
-                  i >= state.items.length - _prefetchDistance) {
-                // The grid only builds items near the viewport, so reaching
-                // the tail means the user is about to hit the end.
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => onLoadMore(),
-                );
-              }
-              return DrawingCard(
-                drawing: d,
-                onTap: () => onTap(d),
-                favoriteAction: favoriteActionFor?.call(d),
-              );
-            },
-          ),
+        _DrawingGrid(
+          items: state.items,
+          canPrefetch: state.hasMore && state.loadMoreError == null,
+          onTap: onTap,
+          onLoadMore: onLoadMore,
+          favoriteActionFor: favoriteActionFor,
         ),
         SliverToBoxAdapter(
           child: _PagedFooter(state: state, onRetry: onRetryMore),
@@ -79,25 +69,58 @@ List<Widget> pagedDrawingSlivers({
   );
 }
 
+class _DrawingGrid extends StatelessWidget {
+  const _DrawingGrid({
+    required this.items,
+    required this.canPrefetch,
+    required this.onTap,
+    required this.onLoadMore,
+    required this.favoriteActionFor,
+  });
+
+  final List<DrawingSummary> items;
+  final bool canPrefetch;
+  final ValueChanged<DrawingSummary> onTap;
+  final VoidCallback onLoadMore;
+  final Widget? Function(DrawingSummary drawing)? favoriteActionFor;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: _gridPadding,
+      sliver: SliverGrid.builder(
+        gridDelegate: _gridDelegate(context),
+        itemCount: items.length,
+        itemBuilder: (context, i) {
+          final d = items[i];
+          if (canPrefetch && i >= items.length - _prefetchDistance) {
+            // The grid only builds items near the viewport, so reaching
+            // the tail means the user is about to hit the end.
+            WidgetsBinding.instance.addPostFrameCallback((_) => onLoadMore());
+          }
+          return DrawingCard(
+            drawing: d,
+            onTap: () => onTap(d),
+            favoriteAction: favoriteActionFor?.call(d),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _SkeletonGrid extends StatelessWidget {
   const _SkeletonGrid();
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.surfaceContainerHighest;
     return SliverPadding(
       padding: _gridPadding,
       sliver: SliverGrid.builder(
         key: const Key('drawing-grid-skeleton'),
-        gridDelegate: _gridDelegate,
+        gridDelegate: _gridDelegate(context),
         itemCount: 6,
-        itemBuilder:
-            (_, __) => DecoratedBox(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+        itemBuilder: (_, __) => const DrawingCardSkeleton(),
       ),
     );
   }

@@ -88,6 +88,8 @@ void main() {
   testWidgets('tapping a drawing opens its detail', (tester) async {
     await open(tester, FakeArchitectsRepository(profile: profile(ids: ['d1'])));
 
+    await tester.ensureVisible(find.text('Plan d1'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Plan d1'));
     await tester.pumpAndSettle();
 

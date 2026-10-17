@@ -1,10 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/plot_size_badge.dart';
+import '../../../core/widgets/price_text.dart';
+import '../../../core/widgets/shimmer.dart';
 import '../domain/drawing_summary.dart';
 import 'formatters.dart';
 
-/// Grid tile for a drawing: preview, title, size, city, price/FREE and rating.
+/// Hero tag shared by the card preview and the detail gallery. Scoped to the
+/// enclosing Navigator (one per tab) so the same drawing shown in several tabs
+/// never produces duplicate tags in a single route subtree.
+String drawingHeroTag(BuildContext context, String drawingId) =>
+    'drawing-hero-${identityHashCode(Navigator.maybeOf(context))}-$drawingId';
+
+/// Image-first grid tile for a drawing: big preview with the plot-size badge
+/// and price chip over it, then title, city and rating.
 class DrawingCard extends StatelessWidget {
   const DrawingCard({
     super.key,
@@ -24,137 +38,147 @@ class DrawingCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final sizeMatch = drawing.sizeMatch;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  DrawingPreviewImage(url: drawing.previewUrl),
-                  if (favoriteAction != null)
-                    Positioned(top: 4, left: 4, child: favoriteAction!),
-                  if (sizeMatch != null)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: _Badge(
-                        label: formatSizeMatch(sizeMatch),
-                        background: scheme.primary,
-                        foreground: scheme.onPrimary,
+    return AppCard(
+      padding: EdgeInsets.zero,
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Hero(
+                  tag: drawingHeroTag(context, drawing.id),
+                  child: DrawingPreviewImage(url: drawing.previewUrl),
+                ),
+                const Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0x00000000), Color(0x66000000)],
+                          stops: [0.55, 1],
+                        ),
                       ),
                     ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    drawing.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${formatPlotSize(drawing)} · ${drawing.city}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                ),
+                if (favoriteAction != null)
+                  Positioned(top: 4, left: 4, child: favoriteAction!),
+                if (sizeMatch != null)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: _Chip(
+                      label: formatSizeMatch(sizeMatch),
+                      background: scheme.primary,
+                      foreground: scheme.onPrimary,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 8,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    runSpacing: 4,
                     children: [
-                      // Shrinks instead of overflowing at large text scales.
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child:
-                              drawing.isFree
-                                  ? _Badge(
-                                    label: 'FREE',
-                                    background: scheme.tertiaryContainer,
-                                    foreground: scheme.onTertiaryContainer,
-                                  )
-                                  : Text(
-                                    formatPaise(drawing.pricePaise),
-                                    style: theme.textTheme.titleSmall,
-                                  ),
-                        ),
+                      PlotSizeBadge(
+                        lengthFt: drawing.plotLengthFt,
+                        breadthFt: drawing.plotBreadthFt,
+                        onImage: true,
                       ),
-                      if (drawing.ratingCount > 0) ...[
-                        const Icon(Icons.star_rounded, size: 16),
-                        const SizedBox(width: 2),
-                        Text(
-                          formatRating(drawing.avgRating),
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ] else
-                        Text(
-                          'New',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  drawing.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.place_outlined,
+                      size: 14,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 2),
+                    Expanded(
+                      child: Text(
+                        drawing.city,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _PriceChip(drawing: drawing),
+                    if (drawing.ratingCount > 0)
+                      RatingLabel(
+                        rating: drawing.avgRating,
+                        count: drawing.ratingCount,
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Watermarked preview image with a blueprint-style fallback.
-class DrawingPreviewImage extends StatelessWidget {
-  const DrawingPreviewImage({super.key, required this.url, this.fit});
+class _PriceChip extends StatelessWidget {
+  const _PriceChip({required this.drawing});
 
-  final String? url;
-  final BoxFit? fit;
+  final DrawingSummary drawing;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final fallback = ColoredBox(
-      color: scheme.surfaceContainerHighest,
-      child: Center(
-        child: Icon(
-          Icons.architecture,
-          size: 36,
-          color: scheme.onSurfaceVariant,
-        ),
-      ),
-    );
-    final u = url;
-    // Decorative: the card text already names the drawing.
-    if (u == null) return ExcludeSemantics(child: fallback);
-    return ExcludeSemantics(
-      child: CachedNetworkImage(
-        imageUrl: u,
-        fit: fit ?? BoxFit.cover,
-        placeholder: (_, __) => fallback,
-        errorWidget: (_, __, ___) => fallback,
-      ),
+    final sem = AppSemanticColors.of(context);
+    if (drawing.isFree) {
+      return _Chip(
+        label: 'FREE',
+        background: sem.success,
+        foreground: sem.onSuccess,
+      );
+    }
+    return PriceText(
+      paise: drawing.pricePaise,
+      style: Theme.of(context).textTheme.titleMedium,
     );
   }
 }
 
-class _Badge extends StatelessWidget {
-  const _Badge({
+class _Chip extends StatelessWidget {
+  const _Chip({
     required this.label,
     required this.background,
     required this.foreground,
@@ -169,16 +193,64 @@ class _Badge extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: foreground,
-            fontWeight: FontWeight.w600,
-          ),
+          style:
+              Theme.of(context).textTheme.labelMedium
+                  ?.copyWith(
+                    color: foreground,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
+                  )
+                  .tabular,
+        ),
+      ),
+    );
+  }
+}
+
+/// Watermarked preview image: shimmer while loading, fade-in, and a
+/// blueprint-sheet fallback when missing or failed.
+class DrawingPreviewImage extends StatelessWidget {
+  const DrawingPreviewImage({super.key, required this.url, this.fit});
+
+  final String? url;
+  final BoxFit? fit;
+
+  @override
+  Widget build(BuildContext context) {
+    final u = url;
+    // Decorative: the card text already names the drawing.
+    if (u == null) return const ExcludeSemantics(child: _PreviewFallback());
+    return ExcludeSemantics(
+      child: CachedNetworkImage(
+        imageUrl: u,
+        fit: fit ?? BoxFit.cover,
+        fadeInDuration: AppMotion.base,
+        placeholder: (_, __) => const Shimmer(child: ShimmerBox(radius: 0)),
+        errorWidget: (_, __, ___) => const _PreviewFallback(),
+      ),
+    );
+  }
+}
+
+class _PreviewFallback extends StatelessWidget {
+  const _PreviewFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ColoredBox(
+      color: scheme.primaryContainer,
+      child: Center(
+        child: Icon(
+          Icons.architecture,
+          size: 36,
+          color: scheme.primary.withValues(alpha: 0.6),
         ),
       ),
     );
