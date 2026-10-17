@@ -67,6 +67,8 @@ describe('buildSearchQuery', () => {
         minPricePaise: 100,
         maxPricePaise: 900,
         floors: [2, 3],
+        bedrooms: [2, 3],
+        tags: ['Vastu', 'Corner'],
         facing: ['N'],
         architectId: ID,
       }),
@@ -80,12 +82,16 @@ describe('buildSearchQuery', () => {
       '"pricePaise" >=',
       '"pricePaise" <=',
       '"floors" IN',
+      '"bedrooms" IN',
+      'unnest(d."tags")',
       '"facing"::text IN',
       '"architectId"',
     ]) {
       expect(sql.sql).toContain(frag);
     }
-    expect(sql.values).toEqual(expect.arrayContaining(['jaipur', 'delhi']));
+    expect(sql.values).toEqual(
+      expect.arrayContaining(['jaipur', 'delhi', 'vastu', 'corner']),
+    );
   });
 
   it('priceType=free filters to price 0', () => {

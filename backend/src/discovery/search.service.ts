@@ -64,6 +64,8 @@ export class SearchService {
       minPricePaise: dto.minPricePaise,
       maxPricePaise: dto.maxPricePaise,
       floors: dto.floors,
+      bedrooms: dto.bedrooms,
+      tags: dto.tag?.map((t) => t.trim()).filter(Boolean),
       facing: dto.facing,
       architectId: dto.architectId,
       sort: dto.sort ?? 'relevance',
