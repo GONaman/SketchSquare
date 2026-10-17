@@ -19,6 +19,91 @@ paths:
       summary: Liveness + dependency check (DB, Redis, S3)
       tags:
         - ops
+  /auth/signup:
+    post:
+      operationId: AuthController_signup
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupDto"
+      responses:
+        "201":
+          description: ""
+      tags: &a1
+        - auth
+  /auth/login:
+    post:
+      operationId: AuthController_login
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginDto"
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+  /auth/refresh:
+    post:
+      operationId: AuthController_refresh
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshDto"
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+  /auth/logout:
+    post:
+      operationId: AuthController_logout
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshDto"
+      responses:
+        "204":
+          description: ""
+      tags: *a1
+  /auth/forgot-password:
+    post:
+      operationId: AuthController_forgotPassword
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordDto"
+      responses:
+        "204":
+          description: ""
+      tags: *a1
+  /auth/reset-password:
+    post:
+      operationId: AuthController_resetPassword
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordDto"
+      responses:
+        "204":
+          description: ""
+      tags: *a1
   /cart:
     get:
       operationId: CartController_get
@@ -30,9 +115,9 @@ paths:
             application/json:
               schema:
                 type: object
-      security: &a1
+      security: &a2
         - bearer: []
-      tags: &a2
+      tags: &a3
         - cart
     post:
       operationId: CartController_add
@@ -50,8 +135,8 @@ paths:
             application/json:
               schema:
                 type: object
-      security: *a1
-      tags: *a2
+      security: *a2
+      tags: *a3
   /cart/{drawingId}:
     delete:
       operationId: CartController_remove
@@ -68,8 +153,8 @@ paths:
             application/json:
               schema:
                 type: object
-      security: *a1
-      tags: *a2
+      security: *a2
+      tags: *a3
   /checkout:
     post:
       operationId: CheckoutController_create
@@ -81,9 +166,9 @@ paths:
             application/json:
               schema:
                 type: object
-      security: &a3
+      security: &a4
         - bearer: []
-      tags: &a4
+      tags: &a5
         - checkout
   /checkout/verify:
     post:
@@ -98,8 +183,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a3
-      tags: *a4
+      security: *a4
+      tags: *a5
   /checkout/stub-complete:
     post:
       operationId: CheckoutController_stubComplete
@@ -113,8 +198,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a3
-      tags: *a4
+      security: *a4
+      tags: *a5
   /checkout/status:
     get:
       operationId: CheckoutController_status
@@ -122,8 +207,8 @@ paths:
       responses:
         "200":
           description: ""
-      security: *a3
-      tags: *a4
+      security: *a4
+      tags: *a5
   /payments/razorpay/webhook:
     post:
       operationId: RazorpayWebhookController_webhook
@@ -162,6 +247,77 @@ components:
       bearerFormat: JWT
       type: http
   schemas:
+    SignupDto:
+      type: object
+      properties:
+        email:
+          type: string
+          maxLength: 254
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+        fullName:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          pattern: ^\+?[0-9]{10,14}$
+        address:
+          type: string
+          maxLength: 300
+        city:
+          type: string
+          maxLength: 100
+      required:
+        - email
+        - password
+        - fullName
+        - phone
+        - address
+        - city
+    LoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          maxLength: 128
+      required:
+        - email
+        - password
+    RefreshDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          maxLength: 512
+      required:
+        - refreshToken
+    ForgotPasswordDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+        - email
+    ResetPasswordDto:
+      type: object
+      properties:
+        token:
+          type: string
+          maxLength: 512
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 128
+      required:
+        - token
+        - newPassword
     AddCartItemDto:
       type: object
       properties:
