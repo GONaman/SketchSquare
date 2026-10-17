@@ -100,12 +100,20 @@ Always the contract shape `{ error: { code, message, details? } }`, produced by 
 decorators and TS types; add `@ApiProperty` only when the inference is not enough. Tag controllers with `@ApiTags('<feature>')`
 and `@ApiBearerAuth()` on authenticated ones.
 
-### Access control (guards)
-Decorators live in `common/decorators/access.decorators.ts`:
+### Access control (guards) — implemented in `src/auth/`
+Decorators: `Public`, `AllowUnverified`, `Roles` from `common/decorators/access.decorators` (re-exported by `src/auth/decorators`);
+`CurrentUser` + `AuthUser` (`{id,email,fullName,role,verificationStatus}`) from `common/decorators/current-user.decorator`.
 - `@Public()` — no token (contract `[public]`), `@AllowUnverified()` — token required, any verificationStatus (contract `[auth]`),
-  `@Roles('ADMIN')` — role restriction (contract `[admin]`). Undecorated routes = logged-in + APPROVED.
-- The global `JwtAuthGuard` / `VerifiedGuard` / `RolesGuard` (registered as `APP_GUARD` in the auth module, Phase 2) read this metadata with `Reflector`.
-  Controller sketch:
+  `@Roles('ADMIN')` — role restriction (contract `[admin]`). Undecorated routes = logged-in + APPROVED. ADMINs skip the approval check.
+- Guards are global (`APP_GUARD` in `AuthModule`, order: throttler → `JwtAuthGuard` (401 `UNAUTHORIZED`) → `RolesGuard` (403 `FORBIDDEN`) →
+  `ApprovedGuard` (403 `VERIFICATION_REQUIRED`)). **New controllers need no guard wiring** — just add the decorators the contract asks for.
+  The user is re-read from the DB per request, so approval/role changes apply immediately (access tokens carry only `sub` + `role`).
+  Import `AuthModule` only if you need `TokenService` / `PasswordService` (`src/auth/guards` exports the guard classes for unit tests).
+- Rate limit: global 300 req/min/IP (`@nestjs/throttler`); tighten per route with `@Throttle({ default: { limit: 10, ttl: 60_000 } })` → 429 `RATE_LIMITED`.
+  `RATE_LIMIT_ENABLED=false` disables it (the e2e setup does this by default).
+- Contract `User` JSON: `toUserResponse(user, freeDownloadLimit)` from `src/auth/user.mapper.ts`.
+- e2e helper: `createTestUser(app, { role?, verificationStatus?, email? })` from `test/helpers/auth.ts` inserts a user and returns
+  `{ user, password, accessToken, refreshToken }`; use `.set(...bearer(u))` on supertest requests.
   ```ts
   @ApiTags('drawings') @ApiBearerAuth() @Controller('drawings')
   export class DrawingsController {
@@ -114,7 +122,8 @@ Decorators live in `common/decorators/access.decorators.ts`:
   }
   ```
   Ownership checks belong in the service (`if (drawing.architectId !== user.id) throw new ApiException(403, 'FORBIDDEN', …)`).
-- `/health` is already `@Public()`.
+- `/health` is already `@Public()`. A test-only demo controller registered in a test module must carry `@Public()` (or a token), too.
+- Parallel worktrees share `sketchsquare_test`; `resetDb` truncates it, so set `TEST_DATABASE_URL` to a per-worktree DB (auto-created) when several agents run e2e at once.
 
 ### Pagination
 Use `common/pagination.ts`: extend/use `PageQueryDto` (`cursor`, `limit` 20/max 50), fetch `limit + 1` rows ordered by a stable key
