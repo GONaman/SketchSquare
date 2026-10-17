@@ -1,16 +1,31 @@
-# sketch_square
+# SketchSquare app (Flutter)
 
-App to revolutionize the way architects share and access designs globally.
+Flutter client for SketchSquare, a marketplace where verified architects upload, sell, buy and discover architectural drawings.
+Flutter 3.29 / Dart 3.7. Conventions: [`docs/CONVENTIONS.md`](../docs/CONVENTIONS.md). API: [`docs/API_CONTRACT.md`](../docs/API_CONTRACT.md).
 
-## Getting Started
+## Run
 
-This project is a starting point for a Flutter application.
+```sh
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000   # Android emulator (this is also the default)
+flutter run --dart-define=API_BASE_URL=http://localhost:3000  # iOS simulator / web / desktop
+flutter run --dart-define=API_BASE_URL=http://<LAN-IP>:3000   # physical device
+```
 
-A few resources to get you started if this is your first Flutter project:
+`10.0.2.2` is how the Android emulator reaches the host machine's `localhost`. Start the backend first (see the root README).
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Checks
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```sh
+flutter analyze
+flutter test
+flutter build web   # quick compile check without an emulator
+```
+
+## Code generation
+
+Riverpod / freezed / json_serializable output is committed. After changing annotated files:
+
+```sh
+dart run build_runner build --delete-conflicting-outputs
+```
