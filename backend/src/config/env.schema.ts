@@ -29,6 +29,20 @@ const envObject = z.object({
   TRUST_PROXY: int(0),
   APP_BASE_URL: z.string().default('http://localhost:3000'),
 
+  // pino level; `silent` in tests. Logs are JSON on stdout with request ids and secrets redacted.
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+    .default('info'),
+  // Error reporting is off unless a DSN is set.
+  SENTRY_DSN: optionalString,
+  SENTRY_ENVIRONMENT: optionalString,
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0),
+  // GET /metrics requires `Authorization: Bearer <token>`; when unset it is reachable from private addresses only.
+  METRICS_TOKEN: optionalString,
+  // SIGTERM: /health turns 503 immediately; after SHUTDOWN_DRAIN_MS the listener closes and in-flight requests finish.
+  SHUTDOWN_DRAIN_MS: int(0),
+  SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
+
   DATABASE_URL: withDevDefault(
     'postgresql://sketch:sketch@localhost:5432/sketchsquare',
   ),

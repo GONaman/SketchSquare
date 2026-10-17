@@ -9,6 +9,7 @@ import { EngagementModule } from './engagement/engagement.module';
 import { HealthModule } from './health/health.module';
 import { LedgerModule } from './ledger/ledger.module';
 import { MailModule } from './mail/mail.module';
+import { ObservabilityModule } from './observability/observability.module';
 import { RefundsModule } from './refunds/refunds.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -25,6 +26,7 @@ import { StorageModule } from './storage/storage.module';
     StorageModule,
     QueueModule,
     AuditModule,
+    ObservabilityModule,
     HealthModule,
     // Feature modules: add one line per module below.
     MailModule,

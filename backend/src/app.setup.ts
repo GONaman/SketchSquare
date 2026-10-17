@@ -7,6 +7,8 @@ import helmet from 'helmet';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { createValidationPipe } from './common/pipes/validation.pipe';
 import { Env } from './config/env.schema';
+import { MetricsService } from './observability/metrics.service';
+import { requestIdMiddleware } from './observability/request-id';
 
 export function parseCorsOrigins(raw: string): true | string[] {
   const origins = raw
@@ -20,6 +22,10 @@ export function parseCorsOrigins(raw: string): true | string[] {
 export function configureApp(app: INestApplication): void {
   const config = app.get<ConfigService<Env, true>>(ConfigService);
   const express = app as NestExpressApplication;
+
+  // First in the chain, so even body-parser and guard errors carry X-Request-Id.
+  app.use(requestIdMiddleware);
+  app.use(app.get(MetricsService).middleware);
 
   const hops = config.get('TRUST_PROXY', { infer: true });
   if (hops > 0) express.set('trust proxy', hops);

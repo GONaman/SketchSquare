@@ -7,7 +7,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
+import {
+  REQUEST_ID_HEADER,
+  resolveRequestId,
+} from '../../observability/request-id';
+import { reportException } from '../../observability/sentry';
 import { ApiErrorCode, ApiException } from '../errors/api-exception';
 
 interface ErrorBody {
@@ -30,14 +35,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
-    const res = host.switchToHttp().getResponse<Response>();
+    const http = host.switchToHttp();
+    const res = http.getResponse<Response>();
+    const req = http.getRequest<Request | undefined>();
     const { status, body } = this.toResponse(exception);
+    // Normally set by requestIdMiddleware; the fallback covers contexts where it did not run (e.g. unit tests).
+    let requestId = res.getHeader?.(REQUEST_ID_HEADER) as string | undefined;
+    if (!requestId && res.setHeader) {
+      requestId = resolveRequestId(req?.headers?.['x-request-id']);
+      res.setHeader(REQUEST_ID_HEADER, requestId);
+    }
     if (status >= 500) {
       this.logger.error(
         exception instanceof Error
           ? (exception.stack ?? exception.message)
           : String(exception),
       );
+      reportException(exception, requestId);
     }
     res.status(status).json(body);
   }
