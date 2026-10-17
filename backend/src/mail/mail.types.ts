@@ -13,6 +13,14 @@ export type EmailJob =
   | {
       name: 'drawing-under-review';
       data: { to: string; fullName: string; title: string };
+    }
+  | {
+      name: 'drawing-approved';
+      data: { to: string; fullName: string; title: string };
+    }
+  | {
+      name: 'drawing-rejected';
+      data: { to: string; fullName: string; title: string; reason: string };
     };
 
 export type EmailJobName = EmailJob['name'];

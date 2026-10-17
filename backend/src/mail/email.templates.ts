@@ -82,5 +82,31 @@ export function renderEmail(job: EmailJob): RenderedEmail {
         text: `Hi ${fullName},\n\nYour drawing "${title}" looks similar to an existing drawing on SketchSquare, so our team will review it before it goes live.\nWe will email you as soon as a decision is made. You do not need to do anything.`,
       };
     }
+    case 'drawing-approved': {
+      const { fullName, title } = job.data;
+      return {
+        subject: `"${title}" is now live`,
+        html: layout(
+          'Your drawing has been approved',
+          `<p>Hi ${esc(fullName)},</p>
+<p>Our team reviewed your drawing <strong>${esc(title)}</strong> and approved it. It is now published on SketchSquare.</p>`,
+        ),
+        text: `Hi ${fullName},\n\nOur team reviewed your drawing "${title}" and approved it. It is now published on SketchSquare.`,
+      };
+    }
+    case 'drawing-rejected': {
+      const { fullName, title, reason } = job.data;
+      return {
+        subject: `"${title}" was not approved`,
+        html: layout(
+          'Your drawing was not approved',
+          `<p>Hi ${esc(fullName)},</p>
+<p>After review, your drawing <strong>${esc(title)}</strong> could not be published because it appears to copy existing work on SketchSquare.</p>
+<p style="background:#fdf2f2;border-left:4px solid #c0392b;padding:12px 16px"><strong>Reason:</strong> ${esc(reason)}</p>
+<p>The drawing has been removed. Only original work can be published.</p>`,
+        ),
+        text: `Hi ${fullName},\n\nAfter review, your drawing "${title}" could not be published because it appears to copy existing work on SketchSquare.\nReason: ${reason}\n\nThe drawing has been removed. Only original work can be published.`,
+      };
+    }
   }
 }
