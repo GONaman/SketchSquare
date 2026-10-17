@@ -47,6 +47,8 @@ export const envSchema = z.object({
   JWT_ACCESS_TTL_SECONDS: int(900),
   JWT_REFRESH_TTL_DAYS: int(30),
   PASSWORD_RESET_TTL_MINUTES: int(60),
+  // Throttler on/off (e2e tests turn it off, the rate-limit test turns it back on).
+  RATE_LIMIT_ENABLED: bool(true),
 
   SMTP_HOST: z.string().min(1).default('localhost'),
   SMTP_PORT: z.coerce.number().int().positive().default(1025),

@@ -4,6 +4,7 @@ import { IsEmail, IsInt, Min } from 'class-validator';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { Public } from '../src/common/decorators/access.decorators';
 import { configureApp } from '../src/app.setup';
 
 class DemoDto {
@@ -11,6 +12,7 @@ class DemoDto {
   @IsInt() @Min(1) qty!: number;
 }
 
+@Public()
 @Controller('__demo')
 class DemoController {
   @Post()
