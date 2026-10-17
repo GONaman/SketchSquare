@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_tokens.dart';
 import '../data/drawings_providers.dart';
 import '../domain/drawing_search_query.dart';
 import '../domain/plot_size.dart';
@@ -69,37 +68,20 @@ class ActiveFilterChips extends ConsumerWidget {
         ),
     ];
     if (chips.isEmpty) return const SizedBox.shrink();
-    final scheme = Theme.of(context).colorScheme;
-    final showClearAll = chips.length > 1;
     return SizedBox(
       height: 48,
       child: ListView.separated(
         key: const Key('active-filters'),
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.gutter,
-          vertical: AppSpacing.xs,
-        ),
-        itemCount: chips.length + (showClearAll ? 1 : 0),
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: chips.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
-          if (i == chips.length) {
-            return TextButton(
-              key: const Key('clear-all-filters'),
-              onPressed: () => onChanged(query.clearFilters()),
-              child: const Text('Clear all'),
-            );
-          }
           final (label, next) = chips[i];
           return InputChip(
             label: Text(label),
             onDeleted: () => onChanged(next),
             deleteButtonTooltipMessage: 'Remove $label',
-            backgroundColor: scheme.primaryContainer,
-            labelStyle: TextStyle(color: scheme.onPrimaryContainer),
-            deleteIconColor: scheme.onPrimaryContainer,
-            side: BorderSide.none,
-            visualDensity: VisualDensity.compact,
           );
         },
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/widgets.dart';
 import 'legal_content.dart';
 
 class LegalDocumentScreen extends StatelessWidget {
@@ -23,29 +24,95 @@ class LegalDocumentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            LegalContent.placeholderNotice,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontStyle: FontStyle.italic,
-            ),
+      body: SelectionArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.xxl,
           ),
-          for (final s in sections) ...[
-            const SizedBox(height: 20),
-            Semantics(
-              header: true,
-              child: Text(s.heading, style: theme.textTheme.titleMedium),
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppCard(
+                      style: AppCardStyle.tonal,
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 20,
+                            color: scheme.primary,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              LegalContent.placeholderNotice,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    for (final s in sections) ...[
+                      const SizedBox(height: AppSpacing.xl),
+                      Semantics(
+                        header: true,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 3,
+                              height: 22,
+                              margin: const EdgeInsets.only(
+                                right: AppSpacing.md,
+                                top: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: scheme.primary,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.pill,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                s.heading,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Padding(
+                        padding: const EdgeInsets.only(left: AppSpacing.md + 3),
+                        child: Text(
+                          s.body,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            height: 1.55,
+                            color: scheme.onSurface.withValues(alpha: 0.87),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 6),
-            Text(s.body, style: theme.textTheme.bodyMedium),
           ],
-          const SizedBox(height: 24),
-        ],
+        ),
       ),
     );
   }

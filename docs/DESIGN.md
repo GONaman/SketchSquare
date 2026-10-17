@@ -158,13 +158,13 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Screen group | Status |
 | --- | --- |
 | Theme, bottom navigation, page transitions | Done |
-| Home (hero plot-size search, categories, feed; hero ≈ 225 dp) | Done |
-| Search (sticky field + filter button, active chips + Clear all, result-count header + sort pill, plot-specific empty state with one-tap widen, filters sheet with plot size/tolerance preview, price range, chips, sort) | Done |
+| Home (hero plot-size search, categories, feed) | Done |
+| Search (field, results grid, empty/error) | Done (filters sheet still stock) |
 | Shared `DrawingCard`, skeleton grid, Featured/Favorites/Architect grids | Done (inherited) |
 | Drawing detail (gallery has hero + new card chips; overview, reviews, purchase bar) | **To do** |
 | Architect profile header | **To do** |
 | Auth: sign-in, sign-up (2-step), forgot/reset, verification upload form | **Done** (`AuthHero`, `StepProgress`, `PasswordStrengthMeter`, `AppTextField`/`PrimaryButton`) |
-| Auth: intro, splash, verification status, Privacy/Terms | **To do** |
+| Auth: intro, splash, verification status (timeline), Privacy/Terms | **Done** (frosted intro controls, `BlueprintIllustration` + status timeline, tonal legal notice) |
 | Upload flow | **To do** |
 | Basket + checkout + order result | Done |
 | Purchases library + download/review sheet | **To do** |

@@ -231,48 +231,6 @@ void main() {
       expect(repo.searchCalls.last.query.q, 'zzz');
     });
 
-    testWidgets('plot-specific empty state widens the tolerance in one tap', (
-      tester,
-    ) async {
-      tallView(tester);
-      final repo = FakeDrawingsRepository();
-      await openSearch(tester, repo, '?length=30&breadth=40');
-      expect(find.text('No drawings near 30×40 ft'), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('widen-tolerance')));
-      await tester.pumpAndSettle();
-      expect(repo.searchCalls.last.query.tolerancePct, 20);
-      expect(repo.searchCalls.last.query.length, 30);
-    });
-
-    testWidgets('at max tolerance the empty state offers to clear the size', (
-      tester,
-    ) async {
-      tallView(tester);
-      final repo = FakeDrawingsRepository();
-      await openSearch(tester, repo, '?length=30&breadth=40&tolerancePct=50');
-      expect(find.byKey(const Key('widen-tolerance')), findsNothing);
-
-      await tester.tap(find.byKey(const Key('clear-plot-size')));
-      await tester.pumpAndSettle();
-      expect(repo.searchCalls.last.query.hasPlotSize, isFalse);
-    });
-
-    testWidgets('shows the result count and a clear-all chip', (tester) async {
-      tallView(tester);
-      final repo = FakeDrawingsRepository(
-        searchPages: [
-          [summary('d1'), summary('d2')],
-        ],
-      );
-      await openSearch(tester, repo, '?city=Pune&priceType=free');
-      expect(find.text('2 drawings'), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('clear-all-filters')));
-      await tester.pumpAndSettle();
-      expect(repo.searchCalls.last.query.activeFilterCount, 0);
-    });
-
     testWidgets('error state retries the search', (tester) async {
       tallView(tester);
       final repo = FakeDrawingsRepository(
