@@ -2,10 +2,12 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Env } from '../config/env.schema';
+import { S3_CLIENT } from './storage.constants';
+import { StorageService } from './storage.service';
 
-export const S3_CLIENT = 'S3_CLIENT';
+export { S3_CLIENT };
 
-/** Provides the raw S3 client (MinIO locally, S3/R2 in prod). Phase 3 builds `StorageService` on top of it. */
+/** Provides the raw S3 client (MinIO locally, S3/R2 in prod). `StorageService` builds on top of it. */
 @Global()
 @Module({
   providers: [
@@ -25,7 +27,8 @@ export const S3_CLIENT = 'S3_CLIENT';
           },
         }),
     },
+    StorageService,
   ],
-  exports: [S3_CLIENT],
+  exports: [S3_CLIENT, StorageService],
 })
 export class StorageModule {}
