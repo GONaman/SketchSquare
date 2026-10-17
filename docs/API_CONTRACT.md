@@ -126,9 +126,10 @@ Also includes `bedrooms: int|null` and `tags: string[]`. Records a DrawingView (
 ## Wallet `[approved]`
 - `GET /wallet` → `{ balancePaise, pendingWithdrawalPaise, minWithdrawalPaise, withdrawalBlocked: bool, bankAccount: {holderName,ifsc,accountNumberLast4}|null }`
 - `GET /wallet/ledger?cursor&limit` → page of `{ id, entryType, amountPaise, description, referenceId, createdAt }`
-- `POST /wallet/bank-account` body `{holderName,ifsc,accountNumber}` → `{holderName,ifsc,accountNumberLast4}`
-- `POST /wallet/withdrawals` body `{amountPaise}` → `201 Withdrawal`; `GET /wallet/withdrawals` → page of `Withdrawal`
-- `Withdrawal { id, amountPaise, status: "REQUESTED"|"PROCESSING"|"PAID"|"FAILED", createdAt, updatedAt }`
+- `POST /wallet/bank-account` body `{holderName (2–100), ifsc (^[A-Z]{4}0[A-Z0-9]{6}$, case-insensitive), accountNumber (9–18 digits)}` → `200 {holderName,ifsc,accountNumberLast4}` (create or replace; only the last 4 digits are stored; `409 CONFLICT` while a withdrawal is in flight)
+- `POST /wallet/withdrawals` body `{amountPaise}` → `201 Withdrawal`; `GET /wallet/withdrawals` → page of `Withdrawal`. Errors: `400 VALIDATION_ERROR` (no bank account), `400 BELOW_MIN_WITHDRAWAL`, `400 INSUFFICIENT_BALANCE`, `403 WITHDRAWAL_BLOCKED` (negative balance), `409 CONFLICT` (another withdrawal in flight). The amount leaves the wallet immediately; a failed payout returns it.
+- `Withdrawal { id, amountPaise, status: "REQUESTED"|"PROCESSING"|"PAID"|"FAILED", failureReason: string|null, createdAt, updatedAt }`
+- `POST /payments/razorpayx/webhook` `[public]` RazorpayX payout events (`payout.processed|failed|rejected|cancelled|reversed`), signature-verified, idempotent by event id.
 
 ## Phase 8 additions
 - `PUT /drawings/:id/favorite`, `DELETE /drawings/:id/favorite` → `204`; `GET /me/favorites` → page of `DrawingSummary`
