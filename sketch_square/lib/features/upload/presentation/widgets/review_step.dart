@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/routes.dart';
 import '../../domain/money.dart';
 import '../../domain/sheet_upload_target.dart';
 import '../upload_flow_controller.dart';
@@ -220,13 +222,7 @@ class PublishStatusView extends ConsumerWidget {
           ),
           title: 'Your drawing is live',
           message: '${s.form.title} is now visible in the marketplace.',
-          actions: [
-            FilledButton(
-              key: const ValueKey('start-new'),
-              onPressed: onStartNew,
-              child: const Text('Upload another drawing'),
-            ),
-          ],
+          actions: [..._finishedActions(context, onStartNew)],
         );
       case PublishPhase.underReview:
         return layout(
@@ -239,13 +235,7 @@ class PublishStatusView extends ConsumerWidget {
           message:
               'Our team will review ${s.form.title} before it goes live. '
               "You'll be notified when it is approved.",
-          actions: [
-            FilledButton(
-              key: const ValueKey('start-new'),
-              onPressed: onStartNew,
-              child: const Text('Upload another drawing'),
-            ),
-          ],
+          actions: [..._finishedActions(context, onStartNew)],
         );
       case PublishPhase.failed:
         return layout(
@@ -273,3 +263,18 @@ class PublishStatusView extends ConsumerWidget {
     }
   }
 }
+
+List<Widget> _finishedActions(BuildContext context, VoidCallback onStartNew) =>
+    [
+      FilledButton(
+        key: const ValueKey('start-new'),
+        onPressed: onStartNew,
+        child: const Text('Upload another drawing'),
+      ),
+      const SizedBox(height: 8),
+      OutlinedButton(
+        key: const ValueKey('open-manage-drawings'),
+        onPressed: () => context.push(AppRoutes.manageDrawings),
+        child: const Text('Manage drawings'),
+      ),
+    ];

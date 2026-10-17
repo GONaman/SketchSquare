@@ -16,6 +16,10 @@ abstract final class AppRoutes {
   static const basket = '/basket';
   static const profile = '/profile';
 
+  /// Seller's drawing list (full screen above the shell); `context.push` it
+  /// from anywhere, e.g. the profile tab.
+  static const manageDrawings = '/manage-drawings';
+
   static const basketCheckout = '/basket/checkout';
   static const basketOrderResult = '/basket/order-result';
   static const purchases = '/profile/purchases';

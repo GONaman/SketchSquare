@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/routes.dart';
 import 'upload_flow_controller.dart';
 import 'upload_flow_state.dart';
 import 'widgets/details_step.dart';
@@ -74,6 +76,13 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       appBar: AppBar(
         title: const Text('Upload'),
         actions: [
+          if (s.loaded)
+            IconButton(
+              key: const ValueKey('open-manage'),
+              tooltip: 'Manage drawings',
+              icon: const Icon(Icons.inventory_2_outlined),
+              onPressed: () => context.push(AppRoutes.manageDrawings),
+            ),
           if (s.loaded && !s.locked)
             TextButton.icon(
               key: const ValueKey('save-draft'),
