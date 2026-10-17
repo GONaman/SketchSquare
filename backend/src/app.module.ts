@@ -4,6 +4,7 @@ import { AppConfigModule } from './config/config.module';
 import { CommerceModule } from './commerce/commerce.module';
 import { DrawingsModule } from './drawings/drawings.module';
 import { DiscoveryModule } from './discovery/discovery.module';
+import { EngagementModule } from './engagement/engagement.module';
 import { HealthModule } from './health/health.module';
 import { LedgerModule } from './ledger/ledger.module';
 import { MailModule } from './mail/mail.module';
@@ -29,6 +30,7 @@ import { StorageModule } from './storage/storage.module';
     DrawingsModule,
     DiscoveryModule,
     VerificationModule,
+    EngagementModule,
   ],
 })
 export class AppModule {}

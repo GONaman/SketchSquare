@@ -39,6 +39,7 @@ export interface ViewerFlags {
   isOwner: boolean;
   isPurchased: boolean;
   inCart: boolean;
+  isFavorite: boolean;
   canDownload: boolean;
   freeDownloadsRemaining: number | null;
   myReview: ReviewView | null;
@@ -246,30 +247,36 @@ export class DrawingDetailService {
     d: { id: string; pricePaise: number; status: string },
     isOwner: boolean,
   ): Promise<ViewerFlags> {
-    const [purchase, inCart, claim, me, myReview] = await Promise.all([
-      this.prisma.purchase.findFirst({
-        where: { buyerId: viewer.id, drawingId: d.id, status: 'PAID' },
-        select: { id: true },
-      }),
-      this.prisma.cartItem.findUnique({
-        where: { userId_drawingId: { userId: viewer.id, drawingId: d.id } },
-        select: { userId: true },
-      }),
-      this.prisma.freeDownload.findUnique({
-        where: { userId_drawingId: { userId: viewer.id, drawingId: d.id } },
-        select: { userId: true },
-      }),
-      this.prisma.user.findUnique({
-        where: { id: viewer.id },
-        select: { freeDownloadsUsed: true },
-      }),
-      this.prisma.review.findUnique({
-        where: {
-          buyerId_drawingId: { buyerId: viewer.id, drawingId: d.id },
-        },
-        select: REVIEW_SELECT,
-      }),
-    ]);
+    const [purchase, inCart, favorite, claim, me, myReview] = await Promise.all(
+      [
+        this.prisma.purchase.findFirst({
+          where: { buyerId: viewer.id, drawingId: d.id, status: 'PAID' },
+          select: { id: true },
+        }),
+        this.prisma.cartItem.findUnique({
+          where: { userId_drawingId: { userId: viewer.id, drawingId: d.id } },
+          select: { userId: true },
+        }),
+        this.prisma.favorite.findUnique({
+          where: { userId_drawingId: { userId: viewer.id, drawingId: d.id } },
+          select: { userId: true },
+        }),
+        this.prisma.freeDownload.findUnique({
+          where: { userId_drawingId: { userId: viewer.id, drawingId: d.id } },
+          select: { userId: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: viewer.id },
+          select: { freeDownloadsUsed: true },
+        }),
+        this.prisma.review.findUnique({
+          where: {
+            buyerId_drawingId: { buyerId: viewer.id, drawingId: d.id },
+          },
+          select: REVIEW_SELECT,
+        }),
+      ],
+    );
     const isPurchased = purchase !== null;
     const isFree = d.pricePaise === 0;
     const limit = this.config.get('FREE_DOWNLOAD_LIMIT', { infer: true });
@@ -279,6 +286,7 @@ export class DrawingDetailService {
       isOwner,
       isPurchased,
       inCart: inCart !== null,
+      isFavorite: favorite !== null,
       canDownload:
         isOwner || isPurchased || (isFree && (claim !== null || canClaimFree)),
       freeDownloadsRemaining: isFree && !isOwner ? remaining : null,
