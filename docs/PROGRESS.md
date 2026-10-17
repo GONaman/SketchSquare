@@ -5,7 +5,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 
 ## Phase 0 — Scaffold
 - [x] 0.1 Repo hygiene (.gitignore, untrack .idea, AGENTS.md, copilot-instructions, progress/decisions docs)
-- [ ] 0.2 infra/docker-compose.yml (postgres, redis, minio + bucket init, mailpit)
+- [x] 0.2 infra/docker-compose.yml (postgres, redis, minio + bucket init, mailpit)
 - [ ] 0.3 backend NestJS scaffold (config, swagger, health, Prisma, lint/test)
 - [ ] 0.4 Flutter core (theme, dio, error model, secure storage, router, 5-tab shell)
 - [ ] 0.5 Root README
