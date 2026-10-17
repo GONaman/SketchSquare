@@ -127,6 +127,7 @@ Integer paise everywhere (Prisma `Int`/`BigInt`, never floats). Timestamps are r
 - Schema: `backend/prisma/schema.prisma`; change it with `npx prisma migrate dev --name <name> < /dev/null` (use `--create-only` and hand-edit when raw SQL is needed). See `docs/data-model.md` for DB-level rules (partial unique, triggers, FTS, ledger).
 - Identifiers in raw SQL are quoted (`"Drawing"."pricePaise"`). Never write `Drawing.plotAreaSqft` or `searchVector`.
 - Ledger: only through `LedgerService.postTransaction(entries, tx?)` (import `LedgerModule`; it is a feature module like any other). Pass the caller's `tx` from `prisma.$transaction(async (tx) => …)` to commit atomically with purchase/withdrawal updates.
+- Seed: `npm run seed` (idempotent, see `backend/prisma/README-seed.md` for the dev accounts/passwords; `prisma migrate reset --force` re-runs it). Extend `prisma/seed.ts` with fixed-id upserts when a later phase needs sample data.
 - e2e DB: `globalSetup` migrates `sketchsquare_test` (override with `TEST_DATABASE_URL`); call `resetDb(prisma)` from `test/helpers/db.ts` in `beforeEach` (TRUNCATE ... CASCADE; ledger rows cannot be DELETEd).
 
 ### Tests
