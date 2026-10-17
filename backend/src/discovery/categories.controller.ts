@@ -57,14 +57,20 @@ export class CategoriesController {
   @Post('admin/category-requests/:id/approve')
   @Roles('ADMIN')
   @HttpCode(HttpStatus.OK)
-  approve(@Param('id', ParseUUIDPipe) id: string) {
-    return this.categories.approve(id);
+  approve(
+    @CurrentUser() admin: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.categories.approve(admin.id, id);
   }
 
   @Post('admin/category-requests/:id/reject')
   @Roles('ADMIN')
   @HttpCode(HttpStatus.OK)
-  reject(@Param('id', ParseUUIDPipe) id: string) {
-    return this.categories.reject(id);
+  reject(
+    @CurrentUser() admin: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.categories.reject(admin.id, id);
   }
 }

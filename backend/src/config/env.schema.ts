@@ -16,12 +16,17 @@ const int = (def: number) => z.coerce.number().int().nonnegative().default(def);
 
 const optionalString = z.string().min(1).optional();
 
-export const envSchema = z.object({
+const envObject = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
+  // Comma-separated origin allowlist. `*` is accepted in development/test only (rejected in production, see below).
   CORS_ORIGINS: z.string().default('*'),
+  // Largest accepted JSON/urlencoded request body (body-parser syntax, e.g. "100kb"). Uploads go straight to S3.
+  BODY_LIMIT: z.string().min(1).default('100kb'),
+  // Number of reverse-proxy hops in front of the API (so rate limits and logs see the client IP). 0 = none.
+  TRUST_PROXY: int(0),
   APP_BASE_URL: z.string().default('http://localhost:3000'),
 
   DATABASE_URL: withDevDefault(
@@ -51,6 +56,10 @@ export const envSchema = z.object({
   PASSWORD_RESET_TTL_MINUTES: int(60),
   // Throttler on/off (e2e tests turn it off, the rate-limit test turns it back on).
   RATE_LIMIT_ENABLED: bool(true),
+  // Ceiling per client IP and route for every non-GET/HEAD/OPTIONS request (routes may tighten it with @Throttle).
+  RATE_LIMIT_WRITE_PER_MIN: z.coerce.number().int().positive().default(60),
+  // redis = shared counters across API instances (falls back to memory while Redis is down); memory = per process.
+  RATE_LIMIT_STORAGE: z.enum(['redis', 'memory']).default('redis'),
 
   SMTP_HOST: z.string().min(1).default('localhost'),
   SMTP_PORT: z.coerce.number().int().positive().default(1025),
@@ -84,6 +93,19 @@ export const envSchema = z.object({
   RAZORPAYX_WEBHOOK_SECRET: optionalString,
   // Stub payouts settle after this delay so the app can show the in-progress state (0 = immediately).
   STUB_PAYOUT_DELAY_MS: int(2000),
+});
+
+export const envSchema = envObject.superRefine((env, ctx) => {
+  if (env.NODE_ENV !== 'production') return;
+  const origins = env.CORS_ORIGINS.split(',').map((o) => o.trim());
+  if (origins.includes('*')) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['CORS_ORIGINS'],
+      message:
+        'must be an explicit origin allowlist in production (a wildcard "*" is not allowed)',
+    });
+  }
 });
 
 export type Env = z.infer<typeof envSchema>;

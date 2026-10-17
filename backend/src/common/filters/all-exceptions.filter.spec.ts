@@ -52,6 +52,27 @@ describe('AllExceptionsFilter', () => {
     });
   });
 
+  it('maps body-parser client errors (oversized / malformed body) instead of 500', () => {
+    const tooLarge = Object.assign(new Error('request entity too large'), {
+      status: 413,
+      expose: true,
+    });
+    expect(run(tooLarge)).toEqual({
+      status: 413,
+      body: {
+        error: { code: 'UPLOAD_INVALID', message: 'Request body is too large' },
+      },
+    });
+    const malformed = Object.assign(new SyntaxError('Unexpected token'), {
+      status: 400,
+      expose: true,
+    });
+    expect(run(malformed)).toMatchObject({
+      status: 400,
+      body: { error: { code: 'VALIDATION_ERROR' } },
+    });
+  });
+
   it('maps Prisma unique violations to 409 CONFLICT', () => {
     const err = new Prisma.PrismaClientKnownRequestError('dup', {
       code: 'P2002',

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { AppConfigModule } from './config/config.module';
 import { CommerceModule } from './commerce/commerce.module';
@@ -22,6 +23,7 @@ import { StorageModule } from './storage/storage.module';
     RedisModule,
     StorageModule,
     QueueModule,
+    AuditModule,
     HealthModule,
     // Feature modules: add one line per module below.
     MailModule,
