@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/api_exception.dart';
-import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../auth/domain/user.dart' show VerificationStatus;
 import '../domain/admin_verification.dart';
 import 'admin_providers.dart';
@@ -93,77 +93,129 @@ class _AdminVerificationDetailScreenState
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(adminVerificationProvider(widget.id));
+    final v = async.valueOrNull;
+    final pending = v != null && v.status == VerificationStatus.pending;
     return Scaffold(
       appBar: AppBar(title: const Text('Verification request')),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ListRowSkeleton(count: 4),
         error:
-            (e, _) => ErrorRetry(
+            (e, _) => ErrorState(
               message: toApiException(e).message,
               onRetry:
                   () => ref.invalidate(adminVerificationProvider(widget.id)),
             ),
         data: _body,
       ),
+      bottomNavigationBar:
+          pending
+              ? SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.gutter,
+                    AppSpacing.sm,
+                    AppSpacing.gutter,
+                    AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SecondaryButton(
+                          label: 'Reject',
+                          onPressed: _busy ? null : () => _reject(v),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: PrimaryButton(
+                          label: 'Approve',
+                          loading: _busy,
+                          onPressed: () => _approve(v),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+              : null,
     );
   }
 
   Widget _body(AdminVerification v) {
-    final text = Theme.of(context).textTheme;
-    final isPending = v.status == VerificationStatus.pending;
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final (tone, label) = switch (v.status) {
+      VerificationStatus.approved => (StatusTone.success, 'Approved'),
+      VerificationStatus.rejected => (StatusTone.danger, 'Rejected'),
+      _ => (StatusTone.warning, 'Pending'),
+    };
     Widget row(String label, String? value) =>
         value == null || value.isEmpty
             ? const SizedBox.shrink()
-            : ListTile(
-              dense: true,
-              title: Text(label, style: text.labelMedium),
-              subtitle: Text(value, style: text.bodyLarge),
+            : Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.labelMedium?.copyWith(color: muted),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(value, style: theme.textTheme.bodyLarge),
+                ],
+              ),
             );
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(AppSpacing.gutter),
       children: [
-        row('Name', v.user.fullName),
-        row('Email', v.user.email),
-        row('Phone', v.user.phone),
-        row('City', v.user.city),
-        row('Address', v.user.address),
-        row('COA registration number', v.coaRegistrationNumber),
-        row(
-          'Submitted',
-          DateFormat.yMMMd().add_jm().format(v.submittedAt.toLocal()),
-        ),
-        row('Status', v.status.name.toUpperCase()),
-        row('Review note', v.reviewNote),
-        Padding(
-          padding: const EdgeInsets.all(16),
+        AppCard(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              OutlinedButton.icon(
-                onPressed:
-                    v.documentUrl == null
-                        ? null
-                        : () => _openDocument(v.documentUrl!),
-                icon: const Icon(Icons.description_outlined),
-                label: const Text('Open document'),
+              AppAvatar(name: v.user.fullName, size: 72),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                v.user.fullName,
+                style: theme.textTheme.titleLarge,
+                textAlign: TextAlign.center,
               ),
-              if (isPending) ...[
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: _busy ? null : () => _approve(v),
-                  child: const Text('Approve'),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                  onPressed: _busy ? null : () => _reject(v),
-                  child: const Text('Reject'),
-                ),
-              ],
+              const SizedBox(height: 2),
+              Text(
+                v.user.email,
+                style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              StatusPill(label: label, tone: tone),
             ],
           ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppCard(
+          style: AppCardStyle.outlined,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              row('COA registration number', v.coaRegistrationNumber),
+              row('Phone', v.user.phone),
+              row('City', v.user.city),
+              row('Address', v.user.address),
+              row(
+                'Submitted',
+                DateFormat.yMMMd().add_jm().format(v.submittedAt.toLocal()),
+              ),
+              row('Review note', v.reviewNote),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        SecondaryButton(
+          label: 'Open document',
+          icon: Icons.description_outlined,
+          onPressed:
+              v.documentUrl == null
+                  ? null
+                  : () => _openDocument(v.documentUrl!),
         ),
       ],
     );

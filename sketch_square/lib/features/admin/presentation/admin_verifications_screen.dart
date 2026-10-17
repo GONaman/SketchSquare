@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
-import '../../../core/widgets/blueprint_empty_state.dart';
-import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/load_more_sentinel.dart';
+import '../../../core/widgets/widgets.dart';
 import '../domain/admin_verification.dart';
 import 'admin_providers.dart';
 
@@ -21,27 +21,11 @@ class AdminVerificationsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(pendingVerificationsProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pending verifications'),
-        actions: [
-          IconButton(
-            key: const Key('open-plagiarism'),
-            icon: const Icon(Icons.fact_check_outlined),
-            tooltip: 'Plagiarism review',
-            onPressed: () => context.push('${AppRoutes.admin}/plagiarism'),
-          ),
-          IconButton(
-            key: const Key('open-refunds'),
-            icon: const Icon(Icons.receipt_long_outlined),
-            tooltip: 'Refunds',
-            onPressed: () => context.push('${AppRoutes.admin}/refunds'),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Pending verifications')),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ListRowSkeleton(count: 4),
         error:
-            (e, _) => ErrorRetry(
+            (e, _) => ErrorState(
               message: toApiException(e).message,
               onRetry: () => ref.invalidate(pendingVerificationsProvider),
             ),
@@ -60,7 +44,7 @@ class AdminVerificationsScreen extends ConsumerWidget {
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: SizedBox(
                         height: c.maxHeight,
-                        child: const BlueprintEmptyState(
+                        child: const EmptyState(
                           icon: Icons.verified_outlined,
                           title: 'All caught up',
                           message: 'No architects are waiting for review.',
@@ -74,17 +58,21 @@ class AdminVerificationsScreen extends ConsumerWidget {
             onRefresh: refresh,
             child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.gutter),
               itemCount: paged.items.length + (paged.hasMore ? 1 : 0),
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder:
+                  (_, __) => const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, i) {
                 if (i == paged.items.length) {
-                  return _LoadMore(
-                    paged.isLoadingMore,
-                    paged.loadMoreError?.message,
-                    () =>
-                        ref
-                            .read(pendingVerificationsProvider.notifier)
-                            .loadMore(),
+                  final notifier = ref.read(
+                    pendingVerificationsProvider.notifier,
+                  );
+                  return LoadMoreSentinel(
+                    key: ValueKey('verifications-more-${paged.items.length}'),
+                    loading: paged.isLoadingMore,
+                    errorMessage: paged.loadMoreError?.message,
+                    onLoadMore: notifier.loadMore,
+                    onRetry: notifier.loadMore,
                   );
                 }
                 return _VerificationTile(paged.items[i]);
@@ -104,57 +92,57 @@ class _VerificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurfaceVariant;
     final city = item.user.city;
-    return ListTile(
-      title: Text(item.user.fullName),
-      subtitle: Text(
-        [
-          'COA ${item.coaRegistrationNumber}',
-          if (city != null && city.isNotEmpty) city,
-          'Submitted ${DateFormat.yMMMd().format(item.submittedAt.toLocal())}',
-        ].join(' • '),
-      ),
-      trailing: const Icon(Icons.chevron_right),
+    return AppCard(
       onTap: () => context.push(adminVerificationPath(item.id)),
-    );
-  }
-}
-
-/// Fetches the next page when it scrolls into view (or on tap after a failure).
-class _LoadMore extends StatefulWidget {
-  const _LoadMore(this.loading, this.error, this.onLoad);
-
-  final bool loading;
-  final String? error;
-  final VoidCallback onLoad;
-
-  @override
-  State<_LoadMore> createState() => _LoadMoreState();
-}
-
-class _LoadMoreState extends State<_LoadMore> {
-  @override
-  void initState() {
-    super.initState();
-    if (!widget.loading && widget.error == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) widget.onLoad();
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.error != null) {
-      return ListTile(
-        leading: const Icon(Icons.refresh),
-        title: Text('${widget.error} Tap to retry.'),
-        onTap: widget.onLoad,
-      );
-    }
-    return const Padding(
-      padding: EdgeInsets.all(16),
-      child: Center(child: CircularProgressIndicator()),
+      child: Row(
+        children: [
+          AppAvatar(name: item.user.fullName, size: 48),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.user.fullName,
+                  style: theme.textTheme.titleSmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  [
+                    'COA ${item.coaRegistrationNumber}',
+                    if (city != null && city.isNotEmpty) city,
+                  ].join(' • '),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    const StatusPill(
+                      label: 'Pending',
+                      tone: StatusTone.warning,
+                      icon: Icons.schedule,
+                      dense: true,
+                    ),
+                    Text(
+                      'Submitted ${DateFormat.yMMMd().format(item.submittedAt.toLocal())}',
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: muted),
+        ],
+      ),
     );
   }
 }
