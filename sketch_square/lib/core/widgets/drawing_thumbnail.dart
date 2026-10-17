@@ -15,20 +15,23 @@ class DrawingThumbnail extends StatelessWidget {
       color: scheme.surfaceContainerHighest,
       child: Icon(Icons.architecture, color: scheme.onSurfaceVariant),
     );
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: SizedBox(
-        width: size,
-        height: size,
-        child:
-            url == null
-                ? placeholder
-                : CachedNetworkImage(
-                  imageUrl: url!,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => placeholder,
-                  errorWidget: (_, __, ___) => placeholder,
-                ),
+    // Decorative: the surrounding row already carries the drawing title.
+    return ExcludeSemantics(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: SizedBox(
+          width: size,
+          height: size,
+          child:
+              url == null
+                  ? placeholder
+                  : CachedNetworkImage(
+                    imageUrl: url!,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => placeholder,
+                    errorWidget: (_, __, ___) => placeholder,
+                  ),
+        ),
       ),
     );
   }
