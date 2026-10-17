@@ -1,0 +1,134 @@
+# SketchSquare API contract (v1)
+
+Single source of truth shared by `backend/` (NestJS) and `sketch_square/` (Flutter) so both can be built in parallel.
+`docs/openapi.yaml` is generated from the backend and must conform to this document. If the backend needs to deviate,
+update **this file in the same PR** and note it in `docs/DECISIONS.md`.
+
+## Conventions
+- JSON, `camelCase`, no URL prefix (e.g. `POST /auth/login`). Ids are UUID strings. Timestamps are ISO-8601 UTC strings.
+- Money is always **integer paise** (`pricePaise`, `amountPaise`, ...). Lengths are stored/returned in **feet** (decimals).
+- Auth: `Authorization: Bearer <accessToken>`; access token 15 min, refresh token 30 days (rotating).
+- Errors: HTTP status + `{ "error": { "code": "SOME_CODE", "message": "human text", "details": {...}? } }`.
+  Codes: `VALIDATION_ERROR` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `VERIFICATION_REQUIRED` (403), `NOT_FOUND` (404),
+  `CONFLICT` (409), `FREE_LIMIT_REACHED` (403), `INSUFFICIENT_BALANCE` (400), `BELOW_MIN_WITHDRAWAL` (400),
+  `WITHDRAWAL_BLOCKED` (403), `UPLOAD_INVALID` (400), `RATE_LIMITED` (429), `INTERNAL` (500).
+- Pagination: cursor-based. Request `?cursor=<opaque>&limit=20` (default 20, max 50). Response `{ "items": [...], "nextCursor": "<opaque>"|null }`.
+- Unless stated, endpoints require a logged-in **APPROVED** user. Endpoints marked `[auth]` only need a valid token (any verification status);
+  `[public]` need nothing; `[admin]` need role ADMIN.
+
+## Shared object shapes
+```jsonc
+User {
+  "id", "email", "fullName", "address", "phone", "avatarUrl": string|null, "city",
+  "role": "ARCHITECT"|"ADMIN", "verificationStatus": "PENDING"|"APPROVED"|"REJECTED",
+  "architectRating": number, "freeDownloadsUsed": int, "freeDownloadLimit": int, "createdAt"
+}
+Tokens { "accessToken", "refreshToken", "expiresIn": 900 }
+ArchitectSummary { "id", "fullName", "city", "architectRating": number, "ratingCount": int, "avatarUrl": string|null }
+DrawingSummary {                       // tile in lists
+  "id", "title", "category": {"id","name","slug"}, "city",
+  "plotLengthFt": number, "plotBreadthFt": number, "plotAreaSqft": number, "floors": int, "facing": string|null,
+  "pricePaise": int, "isFree": bool, "avgRating": number, "ratingCount": int,
+  "previewUrl": string|null, "architect": ArchitectSummary, "status": DrawingStatus, "createdAt",
+  "sizeMatch": number|null            // 0..1, only present for size searches (1 = exact)
+}
+Sheet { "id", "type": "ARCHITECTURAL"|"STRUCTURAL"|"ELECTRICAL"|"SANITARY"|"PLUMBING"|"HVAC"|"OTHER",
+        "isPreview": bool, "previewUrl": string|null /* only preview sheets */, "originalMime", "fileName", "sizeBytes": int }
+DrawingStatus = "DRAFT"|"PROCESSING"|"PUBLISHED"|"UNDER_REVIEW"|"REMOVED"|"FAILED"
+Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullName"}, "createdAt", "updatedAt" }
+```
+
+## Auth `[public]`
+| Method & path | Body | Response |
+|---|---|---|
+| `POST /auth/signup` | `{email,password(min 8),fullName,phone,address,city}` | `201 {user: User, tokens: Tokens}` (verificationStatus PENDING). 409 `CONFLICT` if email exists. |
+| `POST /auth/login` | `{email,password}` | `{user, tokens}` |
+| `POST /auth/refresh` | `{refreshToken}` | `{tokens}` (rotates; reuse of an old token revokes the family → 401) |
+| `POST /auth/logout` | `{refreshToken}` | `204` |
+| `POST /auth/forgot-password` | `{email}` | `204` (always, no user enumeration) |
+| `POST /auth/reset-password` | `{token,newPassword}` | `204` |
+
+## Verification `[auth]`
+- `POST /verification` multipart (`coaRegistrationNumber`, `document` PDF/JPG/PNG ≤10MB) → `201 VerificationRequest`. Resubmit allowed when REJECTED (or still PENDING: replaces).
+- `GET /verification/me` → `{ "verification": VerificationRequest|null }`
+- `VerificationRequest { id, coaRegistrationNumber, status: "PENDING"|"APPROVED"|"REJECTED", reviewNote: string|null, submittedAt, reviewedAt: string|null }`
+
+## Admin `[admin]`
+- `GET /admin/verifications?status=PENDING&cursor&limit` → page of `{ id, status, coaRegistrationNumber, submittedAt, user: {id,fullName,email,phone,city,address} }`
+- `GET /admin/verifications/:id` → same + `documentUrl` (presigned, 5 min) + `reviewNote`
+- `POST /admin/verifications/:id/approve` → `{ok:true}`; `POST /admin/verifications/:id/reject` body `{note}` → `{ok:true}`
+- `GET /admin/category-requests?status=PENDING` → page of `{id, requestedName, status, user:{id,fullName}, createdAt}`;
+  `POST /admin/category-requests/:id/approve` (creates the Category) / `.../reject`
+- `POST /admin/purchases/:id/refund` → `{ok:true}` (Part 3 refunds)
+- Phase 8: `GET /admin/review-queue` → page of `{ drawing: DrawingSummary, flaggedAgainst: DrawingSummary[], reason }`, `POST /admin/review-queue/:drawingId/approve|reject`
+
+## Profile
+- `GET /me` `[auth]` → `User`
+- `PATCH /me` `[auth]` body `{phone?,city?}` → `User` (sending `fullName` or `address` → 400 `VALIDATION_ERROR` "cannot be changed")
+- `POST /me/avatar/upload-url` body `{contentType}` → `{uploadUrl, objectKey}`; then `POST /me/avatar/confirm` body `{objectKey}` → `User` (backend resizes to 512px)
+
+## Categories, cities, architects
+- `GET /categories` → `[{id,name,slug}]` (active only). `POST /category-requests` body `{name}` → `201 {id,requestedName,status}`
+- `GET /cities` → `[{city, count}]` (cities with published drawings)
+- `GET /architects/top?city=` → `[ArchitectSummary & {drawingCount}]` (need ≥3 ratings; sorted by rating desc)
+- `GET /architects/:id` → `{ architect: ArchitectSummary, drawings: page of DrawingSummary }` (first page; `GET /architects/:id/drawings?cursor` for more)
+
+## Drawings — seller side
+- `POST /drawings` body `{title,description,categoryId,city,plotLength,plotBreadth,unit:"ft"|"m",floors,facing?,pricePaise,isFree?}` → `201 DrawingDetail` (DRAFT).
+  `isFree=true` forces `pricePaise=0`.
+- `PATCH /drawings/:id` owner; draft: any field; published: only `{title,description,pricePaise}`.
+- `DELETE /drawings/:id` owner → `204`, status REMOVED (past buyers keep access).
+- `POST /drawings/:id/sheets/upload-url` body `{fileName,contentType,sizeBytes}` → `{uploadUrl, objectKey, headers: {...}}` (client PUTs the file with those headers; ≤50MB; PDF/PNG/JPG/DWG/DXF)
+- `POST /drawings/:id/sheets` body `{type,objectKey,isPreview,fileName,sizeBytes}` → `201 Sheet` (server verifies object exists + magic bytes)
+- `PATCH /drawings/:id/sheets/:sheetId` body `{type?,isPreview?}`; `DELETE /drawings/:id/sheets/:sheetId` → `204`
+- `POST /drawings/:id/publish` → `202 {status:"PROCESSING"}` (needs ≥1 sheet and 1–2 preview sheets, else 400 `VALIDATION_ERROR`). Poll `GET /drawings/:id` until `status` is `PUBLISHED` or `FAILED` (`failureReason` set).
+- `GET /me/drawings?status=&cursor&limit` → page of `{ drawing: DrawingSummary, stats: {viewCount,purchaseCount,avgRating,ratingCount} }`
+- `GET /drawings/:id/buyers` owner → page of `{buyer:{id,fullName,city}, pricePaise, purchasedAt}`
+- `GET /drawings/:id/viewers` owner (last 30 days, deduped) → page of `{viewer:{id,fullName,city}, lastViewedAt}`
+- `GET /drawings/:id/reviews?cursor&limit` → page of `Review`
+
+## Discovery
+`GET /drawings/search` → page of `DrawingSummary` (PUBLISHED drawings of APPROVED architects only). Query params:
+`q`, `categoryId`, `length`, `breadth`, `unit` (`ft`|`m`, default ft), `tolerancePct` (default 10; both dimensions within tolerance, rotated plot also matches; exact first via `sizeMatch`),
+`city` (repeatable), `minDrawingRating`, `minArchitectRating`, `priceType` (`free`|`paid`|`all`), `minPricePaise`, `maxPricePaise`,
+`sort` (`relevance`|`price_asc`|`price_desc`|`drawing_rating`|`architect_rating`|`newest`), `cursor`, `limit`.
+
+`GET /drawings/:id` → `DrawingDetail`:
+```jsonc
+DrawingDetail = DrawingSummary & {
+  "description", "floors", "viewCount", "purchaseCount", "failureReason": string|null,
+  "sheets": [Sheet],                       // never includes original keys/urls
+  "reviews": { "items": [Review], "nextCursor" },   // first page
+  "viewer": { "isOwner": bool, "isPurchased": bool, "inCart": bool, "canDownload": bool,
+              "freeDownloadsRemaining": int|null, "myReview": Review|null }
+}
+```
+Records a DrawingView (deduped per viewer per 24 h) except for the owner. Non-published drawings are visible only to the owner/admin.
+
+## Cart, checkout, payments, downloads
+- `GET /cart` → `{ items: [DrawingSummary], totalPaise }`; `POST /cart` body `{drawingId}` → cart; `DELETE /cart/:drawingId` → cart.
+  Rejects own, already-purchased and free drawings (400 `VALIDATION_ERROR` with a clear message).
+- `POST /checkout` → `{ orderId, razorpayKeyId, amountPaise, currency:"INR", purchaseIds:[...] }`. `razorpayKeyId == "stub"` means stub mode.
+- `POST /checkout/verify` body `{razorpayOrderId,razorpayPaymentId,razorpaySignature}` → `{status:"PAID"|"FAILED"}` (idempotent; webhook is source of truth)
+- `POST /checkout/stub-complete` body `{orderId}` → `{status:"PAID"}`; only available when Razorpay keys are not configured (stub mode), simulates the captured-payment webhook.
+- `GET /checkout/status?orderId=` → `{status:"CREATED"|"PAID"|"FAILED"}` (client polls after app resume)
+- `POST /payments/razorpay/webhook` `[public]` signature-verified, idempotent by event id.
+- `GET /drawings/:id/download?sheetId=` → `{ url, expiresInSeconds: 300, fileName }` (entitlement: owner, PAID purchase, or free within quota; else 403 `FORBIDDEN` / `FREE_LIMIT_REACHED`)
+- `GET /me/purchases?cursor&limit` → page of `{ kind:"PAID"|"FREE", purchasedAt, pricePaise, purchaseId: string|null, drawing: DrawingSummary & {sheets:[Sheet]} }`
+- `PUT /drawings/:id/review` body `{rating,comment?}` → `Review` (entitled non-owner only)
+
+## Wallet `[approved]`
+- `GET /wallet` → `{ balancePaise, pendingWithdrawalPaise, minWithdrawalPaise, withdrawalBlocked: bool, bankAccount: {holderName,ifsc,accountNumberLast4}|null }`
+- `GET /wallet/ledger?cursor&limit` → page of `{ id, entryType, amountPaise, description, referenceId, createdAt }`
+- `POST /wallet/bank-account` body `{holderName,ifsc,accountNumber}` → `{holderName,ifsc,accountNumberLast4}`
+- `POST /wallet/withdrawals` body `{amountPaise}` → `201 Withdrawal`; `GET /wallet/withdrawals` → page of `Withdrawal`
+- `Withdrawal { id, amountPaise, status: "REQUESTED"|"PROCESSING"|"PAID"|"FAILED", createdAt, updatedAt }`
+
+## Phase 8 additions
+- `PUT /drawings/:id/favorite`, `DELETE /drawings/:id/favorite` → `204`; `GET /me/favorites` → page of `DrawingSummary`
+- `PUT /drawings/:id/interest`, `DELETE /drawings/:id/interest` → `204`; `GET /drawings/:id/interests` owner → page of `{user:{id,fullName,city}, createdAt}`
+- `DrawingDetail.viewer` additionally gets `isFavorite: bool`, `isInterested: bool`
+- `POST /me/device-tokens` body `{token, platform}` → `204` (FCM)
+
+## Ops
+- `GET /health` `[public]` → `{ status:"ok", checks: { db, redis, s3 } }`; `GET /docs` Swagger UI.
