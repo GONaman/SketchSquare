@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/widgets.dart' hide formatPaise;
 import '../../drawings/domain/drawing_summary.dart';
 import '../../drawings/presentation/formatters.dart';
 import '../domain/manage_drawings_repository.dart';
@@ -53,6 +53,34 @@ String actionLabel(ManageAction a, DrawingStatus status) => switch (a) {
   ManageAction.delete => 'Delete',
 };
 
+IconData actionIcon(ManageAction a) => switch (a) {
+  ManageAction.continueEditing => Icons.edit_note_rounded,
+  ManageAction.viewProgress => Icons.timelapse_rounded,
+  ManageAction.interested => Icons.groups_2_outlined,
+  ManageAction.edit => Icons.edit_outlined,
+  ManageAction.remove => Icons.visibility_off_outlined,
+  ManageAction.delete => Icons.delete_outline_rounded,
+};
+
+StatusTone statusTone(DrawingStatus s) => switch (s) {
+  DrawingStatus.published => StatusTone.success,
+  DrawingStatus.processing => StatusTone.info,
+  DrawingStatus.underReview => StatusTone.warning,
+  DrawingStatus.failed => StatusTone.danger,
+  DrawingStatus.draft || DrawingStatus.removed => StatusTone.neutral,
+};
+
+IconData statusIcon(DrawingStatus s) => switch (s) {
+  DrawingStatus.published => Icons.check_circle_outline_rounded,
+  DrawingStatus.processing => Icons.autorenew_rounded,
+  DrawingStatus.underReview => Icons.hourglass_top_rounded,
+  DrawingStatus.failed => Icons.error_outline_rounded,
+  DrawingStatus.draft => Icons.edit_note_rounded,
+  DrawingStatus.removed => Icons.visibility_off_outlined,
+};
+
+/// One drawing in the seller's list: thumbnail, status pill, stats and the
+/// actions that apply to its current status.
 class ManagedDrawingCard extends StatelessWidget {
   const ManagedDrawingCard({
     super.key,
@@ -66,122 +94,110 @@ class ManagedDrawingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final d = item.drawing;
     final showStats =
         d.status == DrawingStatus.published ||
         d.status == DrawingStatus.underReview;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xs + 1,
+      ),
+      child: AppCard(
+        style: AppCardStyle.outlined,
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Thumb(url: d.previewUrl),
-                const SizedBox(width: 12),
+                DrawingThumbnail(url: d.previewUrl, size: 76),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: StatusPill(
+                          label: statusLabel(d.status),
+                          tone: statusTone(d.status),
+                          icon: statusIcon(d.status),
+                          dense: true,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs + 2),
                       Text(
                         d.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${formatPlotSize(d)} · ${d.city}',
-                        style: theme.textTheme.bodySmall,
-                      ),
                       const SizedBox(height: 2),
                       Text(
-                        d.isFree ? 'Free' : formatPaise(d.pricePaise),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        '${formatPlotSize(d)} · ${d.city}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
-                _StatusChip(status: d.status),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  d.isFree ? 'Free' : formatPaise(d.pricePaise),
+                  style: theme.textTheme.titleSmall?.tabular.copyWith(
+                    color:
+                        d.isFree
+                            ? AppSemanticColors.of(context).success
+                            : scheme.onSurface,
+                  ),
+                ),
               ],
             ),
             if (showStats) ...[
-              const SizedBox(height: 10),
-              Row(
-                key: ValueKey('stats-${d.id}'),
-                children: [
-                  _Stat(
-                    icon: Icons.visibility_outlined,
-                    text: '${item.stats.viewCount} views',
-                  ),
-                  const SizedBox(width: 16),
-                  _Stat(
-                    icon: Icons.shopping_bag_outlined,
-                    text: '${item.stats.purchaseCount} sales',
-                  ),
-                  const SizedBox(width: 16),
-                  _Stat(
-                    icon: Icons.star_outline,
-                    text:
-                        item.stats.ratingCount == 0
-                            ? 'No ratings'
-                            : '${formatRating(item.stats.avgRating)} '
-                                '(${item.stats.ratingCount})',
-                  ),
-                ],
-              ),
+              const SizedBox(height: AppSpacing.md),
+              _StatsStrip(key: ValueKey('stats-${d.id}'), stats: item.stats),
             ],
             if (d.status == DrawingStatus.underReview)
-              Padding(
+              _Notice(
                 key: ValueKey('under-review-${d.id}'),
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  'Under review by admins. A preview looks like another '
-                  "architect's drawing; you'll be emailed once it is decided.",
-                  style: theme.textTheme.bodySmall,
-                ),
+                icon: Icons.hourglass_top_rounded,
+                tone: StatusTone.warning,
+                text:
+                    'Under review by admins. A preview looks like another '
+                    "architect's drawing; you'll be emailed once it is decided.",
               ),
             if (d.status == DrawingStatus.failed)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  item.failureReason == null || item.failureReason!.isEmpty
-                      ? 'Processing failed. Open it to see the reason and '
-                          'try again.'
-                      : 'Rejected: ${item.failureReason}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
-                ),
+              _Notice(
+                icon: Icons.error_outline_rounded,
+                tone: StatusTone.danger,
+                text:
+                    item.failureReason == null || item.failureReason!.isEmpty
+                        ? 'Processing failed. Open it to see the reason and '
+                            'try again.'
+                        : 'Rejected: ${item.failureReason}',
               ),
             if (d.status == DrawingStatus.processing)
               const Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: LinearProgressIndicator(),
-              ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                for (final a in actionsFor(d.status, paid: !d.isFree))
-                  TextButton(
-                    key: ValueKey('action-${a.name}-${d.id}'),
-                    onPressed: () => onAction(a),
-                    style:
-                        a == ManageAction.delete || a == ManageAction.remove
-                            ? TextButton.styleFrom(
-                              foregroundColor: theme.colorScheme.error,
-                            )
-                            : null,
-                    child: Text(actionLabel(a, d.status)),
+                padding: EdgeInsets.only(top: AppSpacing.md),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(AppRadius.pill),
                   ),
-              ],
+                  child: LinearProgressIndicator(minHeight: 6),
+                ),
+              ),
+            _Actions(
+              status: d.status,
+              id: d.id,
+              paid: !d.isFree,
+              onAction: onAction,
             ),
           ],
         ),
@@ -190,62 +206,45 @@ class ManagedDrawingCard extends StatelessWidget {
   }
 }
 
-class _Thumb extends StatelessWidget {
-  const _Thumb({this.url});
-  final String? url;
+class _StatsStrip extends StatelessWidget {
+  const _StatsStrip({super.key, required this.stats});
+
+  final DrawingStats stats;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final fallback = ColoredBox(
-      color: scheme.surfaceContainerHighest,
-      child: Icon(Icons.architecture, color: scheme.onSurfaceVariant),
-    );
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: SizedBox(
-        width: 72,
-        height: 72,
-        child:
-            url == null
-                ? fallback
-                : CachedNetworkImage(
-                  imageUrl: url!,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => fallback,
-                  placeholder: (_, __) => fallback,
-                ),
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-  final DrawingStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final (bg, fg) = switch (status) {
-      DrawingStatus.published => (
-        scheme.primaryContainer,
-        scheme.onPrimaryContainer,
-      ),
-      DrawingStatus.failed => (scheme.errorContainer, scheme.onErrorContainer),
-      _ => (scheme.secondaryContainer, scheme.onSecondaryContainer),
-    };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(10),
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
-      child: Text(
-        statusLabel(status),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w600,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm + 2,
+        ),
+        child: Wrap(
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.xs,
+          children: [
+            _Stat(
+              icon: Icons.visibility_outlined,
+              text: '${stats.viewCount} views',
+            ),
+            _Stat(
+              icon: Icons.shopping_bag_outlined,
+              text: '${stats.purchaseCount} sales',
+            ),
+            _Stat(
+              icon: Icons.star_outline_rounded,
+              text:
+                  stats.ratingCount == 0
+                      ? 'No ratings'
+                      : '${formatRating(stats.avgRating)} '
+                          '(${stats.ratingCount})',
+            ),
+          ],
         ),
       ),
     );
@@ -254,6 +253,7 @@ class _StatusChip extends StatelessWidget {
 
 class _Stat extends StatelessWidget {
   const _Stat({required this.icon, required this.text});
+
   final IconData icon;
   final String text;
 
@@ -264,9 +264,110 @@ class _Stat extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 4),
-        Text(text, style: theme.textTheme.bodySmall),
+        const SizedBox(width: AppSpacing.xs + 1),
+        Text(text, style: theme.textTheme.bodySmall?.tabular),
       ],
+    );
+  }
+}
+
+class _Notice extends StatelessWidget {
+  const _Notice({
+    super.key,
+    required this.icon,
+    required this.tone,
+    required this.text,
+  });
+
+  final IconData icon;
+  final StatusTone tone;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final sem = AppSemanticColors.of(context);
+    final (bg, fg) = switch (tone) {
+      StatusTone.danger => (scheme.errorContainer, scheme.onErrorContainer),
+      StatusTone.warning => (sem.warningContainer, scheme.onSurface),
+      _ => (scheme.surfaceContainerLow, scheme.onSurface),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 18, color: fg),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  text,
+                  style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Actions extends StatelessWidget {
+  const _Actions({
+    required this.status,
+    required this.id,
+    required this.paid,
+    required this.onAction,
+  });
+
+  final DrawingStatus status;
+  final String id;
+  final bool paid;
+  final void Function(ManageAction action) onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final actions = actionsFor(status, paid: paid);
+    if (actions.isEmpty) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: Wrap(
+        alignment: WrapAlignment.end,
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
+        children: [
+          for (final a in actions)
+            if (a == ManageAction.delete || a == ManageAction.remove)
+              TextButton.icon(
+                key: ValueKey('action-${a.name}-$id'),
+                onPressed: () => onAction(a),
+                icon: Icon(actionIcon(a), size: 18),
+                label: Text(actionLabel(a, status)),
+                style: TextButton.styleFrom(
+                  foregroundColor: scheme.error,
+                  minimumSize: const Size(48, 48),
+                ),
+              )
+            else
+              SecondaryButton(
+                key: ValueKey('action-${a.name}-$id'),
+                label: actionLabel(a, status),
+                icon: actionIcon(a),
+                expand: false,
+                onPressed: () => onAction(a),
+              ),
+        ],
+      ),
     );
   }
 }
