@@ -46,4 +46,23 @@ describe('renderEmail', () => {
     expect(r.html).not.toContain('<i>Villa');
     expect(r.text).toContain('"<i>Villa</i>"');
   });
+
+  it('renders the approval and rejection emails', () => {
+    const ok = renderEmail({
+      name: 'drawing-approved',
+      data: { to: 'a@b.c', fullName: 'Asha', title: 'Villa' },
+    });
+    expect(ok.subject).toContain('now live');
+    const no = renderEmail({
+      name: 'drawing-rejected',
+      data: {
+        to: 'a@b.c',
+        fullName: 'Asha',
+        title: 'Villa',
+        reason: 'Copy of <b>X</b>',
+      },
+    });
+    expect(no.html).toContain('Copy of &lt;b&gt;X&lt;/b&gt;');
+    expect(no.text).toContain('Reason: Copy of <b>X</b>');
+  });
 });

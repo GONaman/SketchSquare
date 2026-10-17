@@ -69,7 +69,15 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
   (`PAYMENT_GATEWAY +price`, seller `USER_WALLET −net`, `PLATFORM_REVENUE −fee`; zero-sum), `purchaseCount −1`, `AuditLog`. The gateway call runs after the commit; if it fails the refund stays booked with `providerStatus:"FAILED"` and calling again retries only the gateway (`alreadyRefunded:true`).
   Errors: 400 `VALIDATION_ERROR` (missing/short reason), 403 `FORBIDDEN` (non-admin), 404 `NOT_FOUND`, 409 `CONFLICT` (purchase is not PAID/REFUNDED).
   Effects: the refunded purchase no longer entitles the buyer (download → 403 `FORBIDDEN`, gone from `/me/purchases`, cannot review/edit a review). The seller's wallet may go negative; `POST /wallet/withdrawals` then returns 403 `WITHDRAWAL_BLOCKED` until the balance is ≥ 0 (`GET /wallet` `withdrawalBlocked:true`).
-- Phase 8: `GET /admin/review-queue` → page of `{ drawing: DrawingSummary, flaggedAgainst: DrawingSummary[], reason }`, `POST /admin/review-queue/:drawingId/approve|reject`
+- `GET /admin/plagiarism-flags?status=PENDING|APPROVED|REJECTED&cursor&limit` `[admin]` → page of
+  `PlagiarismFlagItem { id, status, hammingDistance, reviewNote, reviewedAt, createdAt, drawing: ReviewDrawing, matchedDrawing: ReviewDrawing, flaggedSheet:{id,previewUrl}, matchedSheet:{id,previewUrl} }`
+  where `ReviewDrawing = DrawingSummary + { description, sheets:[{id,title,previewUrl,isPreview,…}] }` (preview data only, never original files).
+  `drawing` is the uploaded one (held `UNDER_REVIEW`), `matchedDrawing` the existing one it resembles (other architect), `flaggedSheet`/`matchedSheet` the closest preview pair to show side by side; `hammingDistance` 0–64 (lower = more similar).
+  Oldest first (`createdAt asc, id asc`), `status` defaults to `PENDING`; pending items whose drawing is no longer `UNDER_REVIEW` (e.g. deleted by the owner) are omitted.
+- `POST /admin/plagiarism-flags/:id/approve` `[admin]` → `201 {ok:true}`: the drawing goes `UNDER_REVIEW → PUBLISHED` (the contribution rule is not re-applied) and all its pending flags become `APPROVED`. The uploader gets a `drawing-approved` email.
+- `POST /admin/plagiarism-flags/:id/reject` `[admin]` body `{reason}` (trimmed, 1–500 chars) → `201 {ok:true}`: the drawing becomes `REMOVED` with `failureReason=reason` and all its pending flags `REJECTED` (`reviewNote=reason`). The uploader gets a `drawing-rejected` email containing the reason.
+  Errors for both: 400 `VALIDATION_ERROR` (bad uuid / missing reason), 401, 403 `FORBIDDEN` (non-admin), 404 `NOT_FOUND`, 409 `CONFLICT` (flag already decided or drawing no longer under review). Decisions are written to `AuditLog` (`plagiarism.approve|reject`).
+  (Replaces the earlier draft `GET /admin/review-queue` contract.)
 
 ## Profile
 - `GET /me` `[auth]` → `User`

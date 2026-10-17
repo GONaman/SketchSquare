@@ -54,4 +54,27 @@ export class MailService {
       data: { to, fullName, title },
     });
   }
+
+  sendDrawingApproved(
+    to: string,
+    fullName: string,
+    title: string,
+  ): Promise<void> {
+    return this.enqueue({
+      name: 'drawing-approved',
+      data: { to, fullName, title },
+    });
+  }
+
+  sendDrawingRejected(
+    to: string,
+    fullName: string,
+    title: string,
+    reason: string,
+  ): Promise<void> {
+    return this.enqueue({
+      name: 'drawing-rejected',
+      data: { to, fullName, title, reason },
+    });
+  }
 }

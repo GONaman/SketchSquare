@@ -60,7 +60,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 8.2 Express interest — backend done (`PUT/DELETE /drawings/:id/interest`, `GET /drawings/:id/interests`, `viewer.isInterested`); Flutter button/owner list pending; push on new interest comes with 8.5
 - [x] 8.3 Contribution rule
 - [x] 8.6 Refunds/disputes (Part 3) — backend: `GET /admin/purchases[/:id]`, `POST /admin/purchases/:id/refund`, `RefundProvider` (stub/Razorpay), TAX enum reserved; Flutter: Admin → Refunds screens (search, detail, refund with reason + confirm) and a clearer negative-balance withdrawal-blocked message in the wallet
-- [ ] 8.4 Plagiarism check + admin review queue
+- [x] 8.4 Plagiarism check + admin review queue — backend: SHA-256 hard block + pHash flagging in the processing job, `GET /admin/plagiarism-flags`, `POST …/:id/approve|reject` + emails; Flutter admin review screen + uploader messaging pending; pHash threshold needs tuning on real plans
 - [ ] 8.5 Push notifications (stub)
 
 ## Needs manual check
