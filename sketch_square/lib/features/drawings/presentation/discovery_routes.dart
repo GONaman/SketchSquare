@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/widgets/placeholder_screen.dart';
+import '../../architects/presentation/architect_profile_screen.dart';
 import '../domain/drawing_search_query.dart';
 import 'discovery_paths.dart';
+import 'drawing_detail_screen.dart';
 import 'search_screen.dart';
 
 /// Sub-routes of a tab for the discovery flow: search results, drawing detail
@@ -28,15 +28,17 @@ List<RouteBase> discoverySubRoutes(
   GoRoute(
     path: '${DiscoveryPaths.drawingSegment}/:id',
     builder:
-        (_, __) =>
-            const PlaceholderScreen(title: 'Drawing', icon: Icons.architecture),
+        (_, state) => DrawingDetailScreen(
+          drawingId: state.pathParameters['id']!,
+          paths: paths,
+        ),
   ),
   GoRoute(
     path: '${DiscoveryPaths.architectSegment}/:id',
     builder:
-        (_, __) => const PlaceholderScreen(
-          title: 'Architect',
-          icon: Icons.person_outline,
+        (_, state) => ArchitectProfileScreen(
+          architectId: state.pathParameters['id']!,
+          paths: paths,
         ),
   ),
 ];

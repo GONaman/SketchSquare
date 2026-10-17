@@ -195,6 +195,8 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - `DrawingSearchController` (family keyed by query) holds `PagedState<DrawingSummary>` (`core/pagination`); render with `pagedDrawingSlivers(...)` (skeleton, error retry, empty, grid, prefetch + footer). Text input is debounced 400 ms.
 - Plot size: `PlotSizeController` + `PlotSizeFields`; validation lives in `domain/plot_size.dart` (`validatePlotSize`). Money/size formatting only through `presentation/formatters.dart` (`formatPaise` etc.).
 - Tests: fakes and JSON builders in `test/features/drawings/fixtures.dart` (`discoveryFakes()`, `FakeDrawingsRepository` records `searchCalls`). The shell keeps Home mounted behind Search, so filter `searchCalls` by query when asserting. Never `pumpAndSettle` while a page request is in flight (spinner animates forever).
+- Detail/profile/featured: `DrawingDetailScreen`, `ArchitectProfileScreen` (`ArchitectProfileController`, same paging as search) and `FeaturedScreen` are mounted by `discoverySubRoutes` under each tab, so tapping through stays inside the tab's stack.
+- Gallery images load through `galleryImageResolverProvider`; tests override it (done by `discoveryFakes()`) and call `precacheGalleryImage(tester)` before navigating to a detail, otherwise the PhotoView spinner never settles.
 
 
 ## Flutter upload (`sketch_square/lib/features/upload`, Phase 3.5)
