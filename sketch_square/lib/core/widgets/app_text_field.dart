@@ -90,6 +90,8 @@ class AppTextField extends StatelessWidget {
         labelText: label,
         hintText: hint,
         helperText: helper,
+        helperMaxLines: 3,
+        errorMaxLines: 3,
         errorText: errorText,
         prefixIcon: prefixIcon == null ? null : Icon(prefixIcon),
         suffixIcon: suffix,
