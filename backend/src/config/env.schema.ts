@@ -25,6 +25,8 @@ const envObject = z.object({
   CORS_ORIGINS: z.string().default('*'),
   // Largest accepted JSON/urlencoded request body (body-parser syntax, e.g. "100kb"). Uploads go straight to S3.
   BODY_LIMIT: z.string().min(1).default('100kb'),
+  // Escape hatch for the production startup guard (see production-guard.ts): downgrades its refusals to loud warnings. Never set it on a real deployment.
+  ALLOW_UNSAFE_PRODUCTION: bool(false),
   // Number of reverse-proxy hops in front of the API (so rate limits and logs see the client IP). 0 = none.
   TRUST_PROXY: int(0),
   APP_BASE_URL: z.string().default('http://localhost:3000'),
