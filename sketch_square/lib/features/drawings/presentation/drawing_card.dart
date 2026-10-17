@@ -6,10 +6,18 @@ import 'formatters.dart';
 
 /// Grid tile for a drawing: preview, title, size, city, price/FREE and rating.
 class DrawingCard extends StatelessWidget {
-  const DrawingCard({super.key, required this.drawing, required this.onTap});
+  const DrawingCard({
+    super.key,
+    required this.drawing,
+    required this.onTap,
+    this.favoriteAction,
+  });
 
   final DrawingSummary drawing;
   final VoidCallback onTap;
+
+  /// Optional heart shown over the preview (top-left), e.g. in Favorites.
+  final Widget? favoriteAction;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +37,8 @@ class DrawingCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   DrawingPreviewImage(url: drawing.previewUrl),
+                  if (favoriteAction != null)
+                    Positioned(top: 4, left: 4, child: favoriteAction!),
                   if (sizeMatch != null)
                     Positioned(
                       top: 8,

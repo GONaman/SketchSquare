@@ -27,6 +27,7 @@ List<Widget> pagedDrawingSlivers({
   required VoidCallback onLoadMore,
   required VoidCallback onRetryMore,
   required Widget empty,
+  Widget? Function(DrawingSummary drawing)? favoriteActionFor,
 }) {
   return value.when(
     loading: () => [const _SkeletonGrid()],
@@ -61,7 +62,11 @@ List<Widget> pagedDrawingSlivers({
                   (_) => onLoadMore(),
                 );
               }
-              return DrawingCard(drawing: d, onTap: () => onTap(d));
+              return DrawingCard(
+                drawing: d,
+                onTap: () => onTap(d),
+                favoriteAction: favoriteActionFor?.call(d),
+              );
             },
           ),
         ),
