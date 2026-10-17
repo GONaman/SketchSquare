@@ -728,6 +728,27 @@ paths:
               type: number
               maximum: 100
               minimum: 1
+        - name: bedrooms
+          required: false
+          in: query
+          description: Repeatable; number of bedrooms (0-20)
+          schema:
+            maxItems: 10
+            type: array
+            items:
+              type: number
+              maximum: 20
+              minimum: 0
+        - name: tag
+          required: false
+          in: query
+          description: Repeatable; a drawing must have every given tag (case-insensitive)
+          schema:
+            maxItems: 5
+            maxLength: 24
+            type: array
+            items:
+              type: string
         - name: facing
           required: false
           in: query

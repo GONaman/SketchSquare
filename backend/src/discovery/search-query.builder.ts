@@ -29,6 +29,8 @@ export interface SearchParams {
   minPricePaise?: number;
   maxPricePaise?: number;
   floors?: number[];
+  bedrooms?: number[];
+  tags?: string[];
   facing?: string[];
   architectId?: string;
   sort: SearchSort;
@@ -96,6 +98,13 @@ export function buildSearchQuery(p: SearchParams): BuiltSearch {
     where.push(Prisma.sql`d."pricePaise" <= ${p.maxPricePaise}`);
   if (p.floors?.length)
     where.push(Prisma.sql`d."floors" IN (${Prisma.join(p.floors)})`);
+  if (p.bedrooms?.length)
+    where.push(Prisma.sql`d."bedrooms" IN (${Prisma.join(p.bedrooms)})`);
+  // Every requested tag must be present (case-insensitive); no index, so it only refines other filters.
+  for (const tag of p.tags ?? [])
+    where.push(
+      Prisma.sql`EXISTS (SELECT 1 FROM unnest(d."tags") AS t(v) WHERE lower(t.v) = ${tag.toLowerCase()})`,
+    );
   if (p.facing?.length)
     where.push(Prisma.sql`d."facing"::text IN (${Prisma.join(p.facing)})`);
 

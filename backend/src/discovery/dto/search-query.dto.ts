@@ -154,6 +154,32 @@ export class SearchQueryDto extends PageQueryDto {
   floors?: number[];
 
   @ApiPropertyOptional({
+    type: [Number],
+    description: 'Repeatable; number of bedrooms (0-20)',
+  })
+  @IsOptional()
+  @Transform(toNumberArray)
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  @Max(20, { each: true })
+  bedrooms?: number[];
+
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Repeatable; a drawing must have every given tag (case-insensitive)',
+  })
+  @IsOptional()
+  @Transform(toArray)
+  @IsArray()
+  @ArrayMaxSize(5)
+  @IsString({ each: true })
+  @MaxLength(24, { each: true })
+  tag?: string[];
+
+  @ApiPropertyOptional({
     type: [String],
     enum: FACINGS,
     description: 'Repeatable',

@@ -314,6 +314,8 @@ describe('GET /drawings/search (e2e)', () => {
         avgRating: 4.8,
         floors: 2,
         facing: 'N',
+        bedrooms: 3,
+        tags: ['Vastu', 'Corner plot'],
       });
       await d('cheap jaipur house', {
         pricePaise: 20000,
@@ -321,6 +323,8 @@ describe('GET /drawings/search (e2e)', () => {
         avgRating: 3.0,
         floors: 1,
         facing: 'E',
+        bedrooms: 2,
+        tags: ['vastu'],
       });
       await createDrawing(prisma, {
         architectId: delhi.id,
@@ -331,6 +335,7 @@ describe('GET /drawings/search (e2e)', () => {
         avgRating: 4.2,
         floors: 3,
         facing: 'NE',
+        bedrooms: 5,
         description: 'Spacious courtyard with garden',
       });
     });
@@ -389,6 +394,23 @@ describe('GET /drawings/search (e2e)', () => {
         'premium delhi villa',
       ]);
       await search('minPricePaise=10&maxPricePaise=5').expect(400);
+    });
+
+    it('bedrooms (repeatable) and tag (all must match, case-insensitive)', async () => {
+      expect(titles(await ok('bedrooms=3'))).toEqual(['free blr house']);
+      expect(new Set(titles(await ok('bedrooms=2&bedrooms=5')))).toEqual(
+        new Set(['cheap jaipur house', 'premium delhi villa']),
+      );
+      expect(new Set(titles(await ok('tag=VASTU')))).toEqual(
+        new Set(['free blr house', 'cheap jaipur house']),
+      );
+      expect(titles(await ok('tag=vastu&tag=corner%20plot'))).toEqual([
+        'free blr house',
+      ]);
+      expect(titles(await ok('tag=nope'))).toEqual([]);
+      await search('bedrooms=21').expect(400);
+      await search('bedrooms=x').expect(400);
+      await search('tag=1&tag=2&tag=3&tag=4&tag=5&tag=6').expect(400);
     });
 
     it('floors (repeatable) and facing (repeatable)', async () => {
