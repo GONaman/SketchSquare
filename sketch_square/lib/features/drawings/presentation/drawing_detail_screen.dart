@@ -120,11 +120,18 @@ class _DrawingDetailScreenState extends ConsumerState<DrawingDetailScreen> {
       const SectionHeader(title: 'About this drawing'),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
-        child: Text(
-          d.description,
-          key: const Key('detail-description'),
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
+        child:
+            context.isWide
+                ? SelectableText(
+                  d.description,
+                  key: const Key('detail-description'),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                )
+                : Text(
+                  d.description,
+                  key: const Key('detail-description'),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
       ),
     ],
   );

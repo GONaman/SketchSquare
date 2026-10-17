@@ -91,8 +91,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   AppSpacing.gutter,
                   AppSpacing.lg,
                 ),
-                child: _SearchEntry(
-                  onTap: () => context.push(homePaths.search(), extra: true),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: _SearchEntry(
+                      onTap:
+                          () => context.push(homePaths.search(), extra: true),
+                    ),
+                  ),
                 ),
               ),
             ),

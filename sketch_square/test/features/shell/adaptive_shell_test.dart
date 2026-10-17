@@ -88,7 +88,9 @@ void main() {
       overrides: discoveryFakes(),
     );
     final rect = tester.getRect(find.byKey(const Key('home-search-entry')));
-    expect(rect.width, lessThanOrEqualTo(Breakpoints.browseMaxWidth));
-    expect(rect.center.dx, 950);
+    expect(rect.width, lessThanOrEqualTo(720));
+    // Left-aligned inside the centred 1200 frame, never at the window edge.
+    expect(rect.left, greaterThanOrEqualTo((1900 - 1200) / 2));
+    expect(rect.right, lessThan(950 + Breakpoints.browseMaxWidth / 2));
   });
 }
