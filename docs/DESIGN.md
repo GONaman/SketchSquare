@@ -124,6 +124,27 @@ Shared formatters: `core/format/price.dart` → `formatPaise(int)` (`₹1,24,999
 - **Forms:** `AppTextField` for fields, `PrimaryButton(loading:)` for submit, errors inline (not only snackbars).
 - **Sheets/dialogs/snackbars** are themed (28 dp top radius + drag handle, floating snackbars) — use the stock widgets.
 
+## Responsive (phone · tablet · desktop/web)
+
+The phone layout is the baseline and must not change. Wider windows get native-feeling layouts built from `core/layout/`
+(`import 'package:sketch_square/core/layout/layout.dart'`, also re-exported by `widgets.dart`):
+
+| Class | Width | Chrome |
+| --- | --- | --- |
+| `ScreenSize.compact` | < 600 | bottom `NavigationBar`, 2-column grids |
+| `ScreenSize.medium` | 600 – 1024 | `NavigationRail`, 2–3 columns |
+| `ScreenSize.expanded` | > 1024 | top navigation bar (web), 3–4 columns |
+
+- `context.screenSize` / `context.isCompact` / `context.isWide` / `context.isExpanded` read the window width
+  (`Breakpoints.of(width)` for sub-area widths from a `LayoutBuilder`).
+- `ContentFrame(width: ContentWidth.browse | form | full)` centres content and caps it: **1200** for browse screens,
+  **560** for forms/auth/checkout/wallet/settings. `AdaptiveScaffoldBody` is the same as a `Scaffold.body` wrapper.
+  Backgrounds (Scaffold, hero gradients) stay full-bleed; only content is framed. The app shell already frames every tab
+  screen, so screens normally need **no** per-screen code.
+- `AdaptiveGridDelegate(mainAxisExtent: ...)` is the shared card-grid delegate (min tile 260 → 2/3/4 columns from the
+  sliver's real width). `pagedDrawingSlivers` uses it; use it for any new card grid instead of horizontal strips.
+- Don't hard-code widths for "desktop"; use the helpers above so tablets and resized windows behave too.
+
 ## Testing
 
 `test/core/widget_kit_test.dart` renders the kit at 1.3× text in light and dark. `test/a11y/` visits every route in both themes at

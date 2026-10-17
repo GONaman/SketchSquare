@@ -2,6 +2,7 @@
 library;
 
 export '../format/price.dart';
+export '../layout/layout.dart';
 export '../theme/app_colors.dart';
 export '../theme/app_tokens.dart';
 export '../theme/app_typography.dart';
