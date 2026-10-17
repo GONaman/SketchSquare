@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:sketch_square/core/network/api_exception.dart';
 import 'package:sketch_square/features/drawings/domain/drawing_summary.dart';
+import 'package:sketch_square/features/upload/domain/contribution_status.dart';
 import 'package:sketch_square/features/upload/domain/draft_store.dart';
 import 'package:sketch_square/features/upload/domain/drawing_form.dart';
 import 'package:sketch_square/features/upload/domain/drawing_record.dart';
@@ -166,6 +167,14 @@ class FakeUploadRepository implements UploadRepository {
   Future<void> deleteSheet(String drawingId, String sheetId) async {
     _maybeFail('deleteSheet');
     sheets[drawingId]!.removeWhere((s) => s.id == sheetId);
+  }
+
+  ContributionStatus contribution = const ContributionStatus();
+
+  @override
+  Future<ContributionStatus> fetchContributionStatus() async {
+    _maybeFail('fetchContributionStatus');
+    return contribution;
   }
 
   @override

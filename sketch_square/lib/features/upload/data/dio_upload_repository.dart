@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../drawings/domain/drawing_summary.dart';
+import '../domain/contribution_status.dart';
 import '../domain/drawing_form.dart';
 import '../domain/drawing_record.dart';
 import '../domain/sheet_upload_target.dart';
@@ -128,6 +129,12 @@ class DioUploadRepository implements UploadRepository {
   @override
   Future<void> deleteSheet(String drawingId, String sheetId) =>
       _guard(() => _dio.delete<void>('/drawings/$drawingId/sheets/$sheetId'));
+
+  @override
+  Future<ContributionStatus> fetchContributionStatus() => _guard(() async {
+    final res = await _dio.get<Map<String, dynamic>>('/me/contribution-status');
+    return ContributionStatus.fromJson(res.data!);
+  });
 
   @override
   Future<DrawingStatus> publish(String drawingId) => _guard(() async {

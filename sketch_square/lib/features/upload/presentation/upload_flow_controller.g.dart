@@ -6,7 +6,7 @@ part of 'upload_flow_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$uploadFlowHash() => r'88a69da75e8fb056b66ddca44ba49e925aaf108f';
+String _$uploadFlowHash() => r'0a65307151b789aeb67aa59997f437051ad18f70';
 
 /// Drives the multi-step upload flow: form, draft persistence, presigned
 /// sheet uploads with progress/retry, publish and processing-status polling.

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../drawings/domain/drawing_summary.dart';
+import '../domain/contribution_status.dart';
 import '../domain/drawing_form.dart';
 import '../domain/drawing_form_validators.dart';
 import '../domain/sheet_file_rules.dart';
@@ -83,6 +84,8 @@ abstract class UploadFlowState with _$UploadFlowState {
     String? failureReason,
     // Polling gave up (offline / timeout) but the server may still be working.
     @Default(false) bool pollStalled,
+    // Contribution rule (8.3); null until loaded or if it couldn't be fetched.
+    ContributionStatus? contribution,
   }) = _UploadFlowState;
 
   int get previewCount => sheets.where((s) => s.isPreview).length;
@@ -91,7 +94,15 @@ abstract class UploadFlowState with _$UploadFlowState {
       sheets.any((s) => s.isBusy || s.status == SheetUploadStatus.queued);
 
   Map<String, String> get detailErrors => DrawingFormValidators.details(form);
-  Map<String, String> get pricingErrors => DrawingFormValidators.pricing(form);
+
+  /// Paid listing blocked by the contribution rule (needs more free drawings).
+  bool get paidBlockedByContribution =>
+      !form.isFree && contribution != null && !contribution!.canPublishPaid;
+
+  Map<String, String> get pricingErrors => {
+    ...DrawingFormValidators.pricing(form),
+    if (paidBlockedByContribution) 'contribution': contribution!.blockedMessage,
+  };
 
   /// Message for the sheets step, or null if it is complete.
   String? get sheetsError {

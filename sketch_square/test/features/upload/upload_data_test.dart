@@ -61,6 +61,26 @@ void main() {
       expect(cats.single.name, 'Houses');
     });
 
+    test('fetchContributionStatus parses the contract shape', () async {
+      adapter.onGet(
+        '/me/contribution-status',
+        (s) => s.reply(200, {
+          'freePublished': 0,
+          'paidPublished': 1,
+          'paidPending': 0,
+          'freePerPaid': 1,
+          'freeNeeded': 1,
+          'canPublishPaid': false,
+          'guidance': 'Publish a free drawing first.',
+        }),
+      );
+      final status = await repo.fetchContributionStatus();
+      expect(status.canPublishPaid, isFalse);
+      expect(status.freeNeeded, 1);
+      expect(status.ruleActive, isTrue);
+      expect(status.explanation, 'Publish a free drawing first.');
+    });
+
     test('createDraft posts the form and parses DrawingDetail', () async {
       const form = DrawingForm(
         title: 'Modern duplex',

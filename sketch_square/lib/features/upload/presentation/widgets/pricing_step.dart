@@ -15,22 +15,41 @@ class PricingStep extends ConsumerWidget {
     final f = s.form;
     final theme = Theme.of(context);
     final error = s.showErrors ? s.pricingErrors['price'] : null;
+    final contribution = s.contribution;
+    final blocked = contribution != null && !contribution.canPublishPaid;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
+        if (contribution != null && contribution.ruleActive) ...[
+          MessageBanner(
+            key: const ValueKey('contribution-banner'),
+            message: contribution.explanation,
+            isError: false,
+          ),
+          const SizedBox(height: 8),
+        ],
         SegmentedButton<bool>(
           key: const ValueKey('price-mode'),
-          segments: const [
-            ButtonSegment(value: true, label: Text('Free')),
-            ButtonSegment(value: false, label: Text('Paid')),
+          segments: [
+            const ButtonSegment(value: true, label: Text('Free')),
+            ButtonSegment(
+              value: false,
+              label: const Text('Paid'),
+              enabled: !blocked,
+            ),
           ],
           selected: {f.isFree},
           onSelectionChanged:
               (v) => c.updateForm((f) => f.copyWith(isFree: v.first)),
         ),
         const SizedBox(height: 16),
+        if (s.paidBlockedByContribution)
+          MessageBanner(
+            key: const ValueKey('contribution-blocked'),
+            message: contribution!.blockedMessage,
+          ),
         if (f.isFree)
           Text(
             'Anyone can download this drawing for free. You will not earn from it.',
