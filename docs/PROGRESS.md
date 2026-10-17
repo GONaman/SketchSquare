@@ -39,7 +39,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [ ] 4.4 Flutter featured + drawing detail
 
 ## Phase 5 — Purchasing
-- [ ] 5.1 Cart + checkout + Razorpay (stub) + webhook + ledger
+- [x] 5.1 Cart + checkout + Razorpay (stub) + webhook + ledger
 - [ ] 5.2 Downloads + free quota + reviews
 - [ ] 5.3 Flutter basket/checkout/download/reviews
 

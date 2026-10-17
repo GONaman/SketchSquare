@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { AppConfigModule } from './config/config.module';
+import { CommerceModule } from './commerce/commerce.module';
 import { HealthModule } from './health/health.module';
 import { LedgerModule } from './ledger/ledger.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -19,6 +20,7 @@ import { StorageModule } from './storage/storage.module';
     // Feature modules: add one line per module below.
     AuthModule,
     LedgerModule,
+    CommerceModule,
   ],
 })
 export class AppModule {}
