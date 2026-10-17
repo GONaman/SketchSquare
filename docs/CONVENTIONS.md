@@ -188,6 +188,9 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - Shared fixtures: `fakeDrawing()` / `fakeSheet()` in `test/helpers/commerce_fixtures.dart`.
 - Purchases/download seams: `PurchasesRepository`, `ReviewRepository`, `FileDownloader` (bare Dio, no auth), `FileHandler` (open/share) in `features/purchases/domain`; fakes in `test/features/purchases/fakes.dart` (`fakePurchase`, `FakePurchasesRepository` pages by index cursor). Paged lists use `PagedState` + `retryLoadMore()`.
 - `core/format/file_size.dart` → `formatBytes`.
+- Profile (`features/profile`): `ProfileRepository` / `AvatarPicker` interfaces, fakes in `test/features/profile/fakes.dart`. Subroutes live in `profile_routes.dart`; path constants in `AppRoutes` (`profileEdit`, `settings`, `wallet`, `manageDrawings`).
+- Link to routes owned by other agents with `pushIfRegistered(context, AppRoutes.x)` (`core/router/route_utils.dart`): it shows a "Coming soon" snackbar if the path is not registered yet.
+- In widget tests list `...discoveryFakes()` FIRST in `overrides`, otherwise it replaces your `architectsRepositoryProvider` override.
 
 ## Flutter discovery (home / search / detail)
 - Routes: `DiscoveryPaths(base)` builds `search`/`drawing`/`architect` locations under a tab; `discoverySubRoutes(paths)` registers the sub-routes, so Home and Featured share screens.
