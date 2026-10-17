@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -157,7 +158,9 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
               key: const Key('profile-avatar'),
               radius: 48,
               backgroundImage:
-                  user.avatarUrl == null ? null : NetworkImage(user.avatarUrl!),
+                  user.avatarUrl == null
+                      ? null
+                      : CachedNetworkImageProvider(user.avatarUrl!),
               onBackgroundImageError:
                   user.avatarUrl == null ? null : (_, __) {},
               child: Text(

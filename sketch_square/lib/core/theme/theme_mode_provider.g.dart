@@ -6,9 +6,9 @@ part of 'theme_mode_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appThemeModeHash() => r'ed99836113f51a409116c719be4a54080ec2bc9c';
+String _$appThemeModeHash() => r'329e73c2882e34d679000b8c352d178fa86ecd73';
 
-/// User-selected theme mode (Settings screen comes in Phase 6).
+/// User-selected theme mode, persisted in SharedPreferences.
 ///
 /// Copied from [AppThemeMode].
 @ProviderFor(AppThemeMode)
