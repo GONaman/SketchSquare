@@ -726,6 +726,21 @@ paths:
       security: *a14
       summary: Reviews of a drawing, newest first
       tags: *a15
+  /me/contribution-status:
+    get:
+      operationId: ContributionController_status
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - bearer: []
+      tags:
+        - drawings
   /drawings/search:
     get:
       operationId: SearchController_searchDrawings

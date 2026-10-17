@@ -10,7 +10,7 @@ update **this file in the same PR** and note it in `docs/DECISIONS.md`.
 - Auth: `Authorization: Bearer <accessToken>`; access token 15 min, refresh token 30 days (rotating).
 - Errors: HTTP status + `{ "error": { "code": "SOME_CODE", "message": "human text", "details": {...}? } }`.
   Codes: `VALIDATION_ERROR` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `VERIFICATION_REQUIRED` (403), `NOT_FOUND` (404),
-  `CONFLICT` (409), `FREE_LIMIT_REACHED` (403), `INSUFFICIENT_BALANCE` (400), `BELOW_MIN_WITHDRAWAL` (400),
+  `CONFLICT` (409), `FREE_LIMIT_REACHED` (403), `CONTRIBUTION_REQUIRED` (403), `INSUFFICIENT_BALANCE` (400), `BELOW_MIN_WITHDRAWAL` (400),
   `WITHDRAWAL_BLOCKED` (403), `UPLOAD_INVALID` (400), `RATE_LIMITED` (429), `INTERNAL` (500).
 - Pagination: cursor-based. Request `?cursor=<opaque>&limit=20` (default 20, max 50). Response `{ "items": [...], "nextCursor": "<opaque>"|null }`.
 - Unless stated, endpoints require a logged-in **APPROVED** user. Endpoints marked `[auth]` only need a valid token (any verification status);
@@ -84,6 +84,8 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
 - `POST /drawings/:id/sheets` body `{type,objectKey,isPreview,fileName,sizeBytes}` → `201 Sheet` (server verifies object exists + magic bytes)
 - `PATCH /drawings/:id/sheets/:sheetId` body `{type?,isPreview?}`; `DELETE /drawings/:id/sheets/:sheetId` → `204`
 - `POST /drawings/:id/publish` → `202 {status:"PROCESSING"}` (needs ≥1 sheet and 1–2 preview sheets, else 400 `VALIDATION_ERROR`). Poll `GET /drawings/:id` until `status` is `PUBLISHED` or `FAILED` (`failureReason` set).
+- `POST /drawings/:id/publish` on a **paid** drawing (`pricePaise > 0`) additionally enforces the contribution rule: the architect needs `CONTRIBUTION_FREE_PER_PAID` (env, default 1, `0` = off) PUBLISHED free drawings per paid drawing they already have (published, processing or under review) — so the 1st paid drawing is always allowed, the 2nd needs 1 free one. Otherwise `403 CONTRIBUTION_REQUIRED` with `details {freePublished, paidPublished, paidPending, freePerPaid, freeNeeded}` and a human `message`; the drawing stays DRAFT/FAILED.
+- `GET /me/contribution-status` → `{ freePublished, paidPublished, paidPending, freePerPaid, freeNeeded, canPublishPaid: bool, guidance: string }` (`canPublishPaid` = may publish another paid drawing now; `freeNeeded` = extra free drawings required; show `guidance` in the upload flow).
 - `GET /me/drawings?status=&cursor&limit` → page of `{ drawing: DrawingSummary, stats: {viewCount,purchaseCount,avgRating,ratingCount} }`
 - `GET /drawings/:id/buyers` owner → page of `{buyer:{id,fullName,city}, pricePaise, purchasedAt}`
 - `GET /drawings/:id/viewers` owner (last 30 days, deduped) → page of `{viewer:{id,fullName,city}, lastViewedAt}`

@@ -1,6 +1,8 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { WatermarkModule } from '../watermark/watermark.module';
+import { ContributionController } from './contribution.controller';
+import { ContributionService } from './contribution.service';
 import { DrawingProcessingService } from './drawing-processing.service';
 import { DrawingProcessor } from './drawing.processor';
 import { DrawingsController } from './drawings.controller';
@@ -22,12 +24,14 @@ import { SheetsService } from './sheets.service';
     SheetsController,
     MyDrawingsController,
     SellerController,
+    ContributionController,
   ],
   providers: [
     DrawingsService,
     SheetsService,
     SellerService,
     PublishService,
+    ContributionService,
     DrawingProcessingService,
     DrawingProcessor,
   ],

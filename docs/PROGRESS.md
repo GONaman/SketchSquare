@@ -58,7 +58,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 ## Phase 8 — Future features
 - [x] 8.1 Favorites — backend done (`PUT/DELETE /drawings/:id/favorite`, `GET /me/favorites`, `viewer.isFavorite`); Flutter heart/list pending
 - [ ] 8.2 Express interest
-- [ ] 8.3 Contribution rule
+- [x] 8.3 Contribution rule
 - [ ] 8.4 Plagiarism check + admin review queue
 - [ ] 8.5 Push notifications (stub)
 
