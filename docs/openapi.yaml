@@ -1232,6 +1232,61 @@ paths:
           description: ""
       security: *a22
       tags: *a23
+  /drawings/{id}/favorite:
+    put:
+      operationId: FavoritesController_add
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+      security: &a24
+        - bearer: []
+      summary: Favourite a drawing (idempotent)
+      tags: &a25
+        - favorites
+    delete:
+      operationId: FavoritesController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+      security: *a24
+      summary: Remove a favourite (idempotent)
+      tags: *a25
+  /me/favorites:
+    get:
+      operationId: FavoritesController_list
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor from a previous page
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        "200":
+          description: ""
+      security: *a24
+      summary: My favourite drawings, most recently added first
+      tags: *a25
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -1426,7 +1481,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: &a24
+          enum: &a26
             - ft
             - m
         floors:
@@ -1490,7 +1545,7 @@ components:
           minimum: 1
         unit:
           type: string
-          enum: *a24
+          enum: *a26
         floors:
           type: number
           minimum: 1

@@ -132,9 +132,11 @@ Also includes `bedrooms: int|null` and `tags: string[]`. Records a DrawingView (
 - `POST /payments/razorpayx/webhook` `[public]` RazorpayX payout events (`payout.processed|failed|rejected|cancelled|reversed`), signature-verified, idempotent by event id.
 
 ## Phase 8 additions
-- `PUT /drawings/:id/favorite`, `DELETE /drawings/:id/favorite` → `204`; `GET /me/favorites` → page of `DrawingSummary`
+- `PUT /drawings/:id/favorite`, `DELETE /drawings/:id/favorite` → `204`; `GET /me/favorites` → page of `DrawingSummary`.
+  Both writes are idempotent (repeating them is a `204` no-op). `PUT` only works on PUBLISHED drawings of APPROVED architects (else 404 `NOT_FOUND`; your own drawing is allowed); `DELETE` always `204`.
+  `GET /me/favorites` is newest-favourited first and omits drawings that are no longer listable (removed/unpublished); it is not an extra `isFavorite` field on search tiles — use `viewer.isFavorite` on the detail, or treat every item of the favourites list as a favourite.
 - `PUT /drawings/:id/interest`, `DELETE /drawings/:id/interest` → `204`; `GET /drawings/:id/interests` owner → page of `{user:{id,fullName,city}, createdAt}`
-- `DrawingDetail.viewer` additionally gets `isFavorite: bool`, `isInterested: bool`
+- `DrawingDetail.viewer` additionally gets `isFavorite: bool` (implemented), `isInterested: bool`
 - `POST /me/device-tokens` body `{token, platform}` → `204` (FCM)
 
 ## Ops
