@@ -8,6 +8,7 @@ import '../../../core/router/routes.dart';
 import '../../../core/widgets/blueprint_empty_state.dart';
 import '../../../core/widgets/error_retry.dart';
 import '../../drawings/domain/drawing_summary.dart';
+import '../../interest/presentation/interested_sheet.dart';
 import '../data/manage_drawings_providers.dart';
 import '../domain/manage_drawings_repository.dart';
 import 'edit_published_sheet.dart';
@@ -118,6 +119,12 @@ class _DrawingList extends ConsumerWidget {
       case ManageAction.continueEditing:
       case ManageAction.viewProgress:
         context.go('${AppRoutes.upload}?draft=${d.id}');
+      case ManageAction.interested:
+        await showInterestedSheet(
+          context,
+          drawingId: d.id,
+          drawingTitle: d.title,
+        );
       case ManageAction.edit:
         final saved = await showModalBottomSheet<bool>(
           context: context,

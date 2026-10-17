@@ -5,7 +5,14 @@ import '../../drawings/domain/drawing_summary.dart';
 import '../../drawings/presentation/formatters.dart';
 import '../domain/manage_drawings_repository.dart';
 
-enum ManageAction { continueEditing, viewProgress, edit, remove, delete }
+enum ManageAction {
+  continueEditing,
+  viewProgress,
+  interested,
+  edit,
+  remove,
+  delete,
+}
 
 String statusLabel(DrawingStatus s) => switch (s) {
   DrawingStatus.draft => 'Draft',
@@ -18,10 +25,19 @@ String statusLabel(DrawingStatus s) => switch (s) {
 
 /// Actions offered for a drawing in [status]. Only published drawings can be
 /// edited in place (contract: PATCH is limited to title/description/price).
-List<ManageAction> actionsFor(DrawingStatus status) => switch (status) {
+///
+/// Paid published drawings also offer the list of interested architects.
+List<ManageAction> actionsFor(
+  DrawingStatus status, {
+  bool paid = false,
+}) => switch (status) {
   DrawingStatus.draft => [ManageAction.continueEditing, ManageAction.delete],
   DrawingStatus.processing => [ManageAction.viewProgress],
-  DrawingStatus.published => [ManageAction.edit, ManageAction.remove],
+  DrawingStatus.published => [
+    if (paid) ManageAction.interested,
+    ManageAction.edit,
+    ManageAction.remove,
+  ],
   DrawingStatus.underReview => [ManageAction.remove],
   DrawingStatus.failed => [ManageAction.continueEditing, ManageAction.delete],
   DrawingStatus.removed => const [],
@@ -31,6 +47,7 @@ String actionLabel(ManageAction a, DrawingStatus status) => switch (a) {
   ManageAction.continueEditing =>
     status == DrawingStatus.failed ? 'Fix & retry' : 'Continue editing',
   ManageAction.viewProgress => 'View progress',
+  ManageAction.interested => 'Interested',
   ManageAction.edit => 'Edit',
   ManageAction.remove => 'Remove',
   ManageAction.delete => 'Delete',
@@ -152,7 +169,7 @@ class ManagedDrawingCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                for (final a in actionsFor(d.status))
+                for (final a in actionsFor(d.status, paid: !d.isFree))
                   TextButton(
                     key: ValueKey('action-${a.name}-${d.id}'),
                     onPressed: () => onAction(a),

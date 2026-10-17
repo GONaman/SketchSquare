@@ -9,6 +9,7 @@ import '../../architects/domain/architect_summary.dart';
 import '../../architects/presentation/architect_profile_screen.dart';
 import '../../basket/presentation/cart_controller.dart';
 import '../../favorites/presentation/favorites_controller.dart';
+import '../../interest/presentation/interest_button.dart';
 import '../data/drawings_providers.dart';
 import '../domain/drawing_detail.dart';
 import '../domain/sheet.dart';
@@ -136,6 +137,12 @@ class _DrawingDetailScreenState extends ConsumerState<DrawingDetailScreen> {
           children: [
             DrawingGallery(urls: d.previewUrls),
             _Overview(detail: d),
+            if (!d.viewer.isOwner && !d.summary.isFree && !d.viewer.isPurchased)
+              InterestButton(
+                key: ValueKey('interest-${d.summary.id}'),
+                drawingId: d.summary.id,
+                initial: d.viewer.isInterested,
+              ),
             _SheetsSection(detail: d),
             _ArchitectCard(
               architect: d.summary.architect,
