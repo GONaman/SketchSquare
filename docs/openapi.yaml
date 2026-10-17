@@ -19,6 +19,135 @@ paths:
       summary: Liveness + dependency check (DB, Redis, S3)
       tags:
         - ops
+  /cart:
+    get:
+      operationId: CartController_get
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: &a1
+        - bearer: []
+      tags: &a2
+        - cart
+    post:
+      operationId: CartController_add
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCartItemDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: *a1
+      tags: *a2
+  /cart/{drawingId}:
+    delete:
+      operationId: CartController_remove
+      parameters:
+        - name: drawingId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: *a1
+      tags: *a2
+  /checkout:
+    post:
+      operationId: CheckoutController_create
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      security: &a3
+        - bearer: []
+      tags: &a4
+        - checkout
+  /checkout/verify:
+    post:
+      operationId: CheckoutController_verify
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyPaymentDto"
+      responses:
+        "200":
+          description: ""
+      security: *a3
+      tags: *a4
+  /checkout/stub-complete:
+    post:
+      operationId: CheckoutController_stubComplete
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StubCompleteDto"
+      responses:
+        "200":
+          description: ""
+      security: *a3
+      tags: *a4
+  /checkout/status:
+    get:
+      operationId: CheckoutController_status
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      security: *a3
+      tags: *a4
+  /payments/razorpay/webhook:
+    post:
+      operationId: RazorpayWebhookController_webhook
+      parameters:
+        - name: x-razorpay-signature
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: x-razorpay-event-id
+          required: true
+          in: header
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+      summary: Signature-verified (HMAC over the raw body) and idempotent by `x-razorpay-event-id`.
+      tags:
+        - payments
 info:
   title: SketchSquare API
   description: "Contract: docs/API_CONTRACT.md"
@@ -32,4 +161,36 @@ components:
       scheme: bearer
       bearerFormat: JWT
       type: http
-  schemas: {}
+  schemas:
+    AddCartItemDto:
+      type: object
+      properties:
+        drawingId:
+          type: string
+          format: uuid
+      required:
+        - drawingId
+    VerifyPaymentDto:
+      type: object
+      properties:
+        razorpayOrderId:
+          type: string
+          maxLength: 100
+        razorpayPaymentId:
+          type: string
+          maxLength: 100
+        razorpaySignature:
+          type: string
+          maxLength: 200
+      required:
+        - razorpayOrderId
+        - razorpayPaymentId
+        - razorpaySignature
+    StubCompleteDto:
+      type: object
+      properties:
+        orderId:
+          type: string
+          maxLength: 100
+      required:
+        - orderId
