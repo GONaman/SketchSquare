@@ -33,7 +33,7 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - [x] 3.5 Flutter upload flow (domain/data #11, controller #17, multi-step UI + tests)
 
 ## Phase 4 — Discovery
-- [ ] 4.1 Search endpoint (size tolerance + rotation, filters, sort)
+- [x] 4.1 Search endpoint (size tolerance + rotation, filters, sort)
 - [ ] 4.2 Detail, categories, cities, architects
 - [x] 4.3 Flutter home + search + filters
 - [ ] 4.4 Flutter featured + drawing detail
@@ -68,3 +68,4 @@ Workflow: every sub-step is a small branch → PR → squash-merge into `main` (
 - Flutter document picker (`file_picker`) on iOS/macOS/Android: verify picking PDF/JPG/PNG on a real device (platform permissions/entitlements untested).
 - Password-reset email link does not open the app (no deep-link setup); users paste the code from the email (A10).
 - Discovery (4.3): eyeball the drawing grid on real devices and at large text scales; check keyboard/focus behaviour of the search field and plot-size fields; verify cursor paging and `sizeMatch` against the real backend once 4.1 is merged; cached-image behaviour of `DrawingPreviewImage` is untested.
+- Search: full-text `q` uses `plainto_tsquery` (no prefix matching; stopword-only queries match nothing). Perf numbers are from 50k synthetic rows on local Postgres; re-check with real data volume (data-model.md, SR6).
