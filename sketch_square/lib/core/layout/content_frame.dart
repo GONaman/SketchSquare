@@ -7,6 +7,9 @@ enum ContentWidth {
   /// Feeds, detail pages, lists (1200).
   browse(Breakpoints.browseMaxWidth),
 
+  /// Single-column row lists and summaries: basket, profile, notifications (760).
+  list(Breakpoints.listMaxWidth),
+
   /// Forms, auth, checkout, wallet, settings (560).
   form(Breakpoints.formMaxWidth),
 

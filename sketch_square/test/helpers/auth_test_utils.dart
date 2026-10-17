@@ -8,9 +8,9 @@ import 'fake_auth_repository.dart';
 import 'fake_verification.dart';
 import 'pump_app.dart';
 
-/// Taller than the default 800x600 so long forms don't need scrolling.
+/// A tall phone-width surface (compact layout) so long forms don't need scrolling.
 void useTallScreen(WidgetTester tester) {
-  tester.view.physicalSize = const Size(800, 1800);
+  tester.view.physicalSize = const Size(500, 1800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 }

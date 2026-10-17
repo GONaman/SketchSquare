@@ -145,6 +145,15 @@ The phone layout is the baseline and must not change. Wider windows get native-f
   screen, so screens normally need **no** per-screen code.
 - `AdaptiveGridDelegate(mainAxisExtent: ...)` is the shared card-grid delegate (min tile 260 → 2/3/4 columns from the
   sliver's real width). `pagedDrawingSlivers` uses it; use it for any new card grid instead of horizontal strips.
+- **Shell** (`features/shell/presentation/app_shell.dart`): compact keeps the bottom `NavigationBar`; medium shows a labelled
+  `NavigationRail` (`nav-rail`); expanded shows a 64 px top bar (`top-nav`: brand, Home/Featured/Upload, search pill,
+  basket, profile). Same `StatefulShellRoute` and route paths on every size.
+- **Route widths**: the shell frames each route by path via `contentWidthForPath` (`core/router/route_content_width.dart`):
+  browse 1200 (default), list 760 (`/basket`, `/profile`, `/manage-drawings`, `/admin*`), form 560 (upload, checkout,
+  wallet, edit profile, settings, legal). Routes pushed outside the shell (admin, legal, manage drawings) wrap themselves
+  in `ContentFrame`. New routes get browse width unless added to the mapping.
+- Tests: `pumpApp(size: ...)` sets the surface; with no surface set it defaults to 390×844 so existing tests see the
+  compact layout.
 - Don't hard-code widths for "desktop"; use the helpers above so tablets and resized windows behave too.
 
 ## Testing
