@@ -1,7 +1,7 @@
 {
-  "id": "50da8135-b129-47a6-8779-8169335d07ac",
-  "email": "smoke-buyer-mvbxf97e@example.com",
-  "fullName": "Smoke buyer mvbxf97e",
+  "id": "39fd80a8-b264-4410-a3de-4cf5d1c420c3",
+  "email": "smoke-buyer-mvby60oi@example.com",
+  "fullName": "Smoke buyer mvby60oi",
   "address": "12 Test Street, Pune",
   "phone": "+919800000000",
   "avatarUrl": null,
@@ -11,5 +11,5 @@
   "architectRating": 0,
   "freeDownloadsUsed": 1,
   "freeDownloadLimit": 20,
-  "createdAt": "2026-10-17T04:58:49.679Z"
+  "createdAt": "2026-10-17T05:19:38.319Z"
 }

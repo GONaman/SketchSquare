@@ -8,7 +8,7 @@
  * Needs the API running (stub Razorpay / stub payouts, i.e. no RAZORPAY_* keys), the seeded dev DB (admin account) and MinIO.
  * Every run creates fresh users/drawings (unique emails), so it is safe to repeat.
  */
-import { createHmac } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -210,7 +210,8 @@ async function call(
   }
   const expected = opts.expect ?? 200;
   // 200 and 201 are interchangeable for clients (any 2xx is success); everything else must match exactly.
-  const bothOk = [200, 201].includes(expected) && [200, 201].includes(res.status);
+  const bothOk =
+    [200, 201].includes(expected) && [200, 201].includes(res.status);
   if (res.status !== expected && !bothOk) {
     throw new SmokeFailure(
       `${method} ${path} -> ${res.status} (expected ${expected}): ${text.slice(0, 400)}`,
@@ -292,26 +293,43 @@ async function signup(label: string): Promise<Account> {
   };
 }
 
+/**
+ * Random coarse noise by default: the backend rejects files identical to another architect's published file
+ * and holds visually similar previews for review, so every generated sheet must be distinct.
+ */
 async function pngBytes(
   w: number,
   h: number,
-  rgb: [number, number, number] = [240, 240, 240],
+  flat?: [number, number, number],
 ): Promise<Buffer> {
-  return sharp({
-    create: {
-      width: w,
-      height: h,
-      channels: 3,
-      background: { r: rgb[0], g: rgb[1], b: rgb[2] },
-    },
+  if (flat) {
+    return sharp({
+      create: {
+        width: w,
+        height: h,
+        channels: 3,
+        background: { r: flat[0], g: flat[1], b: flat[2] },
+      },
+    })
+      .png()
+      .toBuffer();
+  }
+  return sharp(randomBytes(16 * 12 * 3), {
+    raw: { width: 16, height: 12, channels: 3 },
   })
+    .resize(w, h, { kernel: 'nearest' })
     .png()
     .toBuffer();
 }
 
 async function pdfBytes(): Promise<Buffer> {
   const doc = await PDFDocument.create();
-  doc.addPage([600, 800]).drawText('Smoke structural sheet', { x: 50, y: 700 });
+  doc
+    .addPage([600, 800])
+    .drawText(
+      `Smoke structural sheet ${KEYWORD}-${Math.random().toString(36).slice(2)}`,
+      { x: 50, y: 700 },
+    );
   return Buffer.from(await doc.save());
 }
 
@@ -574,7 +592,10 @@ async function main(): Promise<void> {
     'admin detail has presigned documentUrl',
   );
   const docRes = await fetch(adminDetail.json.documentUrl);
-  ok(docRes.status === 200, `presigned KYC document readable (${docRes.status})`);
+  ok(
+    docRes.status === 200,
+    `presigned KYC document readable (${docRes.status})`,
+  );
   for (const item of queue) {
     const a = await call('POST', `/admin/verifications/${item.id}/approve`, {
       token: admin,
@@ -685,7 +706,9 @@ async function main(): Promise<void> {
     'avatar upload-url',
   );
   // The Flutter client PUTs with only `Content-Type`; any extra signed header in `headers` would break it.
-  console.log(`     avatar headers: ${JSON.stringify(avatarTarget.json.headers)}`);
+  console.log(
+    `     avatar headers: ${JSON.stringify(avatarTarget.json.headers)}`,
+  );
   const avatarPut = await fetch(avatarTarget.json.uploadUrl, {
     method: 'PUT',
     headers: { 'Content-Type': 'image/png' },
@@ -719,7 +742,11 @@ async function main(): Promise<void> {
     Array.isArray(cats.json) && cats.json.length >= 6,
     'GET /categories -> bare array',
   );
-  shape(cats.json[0], { id: 'string', name: 'string', slug: 'string' }, 'category');
+  shape(
+    cats.json[0],
+    { id: 'string', name: 'string', slug: 'string' },
+    'category',
+  );
   const categoryId = cats.json[0].id as string;
   const cities = await call('GET', '/cities', {
     token: seller.access,
@@ -846,10 +873,14 @@ async function main(): Promise<void> {
       Math.abs(draftPatch.json.plotLengthFt - 32.8084) < 0.01,
     'draft PATCH converts metres -> feet',
   );
-  const publishNoSheets = await call('POST', `/drawings/${draft.json.id}/publish`, {
-    token: seller.access,
-    expect: 400,
-  });
+  const publishNoSheets = await call(
+    'POST',
+    `/drawings/${draft.json.id}/publish`,
+    {
+      token: seller.access,
+      expect: 400,
+    },
+  );
   expectError(publishNoSheets, 'VALIDATION_ERROR', 'publish without sheets');
   await call('DELETE', `/drawings/${draft.json.id}`, {
     token: seller.access,
@@ -872,7 +903,49 @@ async function main(): Promise<void> {
     breadth: 47.7,
   });
 
-  step('Search: text, plot size (incl. rotated, metres), filters, sorts, cursors');
+  if (process.env.CONTRIBUTION_FREE_PER_PAID !== '0') {
+    // 2 paid vs 1 free published: a third paid drawing needs a second free one.
+    const third = await call('POST', '/drawings', {
+      token: seller.access,
+      expect: 201,
+      body: {
+        title: 'Smoke Third Paid',
+        description: 'Smoke test drawing that trips the contribution rule',
+        categoryId,
+        city: 'Pune',
+        plotLength: 30,
+        plotBreadth: 40,
+        unit: 'ft',
+        floors: 1,
+        pricePaise: 50_000,
+      },
+    });
+    await addSheet(
+      seller,
+      third.json.id,
+      { name: 'plan.png', mime: 'image/png', bytes: await pngBytes(900, 600) },
+      'ARCHITECTURAL',
+      true,
+    );
+    const denied = await call('POST', `/drawings/${third.json.id}/publish`, {
+      token: seller.access,
+      expect: 403,
+      capture: 'error_contribution_required',
+    });
+    expectError(denied, 'CONTRIBUTION_REQUIRED', 'contribution rule');
+    ok(
+      denied.json.error.details?.freeNeeded >= 1,
+      'CONTRIBUTION_REQUIRED carries details.freeNeeded',
+    );
+    await call('DELETE', `/drawings/${third.json.id}`, {
+      token: seller.access,
+      expect: 204,
+    });
+  }
+
+  step(
+    'Search: text, plot size (incl. rotated, metres), filters, sorts, cursors',
+  );
   const s1 = await call('GET', '/drawings/search', {
     token: buyer.access,
     query: { q: KEYWORD, limit: 2 },
@@ -908,7 +981,10 @@ async function main(): Promise<void> {
     token: buyer.access,
     query: { length: 47.7, breadth: 33.3, tolerancePct: 1 },
   });
-  ok(rotated.json.items.length >= 3, 'rotated plot (length<->breadth) also matches');
+  ok(
+    rotated.json.items.length >= 3,
+    'rotated plot (length<->breadth) also matches',
+  );
   const metres = await call('GET', '/drawings/search', {
     token: buyer.access,
     query: { length: 10.1498, breadth: 14.539, unit: 'm', tolerancePct: 2 },
@@ -1098,6 +1174,27 @@ async function main(): Promise<void> {
     expect: 204,
   });
 
+  await call('PUT', `/drawings/${paid.id}/interest`, {
+    token: buyer.access,
+    expect: 204,
+  });
+  const interested = await call('GET', `/drawings/${paid.id}`, {
+    token: buyer.access,
+  });
+  ok(interested.json.viewer.isInterested === true, 'viewer.isInterested');
+  const interests = await call('GET', `/drawings/${paid.id}/interests`, {
+    token: seller.access,
+    capture: 'drawing_interests',
+  });
+  ok(
+    interests.json.items.some((i: Json) => i.user?.id === buyer.user.id),
+    'owner sees the interested buyer',
+  );
+  await call('DELETE', `/drawings/${paid.id}/interest`, {
+    token: buyer.access,
+    expect: 204,
+  });
+
   step('Cart');
   const own = await call('POST', '/cart', {
     token: seller.access,
@@ -1236,11 +1333,16 @@ async function main(): Promise<void> {
     expect: 200,
     capture: 'checkout_verify',
   });
-  ok(verifyAgain.json.status === 'PAID', 'POST /checkout/verify idempotent -> PAID');
+  ok(
+    verifyAgain.json.status === 'PAID',
+    'POST /checkout/verify idempotent -> PAID',
+  );
   const cartAfter = await call('GET', '/cart', { token: buyer.access });
   ok(cartAfter.json.items.length === 0, 'cart cleared after payment');
 
-  step('Second checkout through /checkout/stub-complete (what the app uses in stub mode)');
+  step(
+    'Second checkout through /checkout/stub-complete (what the app uses in stub mode)',
+  );
   await call('POST', '/cart', {
     token: buyer.access,
     body: { drawingId: paid2.id },
@@ -1288,15 +1390,21 @@ async function main(): Promise<void> {
     );
   } catch (e) {
     if (e instanceof SmokeFailure) throw e;
-    console.log('     (pdftotext not available — watermark text check skipped)');
+    console.log(
+      '     (pdftotext not available — watermark text check skipped)',
+    );
   }
-  const pngSheet = paid.sheets.find((s: Json) => s.originalMime === 'image/png');
+  const pngSheet = paid.sheets.find(
+    (s: Json) => s.originalMime === 'image/png',
+  );
   const dlPng = await call('GET', `/drawings/${paid.id}/download`, {
     token: buyer.access,
     query: { sheetId: pngSheet.id },
   });
   const pngDl = await fetch(dlPng.json.url);
-  const pngMeta = await sharp(Buffer.from(await pngDl.arrayBuffer())).metadata();
+  const pngMeta = await sharp(
+    Buffer.from(await pngDl.arrayBuffer()),
+  ).metadata();
   ok(
     (pngMeta.height ?? 0) > 800,
     `image download has the footer strip (height ${pngMeta.height} > 800)`,
@@ -1356,7 +1464,10 @@ async function main(): Promise<void> {
     token: seller.access,
     query: { sheetId: pngSheet.id },
   });
-  ok(typeof ownerDl.json.url === 'string', 'owner can download their own sheet');
+  ok(
+    typeof ownerDl.json.url === 'string',
+    'owner can download their own sheet',
+  );
 
   step('Review (entitled buyer), owner cannot review, ratings recomputed');
   const rv = await call('PUT', `/drawings/${paid.id}/review`, {
@@ -1414,7 +1525,11 @@ async function main(): Promise<void> {
     },
     'stats',
   );
-  shape(mineDrawings.json.items[0].drawing, SUMMARY_SHAPE, 'managed drawing summary');
+  shape(
+    mineDrawings.json.items[0].drawing,
+    SUMMARY_SHAPE,
+    'managed drawing summary',
+  );
   const buyers = await call('GET', `/drawings/${paid.id}/buyers`, {
     token: seller.access,
     capture: 'drawing_buyers',
@@ -1449,7 +1564,9 @@ async function main(): Promise<void> {
   });
   expectError(sizeEdit, 'VALIDATION_ERROR', 'size edit on published');
 
-  step('Wallet: summary, ledger, bank account, withdrawal, failure reversal, payout webhook');
+  step(
+    'Wallet: summary, ledger, bank account, withdrawal, failure reversal, payout webhook',
+  );
   const w0 = await call('GET', '/wallet', {
     token: seller.access,
     capture: 'wallet_initial',
@@ -1501,7 +1618,11 @@ async function main(): Promise<void> {
   expectError(noBank, 'VALIDATION_ERROR', 'withdraw without bank account');
   const badIfsc = await call('POST', '/wallet/bank-account', {
     token: seller.access,
-    body: { holderName: 'Smoke Seller', ifsc: 'BAD', accountNumber: '123456789012' },
+    body: {
+      holderName: 'Smoke Seller',
+      ifsc: 'BAD',
+      accountNumber: '123456789012',
+    },
     expect: 400,
   });
   expectError(badIfsc, 'VALIDATION_ERROR', 'bad ifsc');
@@ -1581,7 +1702,9 @@ async function main(): Promise<void> {
     expect: 201,
   });
   const failed = await poll('stub payout failure', async () => {
-    const l = await call('GET', '/wallet/withdrawals', { token: seller.access });
+    const l = await call('GET', '/wallet/withdrawals', {
+      token: seller.access,
+    });
     const w = l.json.items.find((i: Json) => i.id === wdFail.json.id);
     return w.status === 'FAILED' ? w : undefined;
   });

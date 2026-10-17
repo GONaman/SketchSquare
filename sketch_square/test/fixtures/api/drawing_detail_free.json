@@ -1,5 +1,5 @@
 {
-  "id": "34f262de-c31a-40e2-afaf-0a93da18ff21",
+  "id": "dde308a6-6058-4a24-8406-62c6496545e0",
   "title": "Smoke Free Bungalow",
   "category": {
     "id": "558eacde-5267-5bed-9c80-86e3f229b372",
@@ -16,18 +16,18 @@
   "isFree": true,
   "avgRating": 0,
   "ratingCount": 0,
-  "previewUrl": "http://localhost:9000/previews/drawings/34f262de-c31a-40e2-afaf-0a93da18ff21/048ae8e4-3756-4c76-9a23-032a81f139a5-a5226ae17790.png",
+  "previewUrl": "http://localhost:9000/previews/drawings/dde308a6-6058-4a24-8406-62c6496545e0/65b5e71c-1c83-476a-b821-4ce41a0dba5a-f6154438c409.png",
   "architect": {
-    "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
-    "fullName": "Smoke seller mvbxf97e",
+    "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+    "fullName": "Smoke seller mvby60oi",
     "city": "Pune",
     "architectRating": 0,
     "ratingCount": 0,
-    "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
+    "avatarUrl": "http://localhost:9000/previews/avatars/e2583d9f-6d5f-4403-94fd-fca11abd7e34/8c13201d-4a27-4abc-a6f1-809c12bae573.png"
   },
   "status": "PUBLISHED",
-  "createdAt": "2026-10-17T04:58:50.739Z",
-  "description": "Smoke test drawing with a unique searchable keyword zqmvbxf97e",
+  "createdAt": "2026-10-17T05:19:39.324Z",
+  "description": "Smoke test drawing with a unique searchable keyword zqmvby60oi",
   "bedrooms": 3,
   "tags": [
     "vastu",
@@ -38,22 +38,22 @@
   "failureReason": null,
   "sheets": [
     {
-      "id": "048ae8e4-3756-4c76-9a23-032a81f139a5",
+      "id": "65b5e71c-1c83-476a-b821-4ce41a0dba5a",
       "type": "ARCHITECTURAL",
       "isPreview": true,
-      "previewUrl": "http://localhost:9000/previews/drawings/34f262de-c31a-40e2-afaf-0a93da18ff21/048ae8e4-3756-4c76-9a23-032a81f139a5-a5226ae17790.png",
+      "previewUrl": "http://localhost:9000/previews/drawings/dde308a6-6058-4a24-8406-62c6496545e0/65b5e71c-1c83-476a-b821-4ce41a0dba5a-f6154438c409.png",
       "originalMime": "image/png",
       "fileName": "plan.png",
-      "sizeBytes": 4605
+      "sizeBytes": 31659
     },
     {
-      "id": "ec2017e9-1ea4-419b-bd2e-fc1331ff58c8",
+      "id": "332b7f6c-4181-42cb-8c73-d38a8a7538e9",
       "type": "STRUCTURAL",
       "isPreview": false,
       "previewUrl": null,
       "originalMime": "application/pdf",
       "fileName": "structure.pdf",
-      "sizeBytes": 870
+      "sizeBytes": 897
     }
   ],
   "reviews": {
@@ -65,6 +65,7 @@
     "isPurchased": false,
     "inCart": false,
     "isFavorite": false,
+    "isInterested": false,
     "canDownload": true,
     "freeDownloadsRemaining": 20,
     "myReview": null

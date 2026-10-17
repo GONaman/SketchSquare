@@ -1,0 +1,13 @@
+{
+  "error": {
+    "code": "CONTRIBUTION_REQUIRED",
+    "message": "Publish 1 more free drawing to unlock publishing another paid drawing. SketchSquare asks architects to contribute free drawings to the community in return for selling paid ones.",
+    "details": {
+      "freePublished": 1,
+      "paidPublished": 2,
+      "paidPending": 0,
+      "freePerPaid": 1,
+      "freeNeeded": 1
+    }
+  }
+}

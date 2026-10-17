@@ -1,5 +1,5 @@
 {
-  "id": "6b52ee72-dc0d-4bab-bf90-f72fadac50f7",
+  "id": "1571e4c9-670a-4582-8460-b17d09593abf",
   "title": "Draft renamed",
   "category": {
     "id": "558eacde-5267-5bed-9c80-86e3f229b372",
@@ -18,15 +18,15 @@
   "ratingCount": 0,
   "previewUrl": null,
   "architect": {
-    "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
-    "fullName": "Smoke seller mvbxf97e",
+    "id": "e2583d9f-6d5f-4403-94fd-fca11abd7e34",
+    "fullName": "Smoke seller mvby60oi",
     "city": "Pune",
     "architectRating": 0,
     "ratingCount": 0,
-    "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
+    "avatarUrl": "http://localhost:9000/previews/avatars/e2583d9f-6d5f-4403-94fd-fca11abd7e34/8c13201d-4a27-4abc-a6f1-809c12bae573.png"
   },
   "status": "DRAFT",
-  "createdAt": "2026-10-17T04:58:50.712Z",
+  "createdAt": "2026-10-17T05:19:39.301Z",
   "description": "dd",
   "bedrooms": 2,
   "tags": [

@@ -15,6 +15,7 @@ abstract final class ApiErrorCodes {
   static const notFound = 'NOT_FOUND';
   static const conflict = 'CONFLICT';
   static const freeLimitReached = 'FREE_LIMIT_REACHED';
+  static const contributionRequired = 'CONTRIBUTION_REQUIRED';
   static const insufficientBalance = 'INSUFFICIENT_BALANCE';
   static const belowMinWithdrawal = 'BELOW_MIN_WITHDRAWAL';
   static const withdrawalBlocked = 'WITHDRAWAL_BLOCKED';
