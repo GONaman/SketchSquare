@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/layout/adaptive_grid.dart';
 import '../../../core/pagination/paged_state.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/error_retry.dart';
@@ -12,11 +13,8 @@ import 'drawing_card.dart';
 /// Card height grows with the text scale so the info block never overflows.
 SliverGridDelegate _gridDelegate(BuildContext context) {
   final scale = MediaQuery.textScalerOf(context).scale(1);
-  return SliverGridDelegateWithMaxCrossAxisExtent(
-    maxCrossAxisExtent: 260,
+  return AdaptiveGridDelegate(
     mainAxisExtent: 300 + (scale - 1).clamp(0, 1) * 160,
-    mainAxisSpacing: 14,
-    crossAxisSpacing: 14,
   );
 }
 

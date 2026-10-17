@@ -143,7 +143,7 @@ The phone layout is the baseline and must not change. Wider windows get native-f
   **560** for forms/auth/checkout/wallet/settings. `AdaptiveScaffoldBody` is the same as a `Scaffold.body` wrapper.
   Backgrounds (Scaffold, hero gradients) stay full-bleed; only content is framed. The app shell already frames every tab
   screen, so screens normally need **no** per-screen code.
-- `AdaptiveGridDelegate(mainAxisExtent: ...)` is the shared card-grid delegate (min tile 260 → 2/3/4 columns from the
+- `AdaptiveGridDelegate(mainAxisExtent: ...)` is the shared card-grid delegate (min tile 230 → 2/3/4 columns from the
   sliver's real width). `pagedDrawingSlivers` uses it; use it for any new card grid instead of horizontal strips.
 - **Shell** (`features/shell/presentation/app_shell.dart`): compact keeps the bottom `NavigationBar`; medium shows a labelled
   `NavigationRail` (`nav-rail`); expanded shows a 64 px top bar (`top-nav`: brand, Home/Featured/Upload, search pill,

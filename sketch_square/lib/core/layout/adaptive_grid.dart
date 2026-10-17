@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 /// accounted for.
 class AdaptiveGridDelegate extends SliverGridDelegate {
   const AdaptiveGridDelegate({
-    this.minTileWidth = 260,
+    this.minTileWidth = 230,
     this.minColumns = 2,
     this.maxColumns = 4,
     this.mainAxisExtent,

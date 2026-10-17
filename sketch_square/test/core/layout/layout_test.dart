@@ -15,7 +15,8 @@ void main() {
   test('adaptive grid goes 2 / 3 / 4 columns by width', () {
     const g = AdaptiveGridDelegate(mainAxisExtent: 300);
     expect(g.columnsFor(350), 2);
-    expect(g.columnsFor(700), 2);
+    expect(g.columnsFor(500), 2);
+    expect(g.columnsFor(720), 3);
     expect(g.columnsFor(850), 3);
     expect(g.columnsFor(1160), 4);
     expect(g.columnsFor(3000), 4);
