@@ -5,6 +5,7 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/widgets.dart';
 import 'drawing_card.dart' show DrawingPreviewImage;
 
 part 'drawing_gallery.g.dart';
@@ -27,7 +28,10 @@ class DrawingGallery extends ConsumerStatefulWidget {
   });
 
   final List<String> urls;
-  final double height;
+
+  /// Fixed height, or null to fill the parent (the detail header's flexible
+  /// space).
+  final double? height;
 
   /// When set, the first image flies in from the matching card (see
   /// `drawingHeroTag`).
@@ -90,6 +94,7 @@ class _DrawingGalleryState extends ConsumerState<DrawingGallery> {
     return SizedBox(
       height: widget.height,
       child: Stack(
+        fit: StackFit.expand,
         children: [
           Semantics(
             button: true,
@@ -113,16 +118,16 @@ class _DrawingGalleryState extends ConsumerState<DrawingGallery> {
           ),
           if (widget.urls.length > 1)
             Positioned(
-              right: 12,
-              bottom: 12,
+              right: AppSpacing.lg,
+              bottom: AppSpacing.lg,
               child: _Pill(
                 key: const Key('gallery-indicator'),
                 label: '${_index + 1} / ${widget.urls.length}',
               ),
             ),
           const Positioned(
-            left: 12,
-            bottom: 12,
+            left: AppSpacing.lg,
+            bottom: AppSpacing.lg,
             child: _Pill(label: 'Preview · watermarked'),
           ),
         ],
@@ -153,8 +158,7 @@ class _GalleryView extends ConsumerWidget {
       backgroundDecoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
       ),
-      loadingBuilder:
-          (_, __) => const Center(child: CircularProgressIndicator()),
+      loadingBuilder: (_, __) => const ShimmerBox(radius: 0),
       builder:
           (_, i) => PhotoViewGalleryPageOptions(
             imageProvider: resolve(urls[i]),
@@ -212,10 +216,13 @@ class _Pill extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black54,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs + 1,
+        ),
         child: Text(
           label,
           style: Theme.of(

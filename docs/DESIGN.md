@@ -170,7 +170,7 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Home (hero plot-size search, categories, feed; hero ≈ 225 dp) | Done |
 | Search (sticky field + filter button, active chips + Clear all, result-count header + sort pill, plot-specific empty state with one-tap widen, filters sheet with plot size/tolerance preview, price range, chips, sort) | Done |
 | Shared `DrawingCard`, skeleton grid, Featured/Favorites/Architect grids | Done (inherited) |
-| Drawing detail (gallery has hero + new card chips; overview, reviews, purchase bar) | **To do** |
+| Drawing detail (immersive collapsing gallery, title/price, spec `StatTile` grid, architect card, rating summary, sticky purchase bar, licence note) | Done |
 | Architect profile header | **To do** |
 | Auth: sign-in, sign-up (2-step), forgot/reset, verification upload form | **Done** (`AuthHero`, `StepProgress`, `PasswordStrengthMeter`, `AppTextField`/`PrimaryButton`) |
 | Auth: intro, splash, verification status, Privacy/Terms | **To do** |
