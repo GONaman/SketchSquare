@@ -120,11 +120,24 @@ class ManagedDrawingCard extends StatelessWidget {
                 ],
               ),
             ],
+            if (d.status == DrawingStatus.underReview)
+              Padding(
+                key: ValueKey('under-review-${d.id}'),
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Under review by admins. A preview looks like another '
+                  "architect's drawing; you'll be emailed once it is decided.",
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
             if (d.status == DrawingStatus.failed)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                  'Processing failed. Open it to see the reason and try again.',
+                  item.failureReason == null || item.failureReason!.isEmpty
+                      ? 'Processing failed. Open it to see the reason and '
+                          'try again.'
+                      : 'Rejected: ${item.failureReason}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.error,
                   ),

@@ -25,6 +25,12 @@ class AdminVerificationsScreen extends ConsumerWidget {
         title: const Text('Pending verifications'),
         actions: [
           IconButton(
+            key: const Key('open-plagiarism'),
+            icon: const Icon(Icons.fact_check_outlined),
+            tooltip: 'Plagiarism review',
+            onPressed: () => context.push('${AppRoutes.admin}/plagiarism'),
+          ),
+          IconButton(
             key: const Key('open-refunds'),
             icon: const Icon(Icons.receipt_long_outlined),
             tooltip: 'Refunds',
