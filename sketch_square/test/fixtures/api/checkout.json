@@ -1,0 +1,9 @@
+{
+  "orderId": "order_stub_c6d2c651b0ea125ccb",
+  "razorpayKeyId": "stub",
+  "amountPaise": 100000,
+  "currency": "INR",
+  "purchaseIds": [
+    "63107ec6-97f6-4af9-8d30-be178bf9edcb"
+  ]
+}

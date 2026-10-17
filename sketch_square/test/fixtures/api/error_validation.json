@@ -1,0 +1,34 @@
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "email: email must be an email",
+    "details": {
+      "fields": {
+        "email": [
+          "email must be an email"
+        ],
+        "password": [
+          "password must be longer than or equal to 8 characters"
+        ],
+        "fullName": [
+          "fullName must be shorter than or equal to 100 characters",
+          "fullName should not be empty",
+          "fullName must be a string"
+        ],
+        "phone": [
+          "phone must be 10-14 digits, optionally starting with +"
+        ],
+        "address": [
+          "address must be shorter than or equal to 300 characters",
+          "address should not be empty",
+          "address must be a string"
+        ],
+        "city": [
+          "city must be shorter than or equal to 100 characters",
+          "city should not be empty",
+          "city must be a string"
+        ]
+      }
+    }
+  }
+}

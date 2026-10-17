@@ -1,0 +1,7 @@
+{
+  "balancePaise": 180000,
+  "pendingWithdrawalPaise": 0,
+  "minWithdrawalPaise": 50000,
+  "withdrawalBlocked": false,
+  "bankAccount": null
+}

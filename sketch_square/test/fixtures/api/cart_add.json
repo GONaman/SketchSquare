@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "id": "43f0ab17-df0d-4449-8350-1b5807630faf",
+      "title": "Smoke Paid Villa",
+      "category": {
+        "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+        "name": "Banks",
+        "slug": "banks"
+      },
+      "city": "Pune",
+      "plotLengthFt": 33.3,
+      "plotBreadthFt": 47.7,
+      "plotAreaSqft": 1588.41,
+      "floors": 2,
+      "facing": "NE",
+      "pricePaise": 100000,
+      "isFree": false,
+      "avgRating": 0,
+      "ratingCount": 0,
+      "previewUrl": "http://localhost:9000/previews/drawings/43f0ab17-df0d-4449-8350-1b5807630faf/80719d8f-b9ff-4f25-8567-b16dd883b0d1-0e760c297758.png",
+      "architect": {
+        "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
+        "fullName": "Smoke seller mvbxf97e",
+        "city": "Pune",
+        "architectRating": 0,
+        "ratingCount": 0,
+        "avatarUrl": "http://localhost:9000/previews/avatars/c9c7240b-41c7-4751-8673-ab19506c7297/b2259be2-1d7a-46a5-bbb1-6bb3391cd341.png"
+      },
+      "status": "PUBLISHED",
+      "createdAt": "2026-10-17T04:58:50.123Z",
+      "sizeMatch": null
+    }
+  ],
+  "totalPaise": 100000
+}

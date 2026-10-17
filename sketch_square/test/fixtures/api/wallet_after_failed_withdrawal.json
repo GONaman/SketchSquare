@@ -1,0 +1,11 @@
+{
+  "balancePaise": 130000,
+  "pendingWithdrawalPaise": 0,
+  "minWithdrawalPaise": 50000,
+  "withdrawalBlocked": false,
+  "bankAccount": {
+    "holderName": "Smoke Seller",
+    "ifsc": "HDFC0001234",
+    "accountNumberLast4": "0000"
+  }
+}

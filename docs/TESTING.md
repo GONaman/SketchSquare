@@ -51,4 +51,8 @@ flutter analyze
 flutter test
 ```
 
+`test/contract/api_fixtures_test.dart` replays the captured backend JSON (`test/fixtures/api/*.json`) through the real Dio repositories and models; re-capture with the smoke script after any API change.
+
+Presigned upload/download URLs use the host in `S3_PUBLIC_ENDPOINT` (default `http://localhost:9000`). A phone or Android emulator cannot reach that: set it to a host the device can resolve (emulator: `http://10.0.2.2:9000`) before booting the backend.
+
 Run the app against a local backend with `--dart-define=API_BASE_URL=http://localhost:3100` (Android emulator: `http://10.0.2.2:3100`).

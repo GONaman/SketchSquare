@@ -1,0 +1,45 @@
+{
+  "items": [
+    {
+      "id": "6784e66d-0c03-4f23-a753-dac4c53e6dc8",
+      "entryType": "WITHDRAWAL_REVERSAL",
+      "amountPaise": 50000,
+      "description": "Withdrawal failed – amount returned",
+      "referenceId": "75d3404f-cf9c-4781-be24-2315e186d209",
+      "createdAt": "2026-10-17T04:58:57.489Z"
+    },
+    {
+      "id": "d6cfd6a2-d213-4d7f-805a-52a5ec182b00",
+      "entryType": "WITHDRAWAL",
+      "amountPaise": -50000,
+      "description": "Withdrawal to bank ••••0000",
+      "referenceId": "75d3404f-cf9c-4781-be24-2315e186d209",
+      "createdAt": "2026-10-17T04:58:55.419Z"
+    },
+    {
+      "id": "fc099efe-e1c7-4cdb-be64-c7a86cb71ec9",
+      "entryType": "WITHDRAWAL",
+      "amountPaise": -50000,
+      "description": "Withdrawal to bank ••••0000",
+      "referenceId": "d513ec72-a744-4fdf-9538-edb45a6262bf",
+      "createdAt": "2026-10-17T04:58:52.833Z"
+    },
+    {
+      "id": "6f480f53-f11f-4116-9f9b-611ca932b998",
+      "entryType": "SALE",
+      "amountPaise": 90000,
+      "description": "Sale of \"Smoke Paid Duplex\"",
+      "referenceId": "40539f62-3f8f-47bd-b6b2-5a00856435b6",
+      "createdAt": "2026-10-17T04:58:52.189Z"
+    },
+    {
+      "id": "857ceb07-e1e1-444d-8d60-cabcdcdb62c0",
+      "entryType": "SALE",
+      "amountPaise": 90000,
+      "description": "Sale of \"Smoke Paid Villa v2\"",
+      "referenceId": "63107ec6-97f6-4af9-8d30-be178bf9edcb",
+      "createdAt": "2026-10-17T04:58:52.142Z"
+    }
+  ],
+  "nextCursor": null
+}

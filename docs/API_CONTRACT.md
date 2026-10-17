@@ -85,7 +85,7 @@ Review { "id", "rating": 1..5, "comment": string|null, "reviewer": {"id","fullNa
 ## Drawings — seller side
 - `POST /drawings` body `{title,description,categoryId,city,plotLength,plotBreadth,unit:"ft"|"m",floors,facing?,bedrooms?:int(0-20),tags?:string[](≤8, each ≤24 chars),pricePaise,isFree?}` → `201 DrawingDetail` (DRAFT).
   `bedrooms`/`tags` are optional additions requested by the Flutter upload form; `DrawingDetail` returns them as `bedrooms: int|null`, `tags: string[]`.
-  Until the backend accepts them the app does not send them (`--dart-define=UPLOAD_SEND_EXTENDED_METADATA=true` enables it).
+  The app sends them by default (`--dart-define=UPLOAD_SEND_EXTENDED_METADATA=false` disables it for an older backend).
   `isFree=true` forces `pricePaise=0`.
 - `PATCH /drawings/:id` owner; draft: any field; published: only `{title,description,pricePaise}`.
 - `DELETE /drawings/:id` owner → `204`, status REMOVED (past buyers keep access).
