@@ -257,4 +257,23 @@ void main() {
       );
     });
   });
+
+  testWidgets('flag cards fit a small phone at 1.3x text', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    addTearDown(() {
+      tester.view.reset();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+    final container = await pumpApp(
+      tester,
+      user: _admin,
+      overrides: [plagiarismRepositoryProvider.overrideWithValue(repo)],
+    );
+    container.read(appRouterProvider).go('${AppRoutes.admin}/plagiarism');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('flag-f1')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
