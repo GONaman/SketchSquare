@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../auth/presentation/widgets/form_widgets.dart';
 import '../domain/wallet_validators.dart';
 import 'wallet_controllers.dart';
@@ -97,61 +98,82 @@ class _BankAccountScreenState extends ConsumerState<BankAccountScreen> {
       body: Form(
         key: _form,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.gutter),
           children: [
-            TextFormField(
+            AppCard(
+              style: AppCardStyle.tonal,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.lock_outline_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  const Expanded(
+                    child: Text(
+                      'Your earnings are paid out to this account. We only '
+                      'store the last 4 digits of the number.',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            AppTextField(
               key: const Key('field-holder'),
               controller: _holder,
               enabled: !_saving,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Account holder name',
-              ),
+              label: 'Account holder name',
+              prefixIcon: Icons.person_outline_rounded,
               validator:
                   (v) =>
                       WalletValidators.holderName(v) ??
                       _fieldErrors['holderName'],
             ),
-            const SizedBox(height: 12),
-            TextFormField(
+            const SizedBox(height: AppSpacing.md),
+            AppTextField(
               key: const Key('field-ifsc'),
               controller: _ifsc,
               enabled: !_saving,
               textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(labelText: 'IFSC code'),
+              label: 'IFSC code',
+              prefixIcon: Icons.account_balance_outlined,
               validator:
                   (v) => WalletValidators.ifsc(v) ?? _fieldErrors['ifsc'],
             ),
-            const SizedBox(height: 12),
-            TextFormField(
+            const SizedBox(height: AppSpacing.md),
+            AppTextField(
               key: const Key('field-account'),
               controller: _number,
               enabled: !_saving,
               keyboardType: TextInputType.number,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Account number',
-                helperText:
-                    existing == null
-                        ? null
-                        : 'Currently ${existing.maskedNumber}. Re-enter the '
-                            'full number to save changes.',
-                helperMaxLines: 2,
-              ),
+              tabularFigures: true,
+              label: 'Account number',
+              prefixIcon: Icons.pin_outlined,
+              helper:
+                  existing == null
+                      ? null
+                      : 'Currently ${existing.maskedNumber}. Re-enter the '
+                          'full number to save changes.',
               validator:
                   (v) =>
                       WalletValidators.accountNumber(v) ??
                       _fieldErrors['accountNumber'],
             ),
-            const SizedBox(height: 12),
-            TextFormField(
+            const SizedBox(height: AppSpacing.md),
+            AppTextField(
               key: const Key('field-account-confirm'),
               controller: _confirm,
               enabled: !_saving,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Confirm account number',
-              ),
+              tabularFigures: true,
+              label: 'Confirm account number',
+              prefixIcon: Icons.pin_outlined,
               validator:
                   (v) =>
                       WalletValidators.normalizeAccountNumber(v ?? '') ==
@@ -161,21 +183,16 @@ class _BankAccountScreenState extends ConsumerState<BankAccountScreen> {
                           ? null
                           : 'Account numbers do not match',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             if (_error != null) ...[
               FormErrorBanner(_error!),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
             ],
-            FilledButton(
+            PrimaryButton(
               key: const Key('bank-save'),
-              onPressed: _saving ? null : _save,
-              child:
-                  _saving
-                      ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                      : const Text('Save'),
+              label: 'Save',
+              loading: _saving,
+              onPressed: _save,
             ),
           ],
         ),

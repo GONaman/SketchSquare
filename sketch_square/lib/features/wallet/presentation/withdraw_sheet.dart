@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../auth/presentation/widgets/form_widgets.dart';
-import '../../upload/domain/money.dart';
+import '../../upload/domain/money.dart' show parseRupeesToPaise;
 import '../domain/wallet_models.dart';
 import '../domain/wallet_validators.dart';
 import 'wallet_controllers.dart';
@@ -69,14 +70,16 @@ class _WithdrawSheetState extends ConsumerState<WithdrawSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final wallet = widget.wallet;
     final bank = wallet.bankAccount;
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-        16,
+        AppSpacing.gutter,
         0,
-        16,
-        16 + MediaQuery.viewInsetsOf(context).bottom,
+        AppSpacing.gutter,
+        AppSpacing.gutter + MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Form(
         key: _form,
@@ -84,49 +87,63 @@ class _WithdrawSheetState extends ConsumerState<WithdrawSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Withdraw to bank',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              bank == null ? '' : '${bank.holderName} · ${bank.maskedNumber}',
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
+            Text('Withdraw to bank', style: theme.textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.md),
+            if (bank != null)
+              AppCard(
+                style: AppCardStyle.tonal,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  children: [
+                    Icon(Icons.account_balance_outlined, color: scheme.primary),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            bank.holderName,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          Text(
+                            bank.maskedNumber,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: AppSpacing.lg),
+            AppTextField(
               key: const Key('withdraw-amount'),
               controller: _amount,
               enabled: !_submitting,
               autofocus: true,
+              tabularFigures: true,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: InputDecoration(
-                labelText: 'Amount (₹)',
-                helperText:
-                    'Available ${formatPaise(wallet.balancePaise)} · '
-                    'minimum ${formatPaise(wallet.minWithdrawalPaise)}',
-              ),
+              label: 'Amount (₹)',
+              prefixIcon: Icons.currency_rupee_rounded,
+              helper:
+                  'Available ${formatPaise(wallet.balancePaise)} · '
+                  'minimum ${formatPaise(wallet.minWithdrawalPaise)}',
               validator: (v) => WalletValidators.withdrawalAmount(v, wallet),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
             if (_error != null) ...[
               FormErrorBanner(_error!),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
             ],
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                key: const Key('withdraw-submit'),
-                onPressed: _submitting ? null : _submit,
-                child:
-                    _submitting
-                        ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : const Text('Request withdrawal'),
-              ),
+            PrimaryButton(
+              key: const Key('withdraw-submit'),
+              label: 'Request withdrawal',
+              loading: _submitting,
+              onPressed: _submit,
             ),
           ],
         ),

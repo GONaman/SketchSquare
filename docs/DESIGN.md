@@ -185,7 +185,7 @@ The phone layout is the baseline and must not change. Wider windows get native-f
 | Basket + checkout + order result | Done |
 | Purchases library + download/review sheet | Done |
 | Profile tab, settings, edit contact details | Done (`SettingsGroup`/`SettingsTile` in `features/profile`) |
-| Wallet (balance, ledger, bank, payouts, withdraw sheet) | **To do** |
+| Wallet (balance, ledger, bank, payouts, withdraw sheet) | Done (`InkHeroCard` balance, ledger grouped by day) |
 | Manage drawings (`ManagedDrawingCard`) | **To do** |
 | Admin (verifications, refunds, plagiarism, categories) | **To do** |
 
