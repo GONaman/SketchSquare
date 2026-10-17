@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
+import '../../../core/widgets/widgets.dart';
 import '../domain/auth_validators.dart';
 import 'auth_repository_provider.dart';
 import 'widgets/auth_form_scaffold.dart';
 import 'widgets/form_widgets.dart';
+import 'widgets/password_strength_meter.dart';
 
 /// Reached from the emailed link (`/reset-password?token=...`) or manually
 /// after "I have a reset code".
@@ -78,52 +80,54 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     return AuthFormScaffold(
       title: 'Reset password',
       showBack: true,
+      kicker: 'New password',
       heading: 'Choose a new password',
+      subtitle: 'Use at least ${AuthValidators.minPasswordLength} characters.',
       children: [
         Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (widget.token == null) ...[
-                TextFormField(
+                AppTextField(
                   controller: _token,
+                  label: 'Reset code',
+                  helper: 'Paste the code from the email we sent you.',
+                  prefixIcon: Icons.vpn_key_outlined,
                   enabled: !_busy,
                   textInputAction: TextInputAction.next,
                   validator: AuthValidators.resetToken,
-                  decoration: const InputDecoration(labelText: 'Reset code'),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
               ],
               PasswordField(
                 controller: _password,
                 label: 'New password',
+                enabled: !_busy,
                 validator: AuthValidators.password,
                 textInputAction: TextInputAction.next,
               ),
-              const SizedBox(height: 16),
+              PasswordStrengthMeter(controller: _password),
+              const SizedBox(height: AppSpacing.lg),
               PasswordField(
                 controller: _confirm,
                 label: 'Confirm new password',
+                enabled: !_busy,
                 validator: AuthValidators.confirmPassword(() => _password.text),
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _busy ? null : _submit(),
               ),
               if (_error != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 FormErrorBanner(_error!),
               ],
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _busy ? null : _submit,
-                child:
-                    _busy
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : const Text('Update password'),
+              const SizedBox(height: AppSpacing.xl),
+              PrimaryButton(
+                label: 'Update password',
+                loading: _busy,
+                onPressed: _submit,
               ),
             ],
           ),

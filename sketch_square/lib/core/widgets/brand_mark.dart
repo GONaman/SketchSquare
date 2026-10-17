@@ -65,12 +65,17 @@ class _MarkPainter extends CustomPainter {
 
 /// Logo + "SketchSquare" wordmark for app bars.
 class Wordmark extends StatelessWidget {
-  const Wordmark({super.key});
+  const Wordmark({super.key, this.onDark = false});
+
+  /// White lettering for ink/photo backgrounds.
+  final bool onDark;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final style = theme.textTheme.titleLarge;
+    final style = theme.textTheme.titleLarge?.copyWith(
+      color: onDark ? Colors.white : null,
+    );
     return Semantics(
       label: 'SketchSquare',
       excludeSemantics: true,
@@ -93,7 +98,8 @@ class Wordmark extends StatelessWidget {
                     text: 'Square',
                     style: style?.copyWith(
                       fontWeight: FontWeight.w400,
-                      color: theme.colorScheme.primary,
+                      color:
+                          onDark ? Colors.white70 : theme.colorScheme.primary,
                     ),
                   ),
                 ],

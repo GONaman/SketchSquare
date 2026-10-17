@@ -140,7 +140,8 @@ Shared formatters: `core/format/price.dart` → `formatPaise(int)` (`₹1,24,999
 | Shared `DrawingCard`, skeleton grid, Featured/Favorites/Architect grids | Done (inherited) |
 | Drawing detail (gallery has hero + new card chips; overview, reviews, purchase bar) | **To do** |
 | Architect profile header | **To do** |
-| Auth: intro, sign-in, sign-up, forgot/reset, pending verification | **To do** |
+| Auth: sign-in, sign-up (2-step), forgot/reset, verification upload form | **Done** (`AuthHero`, `StepProgress`, `PasswordStrengthMeter`, `AppTextField`/`PrimaryButton`) |
+| Auth: intro, splash, verification status, Privacy/Terms | **To do** |
 | Upload flow | **To do** |
 | Basket + checkout, purchases | **To do** |
 | Profile, wallet (bank, payouts), settings, edit profile | **To do** |
