@@ -7,7 +7,7 @@ part of 'checkout_controller.dart';
 // **************************************************************************
 
 String _$checkoutControllerHash() =>
-    r'3d17522d4665c18dbfe5d0c61a36303d0ae70be0';
+    r'ae8e50f134a173f7f449d86f757fc0903acd240c';
 
 /// Drives basket -> order -> payment -> confirmation. In stub mode
 /// (`razorpayKeyId == "stub"`) the payment sheet is skipped and the backend's

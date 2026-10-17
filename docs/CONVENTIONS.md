@@ -186,6 +186,8 @@ on the shell, so existing feature tests are unaffected. Use `signedIn: false` fo
 - Tab screens in an `IndexedStatefulShell` stay mounted; refresh on re-activation with `TickerMode.of(context)` + `WidgetsBindingObserver` resume (see `basket_screen.dart`).
 - Checkout state is a sealed class (`CheckoutIdle/Processing/Success/Failure/Pending`); screens only react to it, all payment logic is in `CheckoutController`.
 - Shared fixtures: `fakeDrawing()` / `fakeSheet()` in `test/helpers/commerce_fixtures.dart`.
+- Purchases/download seams: `PurchasesRepository`, `ReviewRepository`, `FileDownloader` (bare Dio, no auth), `FileHandler` (open/share) in `features/purchases/domain`; fakes in `test/features/purchases/fakes.dart` (`fakePurchase`, `FakePurchasesRepository` pages by index cursor). Paged lists use `PagedState` + `retryLoadMore()`.
+- `core/format/file_size.dart` → `formatBytes`.
 
 ## Flutter discovery (home / search / detail)
 - Routes: `DiscoveryPaths(base)` builds `search`/`drawing`/`architect` locations under a tab; `discoverySubRoutes(paths)` registers the sub-routes, so Home and Featured share screens.
