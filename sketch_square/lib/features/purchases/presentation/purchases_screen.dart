@@ -5,12 +5,9 @@ import 'package:intl/intl.dart';
 import '../../../core/format/file_size.dart';
 import '../../../core/format/plot_size.dart';
 import '../../../core/network/api_exception.dart';
-import '../../../core/widgets/blueprint_empty_state.dart';
-import '../../../core/widgets/drawing_thumbnail.dart';
-import '../../../core/widgets/error_retry.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../auth/presentation/current_user_provider.dart';
 import '../../drawings/domain/sheet.dart';
-import '../../upload/domain/money.dart';
 import '../domain/purchase_models.dart';
 import 'download_controller.dart';
 import 'purchases_controller.dart';
@@ -25,15 +22,15 @@ class PurchasesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('My purchases')),
       body: purchases.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ListRowSkeleton(count: 3),
         error:
-            (e, _) => ErrorRetry(
+            (e, _) => ErrorState(
               message: toApiException(e).message,
               onRetry: () => ref.invalidate(purchasesControllerProvider),
             ),
         data: (paged) {
           if (paged.items.isEmpty) {
-            return const BlueprintEmptyState(
+            return const EmptyState(
               icon: Icons.folder_open_outlined,
               title: 'No purchases yet',
               message: 'Drawings you buy or download for free appear here.',
@@ -43,7 +40,12 @@ class PurchasesScreen extends ConsumerWidget {
             onRefresh: ref.read(purchasesControllerProvider.notifier).refresh,
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.gutter,
+                AppSpacing.sm,
+                AppSpacing.gutter,
+                AppSpacing.xl,
+              ),
               itemCount: paged.items.length + 2,
               itemBuilder: (_, i) {
                 if (i == 0) return const FreeQuotaBanner();
@@ -77,21 +79,40 @@ class FreeQuotaBanner extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     if (user == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final limit = user.freeDownloadLimit;
     final used = user.freeDownloadsUsed.clamp(0, limit);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Free downloads: $used of $limit used',
-            key: const Key('free-quota-text'),
-            style: theme.textTheme.labelLarge,
-          ),
-          const SizedBox(height: 6),
-          LinearProgressIndicator(value: limit == 0 ? 1 : used / limit),
-        ],
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: AppCard(
+        style: AppCardStyle.tonal,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.card_giftcard_rounded, color: scheme.primary),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Free downloads: $used of $limit used',
+                    key: const Key('free-quota-text'),
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    child: LinearProgressIndicator(
+                      minHeight: 8,
+                      value: limit == 0 ? 1 : used / limit,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -127,51 +148,106 @@ class PurchaseCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final d = item.drawing;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AppCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DrawingThumbnail(url: d.previewUrl, size: 64),
-                const SizedBox(width: 12),
+                DrawingThumbnail(url: d.previewUrl, size: 72),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(d.title, style: theme.textTheme.titleSmall),
+                      Text(
+                        d.title,
+                        style: theme.textTheme.titleSmall,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         '${formatPlotSize(d.plotLengthFt, d.plotBreadthFt)} · ${d.city}',
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                      Text(
-                        '${item.isFree ? 'Free' : formatPaise(item.pricePaise)}'
-                        ' · ${DateFormat.yMMMd().format(item.purchasedAt.toLocal())}',
-                        style: theme.textTheme.bodySmall,
+                      const SizedBox(height: AppSpacing.xs),
+                      Wrap(
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.xs,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          if (item.isFree)
+                            const StatusPill(
+                              label: 'Free',
+                              tone: StatusTone.success,
+                              dense: true,
+                            )
+                          else
+                            Text(
+                              formatPaise(item.pricePaise),
+                              style: theme.textTheme.labelLarge?.tabular,
+                            ),
+                          Text(
+                            DateFormat.yMMMd().format(
+                              item.purchasedAt.toLocal(),
+                            ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                TextButton.icon(
-                  icon: const Icon(Icons.star_outline),
-                  label: const Text('Rate'),
-                  onPressed: () => _rate(context),
-                ),
               ],
             ),
-            const Divider(),
-            for (final sheet in item.sheets)
-              SheetDownloadRow(
-                drawingId: d.id,
-                drawingTitle: d.title,
-                sheet: sheet,
-                isFreePurchase: item.isFree,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
+                ),
+                icon: const Icon(Icons.star_outline_rounded),
+                label: const Text('Rate'),
+                onPressed: () => _rate(context),
               ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                child: Column(
+                  children: [
+                    for (final sheet in item.sheets)
+                      SheetDownloadRow(
+                        drawingId: d.id,
+                        drawingTitle: d.title,
+                        sheet: sheet,
+                        isFreePurchase: item.isFree,
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -256,11 +332,17 @@ class SheetDownloadRow extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.insert_drive_file_outlined, size: 20),
-            const SizedBox(width: 8),
+            Icon(
+              Icons.insert_drive_file_outlined,
+              size: 20,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 '${sheet.fileName} · ${formatBytes(sheet.sizeBytes)}',
+                style: theme.textTheme.bodyMedium,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
