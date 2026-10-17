@@ -213,45 +213,48 @@ class _PlotSizeHero extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: 18,
-              right: 18,
+              top: 14,
+              right: 16,
               child: ExcludeSemantics(
                 child: CustomPaint(
-                  size: const Size(64, 48),
+                  size: const Size(56, 42),
                   painter: _HeroGlyphPainter(AppColors.copperLight),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'SEARCH BY PLOT SIZE',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.copperLight,
-                      letterSpacing: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
                   Padding(
-                    padding: const EdgeInsets.only(right: 56),
-                    child: Text(
-                      'What’s your plot size?',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                      ),
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.xs,
+                      AppSpacing.xs,
+                      56,
+                      0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'SEARCH BY PLOT SIZE',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: AppColors.copperLight,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'What’s your plot size?',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Get ready-to-build drawings that fit your site.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.78),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.md),
                   DecoratedBox(
                     decoration: BoxDecoration(
                       color: scheme.surfaceContainerLowest,
@@ -259,20 +262,15 @@ class _PlotSizeHero extends StatelessWidget {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.md),
-                      child: Column(
-                        children: [
-                          PlotSizeFields(
-                            controller: controller,
-                            onSubmitted: onSearch,
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          PrimaryButton(
-                            key: const Key('plot-search-button'),
-                            label: 'Find drawings',
-                            icon: Icons.search_rounded,
-                            onPressed: onSearch,
-                          ),
-                        ],
+                      child: PlotSizeFields(
+                        controller: controller,
+                        onSubmitted: onSearch,
+                        trailing: PrimaryButton(
+                          key: const Key('plot-search-button'),
+                          label: 'Search',
+                          icon: Icons.search_rounded,
+                          onPressed: onSearch,
+                        ),
                       ),
                     ),
                   ),

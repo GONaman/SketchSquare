@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/drawings_providers.dart';
 import '../domain/drawing_search_query.dart';
 import '../domain/plot_size.dart';
+import '../../../core/widgets/widgets.dart';
 import 'formatters.dart';
 import 'plot_size_fields.dart';
 
@@ -18,6 +19,7 @@ Future<DrawingSearchQuery?> showFiltersSheet(
     isScrollControlled: true,
     showDragHandle: true,
     useSafeArea: true,
+    useRootNavigator: true,
     builder: (_) => _FiltersSheet(initial: initial),
   );
 }
@@ -106,47 +108,148 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final categories = ref.watch(categoriesProvider);
     final cities = ref.watch(citiesProvider);
     final free = _draft.priceType == PriceType.free;
+    final hasChanges =
+        _draft.activeFilterCount > 0 ||
+        _plot.peekSize() != null ||
+        _draft.sort != DrawingSort.relevance;
 
     Widget section(String title, Widget child) => Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.md),
           child,
         ],
       ),
     );
+
+    final divider = Divider(height: 1, color: scheme.outlineVariant);
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.gutter,
+              0,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text('Filters', style: theme.textTheme.titleLarge),
+                ),
+                TextButton(
+                  key: const Key('filters-reset'),
+                  onPressed: _reset,
+                  child: const Text('Reset'),
+                ),
+              ],
+            ),
+          ),
+          divider,
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.gutter,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Filters', style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 16),
                   section(
                     'Plot size',
                     PlotSizeFields(controller: _plot, showTolerance: true),
                   ),
+                  divider,
+                  section(
+                    'Price',
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<PriceType>(
+                            key: const Key('price-type'),
+                            showSelectedIcon: false,
+                            segments: const [
+                              ButtonSegment(
+                                value: PriceType.all,
+                                label: Text('Both'),
+                              ),
+                              ButtonSegment(
+                                value: PriceType.free,
+                                label: Text('Free'),
+                              ),
+                              ButtonSegment(
+                                value: PriceType.paid,
+                                label: Text('Paid'),
+                              ),
+                            ],
+                            selected: {_draft.priceType},
+                            onSelectionChanged:
+                                (s) => setState(() {
+                                  _draft = _draft.copyWith(
+                                    priceType: s.first,
+                                    minPricePaise:
+                                        s.first == PriceType.free
+                                            ? null
+                                            : _draft.minPricePaise,
+                                    maxPricePaise:
+                                        s.first == PriceType.free
+                                            ? null
+                                            : _draft.maxPricePaise,
+                                  );
+                                }),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          free ? 'Free drawings only' : _priceLabel,
+                          key: const Key('price-label'),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color:
+                                free
+                                    ? scheme.onSurfaceVariant
+                                    : scheme.onSurface,
+                          ),
+                        ),
+                        RangeSlider(
+                          key: const Key('price-range'),
+                          values: _priceRange,
+                          min: 0,
+                          max: _priceSteps.toDouble(),
+                          divisions: _priceSteps,
+                          onChanged: free ? null : _setPriceRange,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('₹0', style: theme.textTheme.bodySmall),
+                            Text('₹50,000+', style: theme.textTheme.bodySmall),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  divider,
                   section(
                     'Category',
                     categories.when(
-                      loading: () => const LinearProgressIndicator(),
+                      loading: () => const ShimmerBox(height: 40),
                       error: (_, __) => const Text('Couldn’t load categories'),
                       data:
                           (list) => Wrap(
-                            spacing: 8,
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.sm,
                             children: [
                               ChoiceChip(
                                 label: const Text('All'),
@@ -175,10 +278,11 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
                           ),
                     ),
                   ),
+                  divider,
                   section(
                     'City',
                     cities.when(
-                      loading: () => const LinearProgressIndicator(),
+                      loading: () => const ShimmerBox(height: 40),
                       error: (_, __) => const Text('Couldn’t load cities'),
                       data: (list) {
                         final names = {
@@ -187,7 +291,8 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
                         };
                         if (names.isEmpty) return const Text('No cities yet');
                         return Wrap(
-                          spacing: 8,
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
                           children: [
                             for (final name in names)
                               FilterChip(
@@ -205,6 +310,7 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
                       },
                     ),
                   ),
+                  divider,
                   section(
                     'Drawing rating',
                     _RatingChips(
@@ -216,6 +322,7 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
                           ),
                     ),
                   ),
+                  divider,
                   section(
                     'Architect rating',
                     _RatingChips(
@@ -228,57 +335,23 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
                           ),
                     ),
                   ),
+                  divider,
                   section(
-                    'Price',
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    'Sort by',
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
                       children: [
-                        SegmentedButton<PriceType>(
-                          key: const Key('price-type'),
-                          showSelectedIcon: false,
-                          segments: const [
-                            ButtonSegment(
-                              value: PriceType.all,
-                              label: Text('Both'),
-                            ),
-                            ButtonSegment(
-                              value: PriceType.free,
-                              label: Text('Free'),
-                            ),
-                            ButtonSegment(
-                              value: PriceType.paid,
-                              label: Text('Paid'),
-                            ),
-                          ],
-                          selected: {_draft.priceType},
-                          onSelectionChanged:
-                              (s) => setState(() {
-                                _draft = _draft.copyWith(
-                                  priceType: s.first,
-                                  minPricePaise:
-                                      s.first == PriceType.free
-                                          ? null
-                                          : _draft.minPricePaise,
-                                  maxPricePaise:
-                                      s.first == PriceType.free
-                                          ? null
-                                          : _draft.maxPricePaise,
-                                );
-                              }),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          free ? 'Free drawings only' : _priceLabel,
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        RangeSlider(
-                          key: const Key('price-range'),
-                          values: _priceRange,
-                          min: 0,
-                          max: _priceSteps.toDouble(),
-                          divisions: _priceSteps,
-                          onChanged: free ? null : _setPriceRange,
-                        ),
+                        for (final sort in DrawingSort.values)
+                          ChoiceChip(
+                            key: Key('sort-${sort.apiValue}'),
+                            label: Text(sort.label),
+                            selected: _draft.sort == sort,
+                            onSelected:
+                                (_) => setState(
+                                  () => _draft = _draft.copyWith(sort: sort),
+                                ),
+                          ),
                       ],
                     ),
                   ),
@@ -286,22 +359,21 @@ class _FiltersSheetState extends ConsumerState<_FiltersSheet> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                TextButton(
-                  key: const Key('filters-reset'),
-                  onPressed: _reset,
-                  child: const Text('Reset'),
-                ),
-                const Spacer(),
-                FilledButton(
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              border: Border(top: BorderSide(color: scheme.outlineVariant)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: PrimaryButton(
                   key: const Key('filters-apply'),
+                  label: hasChanges ? 'Show results' : 'Show all drawings',
                   onPressed: _apply,
-                  child: const Text('Show results'),
                 ),
-              ],
+              ),
             ),
           ),
         ],
@@ -324,11 +396,20 @@ class _RatingChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: [
         for (final option in _ratingOptions)
           ChoiceChip(
             key: Key('$keyPrefix-${option ?? 'any'}'),
+            avatar:
+                option == null
+                    ? null
+                    : Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: AppSemanticColors.of(context).warning,
+                    ),
             label: Text(option == null ? 'Any' : '${formatRating(option)}+'),
             selected: value == option,
             onSelected: (_) => onChanged(option),
