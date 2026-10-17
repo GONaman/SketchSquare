@@ -12,6 +12,9 @@ describe('validateEnv', () => {
     expect(env.MIN_WITHDRAWAL_PAISE).toBe(50000);
     expect(env.S3_FORCE_PATH_STYLE).toBe(true);
     expect(env.PAYOUT_PROVIDER).toBe('stub');
+    expect(env.CONTRIBUTION_FREE_PER_PAID).toBe(1);
+    expect(env.PLAGIARISM_PHASH_THRESHOLD).toBe(8);
+    expect(env.PLAGIARISM_PLOT_TOLERANCE_PCT).toBe(5);
   });
 
   it('coerces numbers and booleans from strings', () => {
@@ -32,6 +35,9 @@ describe('validateEnv', () => {
     );
     expect(() => validateEnv({ PLATFORM_FEE_BPS: '20000' })).toThrow(
       /PLATFORM_FEE_BPS/,
+    );
+    expect(() => validateEnv({ PLAGIARISM_PHASH_THRESHOLD: '65' })).toThrow(
+      /PLAGIARISM_PHASH_THRESHOLD/,
     );
   });
 

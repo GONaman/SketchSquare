@@ -69,5 +69,18 @@ export function renderEmail(job: EmailJob): RenderedEmail {
         text: `Hi ${fullName},\n\nWe received a request to reset your password.\nLink: ${resetUrl}\nReset code: ${token}\n\nIf you did not request this, ignore this email.`,
       };
     }
+    case 'drawing-under-review': {
+      const { fullName, title } = job.data;
+      return {
+        subject: `"${title}" is under review`,
+        html: layout(
+          'Your drawing is under review',
+          `<p>Hi ${esc(fullName)},</p>
+<p>Your drawing <strong>${esc(title)}</strong> looks similar to an existing drawing on SketchSquare, so our team will review it before it goes live.</p>
+<p>We will email you as soon as a decision is made. You do not need to do anything.</p>`,
+        ),
+        text: `Hi ${fullName},\n\nYour drawing "${title}" looks similar to an existing drawing on SketchSquare, so our team will review it before it goes live.\nWe will email you as soon as a decision is made. You do not need to do anything.`,
+      };
+    }
   }
 }

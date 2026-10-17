@@ -11,6 +11,12 @@ datasource db {
 // Money is integer paise. Lengths are feet. CHECK constraints, the partial unique index, triggers and the
 // full-text generated column live in raw SQL migrations (see docs/data-model.md).
 
+enum PlagiarismFlagStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum Role {
   ARCHITECT
   ADMIN
@@ -131,7 +137,8 @@ model User {
   withdrawals           Withdrawal[]
   bankAccount           BankAccount?
   auditLogs             AuditLog[]
-  refundsIssued         Refund[]           @relation("RefundAdmin")
+  refundsIssued         Refund[]              @relation("RefundAdmin")
+  plagiarismReviews     PlagiarismFlag[]
 
   @@index([architectRating])
   @@index([city])
@@ -247,6 +254,9 @@ model Drawing {
   cartItems     CartItem[]
   freeDownloads FreeDownload[]
 
+  plagiarismFlags   PlagiarismFlag[] @relation("FlaggedDrawing")
+  plagiarismMatches PlagiarismFlag[] @relation("MatchedDrawing")
+
   @@index([status, categoryId])
   @@index([status, createdAt(sort: Desc)])
   @@index([city])
@@ -275,9 +285,36 @@ model DrawingSheet {
 
   drawing Drawing @relation(fields: [drawingId], references: [id], onDelete: Cascade)
 
+  plagiarismFlags   PlagiarismFlag[] @relation("FlaggedSheet")
+  plagiarismMatches PlagiarismFlag[] @relation("MatchedSheet")
+
   @@unique([drawingId, originalKey])
   @@index([drawingId])
   @@index([sha256])
+}
+
+/// A new drawing whose preview looks like an existing drawing of another architect (pHash within the threshold, similar plot size).
+model PlagiarismFlag {
+  id               String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  drawingId        String               @db.Uuid
+  matchedDrawingId String               @db.Uuid
+  sheetId          String               @db.Uuid
+  matchedSheetId   String               @db.Uuid
+  hammingDistance  Int
+  status           PlagiarismFlagStatus @default(PENDING)
+  reviewNote       String?
+  reviewedById     String?              @db.Uuid
+  reviewedAt       DateTime?
+  createdAt        DateTime             @default(now())
+
+  drawing        Drawing      @relation("FlaggedDrawing", fields: [drawingId], references: [id], onDelete: Cascade)
+  matchedDrawing Drawing      @relation("MatchedDrawing", fields: [matchedDrawingId], references: [id], onDelete: Cascade)
+  sheet          DrawingSheet @relation("FlaggedSheet", fields: [sheetId], references: [id], onDelete: Cascade)
+  matchedSheet   DrawingSheet @relation("MatchedSheet", fields: [matchedSheetId], references: [id], onDelete: Cascade)
+  reviewedBy     User?        @relation(fields: [reviewedById], references: [id])
+
+  @@index([drawingId])
+  @@index([status, createdAt])
 }
 
 model Purchase {

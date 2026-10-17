@@ -43,4 +43,15 @@ export class MailService {
       data: { to, fullName, token, resetUrl },
     });
   }
+
+  sendDrawingUnderReview(
+    to: string,
+    fullName: string,
+    title: string,
+  ): Promise<void> {
+    return this.enqueue({
+      name: 'drawing-under-review',
+      data: { to, fullName, title },
+    });
+  }
 }

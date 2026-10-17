@@ -9,6 +9,10 @@ export type EmailJob =
   | {
       name: 'password-reset';
       data: { to: string; fullName: string; token: string; resetUrl: string };
+    }
+  | {
+      name: 'drawing-under-review';
+      data: { to: string; fullName: string; title: string };
     };
 
 export type EmailJobName = EmailJob['name'];
