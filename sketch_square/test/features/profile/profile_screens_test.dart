@@ -6,6 +6,7 @@ import 'package:sketch_square/core/router/app_router.dart';
 import 'package:sketch_square/core/router/route_utils.dart';
 import 'package:sketch_square/core/router/routes.dart';
 import 'package:sketch_square/core/theme/theme_mode_provider.dart';
+import 'package:sketch_square/core/widgets/widgets.dart';
 import 'package:sketch_square/features/architects/data/architects_providers.dart';
 import 'package:sketch_square/features/architects/domain/architect_profile.dart';
 import 'package:sketch_square/features/architects/domain/architect_summary.dart';
@@ -152,10 +153,10 @@ void main() {
 
     expect(profile.avatars.single.contentType, 'image/png');
     expect(find.text('Photo updated'), findsOneWidget);
-    final avatar = tester.widget<CircleAvatar>(
+    final avatar = tester.widget<AppAvatar>(
       find.byKey(const Key('profile-avatar')),
     );
-    expect(avatar.backgroundImage, isNotNull);
+    expect(avatar.url, isNotNull);
   });
 
   testWidgets('avatar picker errors are shown and nothing is uploaded', (
@@ -191,13 +192,23 @@ void main() {
 
       expect(
         tester
-            .widget<TextFormField>(find.byKey(const Key('field-name')))
+            .widget<TextFormField>(
+              find.descendant(
+                of: find.byKey(const Key('field-name')),
+                matching: find.byType(TextFormField),
+              ),
+            )
             .enabled,
         isFalse,
       );
       expect(
         tester
-            .widget<TextFormField>(find.byKey(const Key('field-address')))
+            .widget<TextFormField>(
+              find.descendant(
+                of: find.byKey(const Key('field-address')),
+                matching: find.byType(TextFormField),
+              ),
+            )
             .enabled,
         isFalse,
       );
