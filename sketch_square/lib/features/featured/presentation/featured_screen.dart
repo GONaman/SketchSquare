@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/layout/layout.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/widgets/blueprint_empty_state.dart';
@@ -126,23 +127,29 @@ class _CityPicker extends ConsumerWidget {
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: DropdownButtonFormField<String?>(
-        key: const Key('city-picker'),
-        value: selected,
-        isExpanded: true,
-        decoration: const InputDecoration(
-          labelText: 'City',
-          prefixIcon: Icon(Icons.place_outlined),
-        ),
-        items: [
-          const DropdownMenuItem<String?>(
-            value: null,
-            child: Text('All cities'),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: DropdownButtonFormField<String?>(
+            key: const Key('city-picker'),
+            value: selected,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'City',
+              prefixIcon: Icon(Icons.place_outlined),
+            ),
+            items: [
+              const DropdownMenuItem<String?>(
+                value: null,
+                child: Text('All cities'),
+              ),
+              for (final name in names)
+                DropdownMenuItem<String?>(value: name, child: Text(name)),
+            ],
+            onChanged: onChanged,
           ),
-          for (final name in names)
-            DropdownMenuItem<String?>(value: name, child: Text(name)),
-        ],
-        onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -168,6 +175,57 @@ class _TopArchitects extends StatelessWidget {
         ),
       );
     }
+    Widget card(int i) {
+      final a = items[i].architect;
+      return SizedBox(
+        width: 140,
+        height: 132,
+        child: Card(
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            key: Key('top-architect-${a.id}'),
+            onTap: () => context.push(featuredPaths.architect(a.id)),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ArchitectAvatar(architect: a, radius: 24),
+                  const SizedBox(height: 8),
+                  Text(
+                    a.fullName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  Text(
+                    '★ ${formatRating(a.architectRating)} · '
+                    '${items[i].drawingCount} drawings',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Wide windows wrap the cards instead of a sideways-scrolling strip.
+    if (context.isWide) {
+      return Padding(
+        key: const Key('top-architects'),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [for (var i = 0; i < items.length; i++) card(i)],
+        ),
+      );
+    }
     return SizedBox(
       height: 132,
       child: ListView.separated(
@@ -176,43 +234,7 @@ class _TopArchitects extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, i) {
-          final a = items[i].architect;
-          return SizedBox(
-            width: 140,
-            child: Card(
-              margin: EdgeInsets.zero,
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                key: Key('top-architect-${a.id}'),
-                onTap: () => context.push(featuredPaths.architect(a.id)),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ArchitectAvatar(architect: a, radius: 24),
-                      const SizedBox(height: 8),
-                      Text(
-                        a.fullName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall,
-                      ),
-                      Text(
-                        '★ ${formatRating(a.architectRating)} · '
-                        '${items[i].drawingCount} drawings',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
+        itemBuilder: (context, i) => card(i),
       ),
     );
   }

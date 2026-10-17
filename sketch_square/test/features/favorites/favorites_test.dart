@@ -46,7 +46,7 @@ Future<void> _open(
   FakeDrawingActions? actions,
   String path = AppRoutes.favorites,
 }) async {
-  tester.view.physicalSize = const Size(900, 2400);
+  tester.view.physicalSize = const Size(500, 2400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final container = await pumpApp(
@@ -170,8 +170,10 @@ void main() {
       for (var i = 0; i < 30; i++) summary('d$i', title: 'Plan $i'),
     ], pageSize: 12);
     await _open(tester, repo);
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
-    await tester.pumpAndSettle();
+    for (var i = 0; i < 2; i++) {
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
+      await tester.pumpAndSettle();
+    }
     expect(repo.cursors.first, isNull);
     expect(repo.cursors[1], '12');
     expect(find.text('Plan 29'), findsOneWidget);

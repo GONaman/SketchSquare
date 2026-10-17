@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../drawings/data/drawings_providers.dart';
 import '../../drawings/domain/drawing_search_query.dart';
+import '../../drawings/domain/drawing_summary.dart';
 import '../../drawings/presentation/discovery_paths.dart';
 import '../../drawings/presentation/drawing_search_controller.dart';
 import '../../drawings/presentation/paged_drawing_slivers.dart';
 import '../../drawings/presentation/plot_size_fields.dart';
+import '../../../core/layout/layout.dart';
 import '../../../core/router/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
@@ -116,37 +118,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             SliverToBoxAdapter(
-              child: SizedBox(
-                height: 52,
-                child: ListView(
-                  key: const Key('category-chips'),
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.gutter,
-                    vertical: 2,
-                  ),
-                  children: [
-                    for (final c in categories.valueOrNull ?? const [])
-                      Padding(
-                        padding: const EdgeInsets.only(right: AppSpacing.sm),
-                        child: ActionChip(
-                          label: Text(c.name),
-                          onPressed:
-                              () => context.push(
-                                homePaths.search(
-                                  DrawingSearchQuery(categoryId: c.id),
-                                ),
-                              ),
-                        ),
-                      ),
-                    ActionChip(
-                      key: const Key('request-category-chip'),
-                      avatar: const Icon(Icons.add, size: 18),
-                      label: const Text('Request a category'),
-                      onPressed: _requestCategory,
+              child: _CategoryChips(
+                categories: categories.valueOrNull ?? const [],
+                onCategory:
+                    (c) => context.push(
+                      homePaths.search(DrawingSearchQuery(categoryId: c.id)),
                     ),
-                  ],
-                ),
+                onRequest: _requestCategory,
               ),
             ),
             const SliverToBoxAdapter(
@@ -169,6 +147,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Category shortcuts: a sideways-scrolling strip on phones, a wrapping row on
+/// wider windows so nothing is cut off.
+class _CategoryChips extends StatelessWidget {
+  const _CategoryChips({
+    required this.categories,
+    required this.onCategory,
+    required this.onRequest,
+  });
+
+  final List<CategoryRef> categories;
+  final ValueChanged<CategoryRef> onCategory;
+  final VoidCallback onRequest;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <Widget>[
+      for (final c in categories)
+        ActionChip(label: Text(c.name), onPressed: () => onCategory(c)),
+      ActionChip(
+        key: const Key('request-category-chip'),
+        avatar: const Icon(Icons.add, size: 18),
+        label: const Text('Request a category'),
+        onPressed: onRequest,
+      ),
+    ];
+    if (context.isWide) {
+      return Padding(
+        key: const Key('category-chips'),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+        child: Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: chips,
+        ),
+      );
+    }
+    return SizedBox(
+      height: 52,
+      child: ListView(
+        key: const Key('category-chips'),
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.gutter,
+          vertical: 2,
+        ),
+        children: [
+          for (final chip in chips)
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: chip,
+            ),
+        ],
       ),
     );
   }
