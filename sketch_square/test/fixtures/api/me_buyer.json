@@ -1,0 +1,15 @@
+{
+  "id": "50da8135-b129-47a6-8779-8169335d07ac",
+  "email": "smoke-buyer-mvbxf97e@example.com",
+  "fullName": "Smoke buyer mvbxf97e",
+  "address": "12 Test Street, Pune",
+  "phone": "+919800000000",
+  "avatarUrl": null,
+  "city": "Pune",
+  "role": "ARCHITECT",
+  "verificationStatus": "APPROVED",
+  "architectRating": 0,
+  "freeDownloadsUsed": 1,
+  "freeDownloadLimit": 20,
+  "createdAt": "2026-10-17T04:58:49.679Z"
+}

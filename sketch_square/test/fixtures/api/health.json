@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "checks": {
+    "db": "up",
+    "redis": "up",
+    "s3": "up"
+  }
+}

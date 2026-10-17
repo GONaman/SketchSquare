@@ -1,0 +1,13 @@
+{
+  "items": [
+    {
+      "id": "d513ec72-a744-4fdf-9538-edb45a6262bf",
+      "amountPaise": 50000,
+      "status": "PAID",
+      "failureReason": null,
+      "createdAt": "2026-10-17T04:58:52.832Z",
+      "updatedAt": "2026-10-17T04:58:54.941Z"
+    }
+  ],
+  "nextCursor": null
+}

@@ -7,16 +7,18 @@ import '../domain/drawing_record.dart';
 import '../domain/sheet_upload_target.dart';
 import '../domain/upload_repository.dart';
 
-/// Set `--dart-define=UPLOAD_SEND_EXTENDED_METADATA=true` once the backend
-/// accepts `bedrooms` / `tags` (docs/API_CONTRACT.md, DECISIONS D-U1).
+/// `bedrooms` / `tags` are sent by default (the backend accepts them, see
+/// docs/API_CONTRACT.md and DECISIONS U1). Build with
+/// `--dart-define=UPLOAD_SEND_EXTENDED_METADATA=false` against an older backend.
 abstract final class UploadConfig {
   static const sendExtendedMetadata = bool.fromEnvironment(
     'UPLOAD_SEND_EXTENDED_METADATA',
+    defaultValue: true,
   );
 }
 
 class DioUploadRepository implements UploadRepository {
-  DioUploadRepository(this._dio, {this.sendExtendedMetadata = false});
+  DioUploadRepository(this._dio, {this.sendExtendedMetadata = true});
 
   final Dio _dio;
   final bool sendExtendedMetadata;

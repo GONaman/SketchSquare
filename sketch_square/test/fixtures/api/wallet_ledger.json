@@ -1,0 +1,21 @@
+{
+  "items": [
+    {
+      "id": "6f480f53-f11f-4116-9f9b-611ca932b998",
+      "entryType": "SALE",
+      "amountPaise": 90000,
+      "description": "Sale of \"Smoke Paid Duplex\"",
+      "referenceId": "40539f62-3f8f-47bd-b6b2-5a00856435b6",
+      "createdAt": "2026-10-17T04:58:52.189Z"
+    },
+    {
+      "id": "857ceb07-e1e1-444d-8d60-cabcdcdb62c0",
+      "entryType": "SALE",
+      "amountPaise": 90000,
+      "description": "Sale of \"Smoke Paid Villa v2\"",
+      "referenceId": "63107ec6-97f6-4af9-8d30-be178bf9edcb",
+      "createdAt": "2026-10-17T04:58:52.142Z"
+    }
+  ],
+  "nextCursor": null
+}

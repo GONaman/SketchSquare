@@ -1,0 +1,42 @@
+[
+  {
+    "id": "558eacde-5267-5bed-9c80-86e3f229b372",
+    "name": "Banks",
+    "slug": "banks"
+  },
+  {
+    "id": "d7bf20d3-8841-5fcc-898e-78c56d374236",
+    "name": "Government Buildings",
+    "slug": "government-buildings"
+  },
+  {
+    "id": "3187a683-b9a6-51b5-949d-5ff95b3d1644",
+    "name": "Hotels",
+    "slug": "hotels"
+  },
+  {
+    "id": "24aa8a9c-7a94-545d-8638-1fe724052c83",
+    "name": "Houses",
+    "slug": "houses"
+  },
+  {
+    "id": "68deac8d-4edb-5b18-a8ba-02dcd060e7ab",
+    "name": "Shopping Complex",
+    "slug": "shopping-complex"
+  },
+  {
+    "id": "c951ce4b-aeb9-44d9-8e87-2c8cfa06b4c3",
+    "name": "Smoke Cat mvbxe2fd",
+    "slug": "smoke-cat-mvbxe2fd"
+  },
+  {
+    "id": "e00f72f1-0764-45d1-b2fd-11a16ba81b5d",
+    "name": "Smoke Cat mvbxetcv",
+    "slug": "smoke-cat-mvbxetcv"
+  },
+  {
+    "id": "4bbde499-2a6c-5ce5-b53c-13306687085f",
+    "name": "Villas",
+    "slug": "villas"
+  }
+]

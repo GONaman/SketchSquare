@@ -1,0 +1,17 @@
+{
+  "id": "ca380c87-214e-43f6-96a3-17c0d2772501",
+  "status": "PENDING",
+  "coaRegistrationNumber": "CA/2020/mvbxf97e",
+  "submittedAt": "2026-10-17T04:58:49.713Z",
+  "user": {
+    "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
+    "fullName": "Smoke seller mvbxf97e",
+    "email": "smoke-seller-mvbxf97e@example.com",
+    "phone": "+919800000000",
+    "city": "Pune",
+    "address": "12 Test Street, Pune"
+  },
+  "reviewNote": null,
+  "reviewedAt": null,
+  "documentUrl": "http://localhost:9000/kyc/verification/c9c7240b-41c7-4751-8673-ab19506c7297/8c98dcdd-e3f3-4ea3-a10a-4652c644c38f.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=REDACTED&X-Amz-Date=20261017T045849Z&X-Amz-Expires=300&X-Amz-Signature=REDACTED&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject"
+}

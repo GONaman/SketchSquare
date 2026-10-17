@@ -1,0 +1,5 @@
+{
+  "url": "http://localhost:9000/originals/licensed/63107ec6-97f6-4af9-8d30-be178bf9edcb/03fa897f-94a9-4563-8078-d28d823663ec/structure.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=REDACTED&X-Amz-Date=20261017T045852Z&X-Amz-Expires=300&X-Amz-Signature=REDACTED&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22structure.pdf%22&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+  "expiresInSeconds": 300,
+  "fileName": "structure.pdf"
+}

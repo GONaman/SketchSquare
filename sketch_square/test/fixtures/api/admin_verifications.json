@@ -1,0 +1,61 @@
+{
+  "items": [
+    {
+      "id": "c699363a-b74d-5411-af03-549072c1e94d",
+      "status": "PENDING",
+      "coaRegistrationNumber": "CA/2020/40004",
+      "submittedAt": "2026-10-17T04:51:51.499Z",
+      "user": {
+        "id": "a519d1e9-5596-5e61-87d5-bce6e81da325",
+        "fullName": "Rohan Pending",
+        "email": "rohan.pending@sketchsquare.local",
+        "phone": "+919800000004",
+        "city": "Kolkata",
+        "address": "3 Park Street, Kolkata 700016"
+      }
+    },
+    {
+      "id": "bb734a22-d984-4b8c-8031-64996faac2c0",
+      "status": "PENDING",
+      "coaRegistrationNumber": "CA/2020/mvbxdum3",
+      "submittedAt": "2026-10-17T04:57:44.334Z",
+      "user": {
+        "id": "68af89a0-14f5-482e-81fc-1763a8934fa7",
+        "fullName": "Smoke buyer mvbxdum3",
+        "email": "smoke-buyer-mvbxdum3@example.com",
+        "phone": "+919800000000",
+        "city": "Pune",
+        "address": "12 Test Street, Pune"
+      }
+    },
+    {
+      "id": "ca380c87-214e-43f6-96a3-17c0d2772501",
+      "status": "PENDING",
+      "coaRegistrationNumber": "CA/2020/mvbxf97e",
+      "submittedAt": "2026-10-17T04:58:49.713Z",
+      "user": {
+        "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
+        "fullName": "Smoke seller mvbxf97e",
+        "email": "smoke-seller-mvbxf97e@example.com",
+        "phone": "+919800000000",
+        "city": "Pune",
+        "address": "12 Test Street, Pune"
+      }
+    },
+    {
+      "id": "a60c62c6-8f2a-4f10-a995-a6138f624f43",
+      "status": "PENDING",
+      "coaRegistrationNumber": "CA/2020/mvbxf97e",
+      "submittedAt": "2026-10-17T04:58:49.728Z",
+      "user": {
+        "id": "50da8135-b129-47a6-8779-8169335d07ac",
+        "fullName": "Smoke buyer mvbxf97e",
+        "email": "smoke-buyer-mvbxf97e@example.com",
+        "phone": "+919800000000",
+        "city": "Pune",
+        "address": "12 Test Street, Pune"
+      }
+    }
+  ],
+  "nextCursor": null
+}

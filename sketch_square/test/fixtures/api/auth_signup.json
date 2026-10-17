@@ -1,0 +1,22 @@
+{
+  "user": {
+    "id": "c9c7240b-41c7-4751-8673-ab19506c7297",
+    "email": "smoke-seller-mvbxf97e@example.com",
+    "fullName": "Smoke seller mvbxf97e",
+    "address": "12 Test Street, Pune",
+    "phone": "+919800000000",
+    "avatarUrl": null,
+    "city": "Pune",
+    "role": "ARCHITECT",
+    "verificationStatus": "PENDING",
+    "architectRating": 0,
+    "freeDownloadsUsed": 0,
+    "freeDownloadLimit": 20,
+    "createdAt": "2026-10-17T04:58:49.630Z"
+  },
+  "tokens": {
+    "accessToken": "REDACTED.JWT.TOKEN",
+    "refreshToken": "6F4A8o5Ku7I8qHSI3E_m_VVZBRNwMub2DIfzB-jS5ubi8Sxz6YFsFDsl7-wwzlh6",
+    "expiresIn": 900
+  }
+}
