@@ -15,12 +15,16 @@ import type { AuthUser } from '../common/decorators/current-user.decorator';
 import { CreateDrawingDto } from './dto/create-drawing.dto';
 import { UpdateDrawingDto } from './dto/update-drawing.dto';
 import { DrawingsService } from './drawings.service';
+import { PublishService } from './publish.service';
 
 @ApiTags('drawings')
 @ApiBearerAuth()
 @Controller('drawings')
 export class DrawingsController {
-  constructor(private readonly drawings: DrawingsService) {}
+  constructor(
+    private readonly drawings: DrawingsService,
+    private readonly publishing: PublishService,
+  ) {}
 
   @Post()
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateDrawingDto) {
@@ -34,6 +38,15 @@ export class DrawingsController {
     @Body() dto: UpdateDrawingDto,
   ) {
     return this.drawings.update(user.id, id, dto);
+  }
+
+  @Post(':id/publish')
+  @HttpCode(HttpStatus.ACCEPTED)
+  publish(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.publishing.publish(user.id, id);
   }
 
   @Delete(':id')
