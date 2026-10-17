@@ -1,0 +1,35 @@
+openapi: 3.0.0
+paths:
+  /health:
+    get:
+      operationId: HealthController_get
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                example:
+                  status: ok
+                  checks:
+                    db: up
+                    redis: up
+                    s3: up
+      summary: Liveness + dependency check (DB, Redis, S3)
+      tags:
+        - ops
+info:
+  title: SketchSquare API
+  description: "Contract: docs/API_CONTRACT.md"
+  version: "1.0"
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas: {}
