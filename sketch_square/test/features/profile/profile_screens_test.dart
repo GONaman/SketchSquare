@@ -14,9 +14,11 @@ import 'package:sketch_square/features/auth/domain/user.dart';
 import 'package:sketch_square/features/auth/presentation/auth_controller.dart';
 import 'package:sketch_square/features/auth/presentation/auth_repository_provider.dart';
 import 'package:sketch_square/core/network/cursor_page.dart';
+import 'package:sketch_square/features/wallet/data/wallet_providers.dart';
 import 'package:sketch_square/features/profile/data/profile_providers.dart';
 import 'package:sketch_square/features/purchases/data/purchases_providers.dart';
 
+import '../wallet/fakes.dart';
 import '../../helpers/commerce_fixtures.dart';
 import '../../helpers/fake_auth_repository.dart';
 import '../../helpers/pump_app.dart';
@@ -54,6 +56,7 @@ void main() {
       tester,
       overrides: [
         ...discoveryFakes(),
+        walletRepositoryProvider.overrideWithValue(FakeWalletRepository()),
         authRepositoryProvider.overrideWithValue(auth),
         profileRepositoryProvider.overrideWithValue(profile),
         avatarPickerProvider.overrideWithValue(picker),
@@ -118,6 +121,15 @@ void main() {
     pushIfRegistered(context, '/profile/not-built-yet');
     await tester.pump();
     expect(find.text('Coming soon'), findsOneWidget);
+  });
+
+  testWidgets('Wallet tile opens the wallet', (tester) async {
+    await open(tester);
+
+    await tester.tap(find.byKey(const Key('tile-wallet')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('wallet-balance')), findsOneWidget);
   });
 
   testWidgets('My purchases tile opens the library', (tester) async {
