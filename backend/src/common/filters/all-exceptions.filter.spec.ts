@@ -1,0 +1,73 @@
+import {
+  ArgumentsHost,
+  BadRequestException,
+  HttpStatus,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { ApiException } from '../errors/api-exception';
+import { AllExceptionsFilter } from './all-exceptions.filter';
+
+function run(exception: unknown): { status: number; body: unknown } {
+  const json = jest.fn<void, [unknown]>();
+  const status = jest.fn<{ json: typeof json }, [number]>().mockReturnValue({
+    json,
+  });
+  const host = {
+    switchToHttp: () => ({ getResponse: () => ({ status }) }),
+  } as unknown as ArgumentsHost;
+  new AllExceptionsFilter().catch(exception, host);
+  return { status: status.mock.calls[0][0], body: json.mock.calls[0][0] };
+}
+
+describe('AllExceptionsFilter', () => {
+  beforeAll(() => {
+    jest.spyOn(Logger.prototype, 'error').mockImplementation();
+  });
+
+  it('keeps ApiException code and details', () => {
+    const { status, body } = run(
+      new ApiException(HttpStatus.FORBIDDEN, 'FREE_LIMIT_REACHED', 'limit', {
+        limit: 20,
+      }),
+    );
+    expect(status).toBe(403);
+    expect(body).toEqual({
+      error: {
+        code: 'FREE_LIMIT_REACHED',
+        message: 'limit',
+        details: { limit: 20 },
+      },
+    });
+  });
+
+  it('maps stock HttpExceptions by status', () => {
+    expect(run(new NotFoundException('nope')).body).toEqual({
+      error: { code: 'NOT_FOUND', message: 'nope' },
+    });
+    expect(run(new BadRequestException(['a must be x', 'b']))).toMatchObject({
+      status: 400,
+      body: { error: { code: 'VALIDATION_ERROR', message: 'a must be x' } },
+    });
+  });
+
+  it('maps Prisma unique violations to 409 CONFLICT', () => {
+    const err = new Prisma.PrismaClientKnownRequestError('dup', {
+      code: 'P2002',
+      clientVersion: 'x',
+    });
+    expect(run(err)).toMatchObject({
+      status: 409,
+      body: { error: { code: 'CONFLICT' } },
+    });
+  });
+
+  it('hides unknown errors behind INTERNAL', () => {
+    const { status, body } = run(new Error('db password leaked'));
+    expect(status).toBe(500);
+    expect(body).toEqual({
+      error: { code: 'INTERNAL', message: 'Internal server error' },
+    });
+  });
+});
